@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comparaison d'Évolution de Carte Dynamique</title>
+    <!-- Chargement de Tailwind CSS pour un design moderne et responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Définition du curseur personnalisé */
+        .comparison-slider-container {
+            /* Utilisation d'une propriété CSS variable pour stocker la position du slider */
+            --position: 50%;
+            user-select: none;
+            cursor: grab;
+            touch-action: none; /* Empêche le défilement du navigateur lors du glisser */
+        }
+        
+        /* Conteneur de l'image "Après" - C'est sa largeur qui change, utilise clip-path pour l'efficacité */
+        .image-apres-wrapper {
+            clip-path: inset(0 0 0 var(--position));
+        }
+
+        /* La poignée (handle) se positionne à la valeur de la variable */
+        .slider-handle {
+            left: var(--position);
+            transform: translateX(-50%); /* Centrage horizontal de la poignée */
+        }
+
+        /* Styles pour la poignée du slider */
+        .handle-line {
+            width: 4px; /* Ligne verticale */
+        }
+
+        .handle-circle {
+            width: 40px;
+            height: 40px;
+        }
+        
+        /* Centrer le contenu dans le cercle */
+        .handle-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Assure que l'image à l'intérieur ne se décale pas lors du redimensionnement du conteneur parent */
+        .image-full-cover {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-900 min-h-screen p-4 flex flex-col items-center font-sans">
+
+    <header class="text-center mb-8">
+        <h1 class="text-4xl font-extrabold text-blue-400">
+            Comparateur d'Évolution de Carte 🗺️
+        </h1>
+        <p class="text-xl text-gray-400 mt-2">
+            Sélectionnez les versions de carte à comparer.
+        </p>
+    </header>
+
+    <main class="w-full max-w-4xl">
+
+        <!-- Sélecteurs de versions -->
+        <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6 p-4 bg-gray-800 rounded-xl shadow-lg border-2 border-gray-700">
+            
+            <!-- Sélecteur AVANT -->
+            <div class="flex-1">
+                <label for="versionAvant" class="block text-sm font-medium text-red-400 mb-1">
+                    Version AVANT :
+                </label>
+                <select id="versionAvant" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-red-500 focus:border-red-500 transition-colors">
+                    <!-- Les options seront remplies par JavaScript -->
+                </select>
+            </div>
+            
+            <!-- Sélecteur APRÈS -->
+            <div class="flex-1">
+                <label for="versionApres" class="block text-sm font-medium text-green-400 mb-1">
+                    Version APRÈS :
+                </label>
+                <select id="versionApres" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-green-500 focus:border-green-500 transition-colors">
+                    <!-- Les options seront remplies par JavaScript -->
+                </select>
+            </div>
+
+        </div>
+
+
+        <!-- Conteneur principal du slider -->
+        <div id="comparisonContainer" 
+             class="comparison-slider-container relative w-full aspect-video shadow-2xl rounded-xl overflow-hidden border-4 border-gray-700 bg-gray-800 transition-all duration-300 ease-in-out">
+
+            <!-- 1. Image de base (VERSION AVANT) -->
+            <img id="imageAvant" 
+                 class="image-full-cover absolute inset-0 z-10" 
+                 src="" 
+                 alt="Carte Avant Mise à Jour">
+            
+            <!-- 2. Conteneur de l'image de dessus (VERSION APRÈS) -->
+            <div class="image-apres-wrapper absolute inset-0 z-20 overflow-hidden bg-gray-600">
+                <img id="imageApres" 
+                     class="image-full-cover absolute inset-0" 
+                     src="" 
+                     alt="Carte Après Mise à Jour">
+            </div>
+
+            <!-- 3. La poignée (Handle) draggable/tactile -->
+            <div id="sliderHandle" 
+                 class="slider-handle absolute top-0 bottom-0 z-30 flex items-center justify-center 
+                        text-white bg-transparent">
+                
+                <!-- La ligne verticale de la poignée -->
+                <div class="handle-line h-full bg-white shadow-lg"></div>
+
+                <!-- Le cercle central avec des flèches -->
+                <div class="handle-circle absolute bg-white p-1 rounded-full shadow-xl 
+                            border-4 border-gray-900/50 hover:scale-110 transition-transform duration-150 ease-out">
+                    <div class="handle-content text-gray-900">
+                        <!-- Icônes des flèches (SVG inline) -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                            <polyline points="15 17 20 12 15 7"></polyline>
+                            <polyline points="9 17 4 12 9 7"></polyline>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 4. Étiquettes de version dynamiques -->
+            <div id="labelAvant" class="absolute top-3 left-3 p-1.5 bg-red-800/80 text-white text-xs font-bold rounded-lg z-40 shadow-md"></div>
+            <div id="labelApres" class="absolute top-3 right-3 p-1.5 bg-green-800/80 text-white text-xs font-bold rounded-lg z-40 shadow-md"></div>
+            
+        </div>
+        
+    </main>
+    
+    <p class="mt-6 text-sm text-gray-500">
+        <span class="text-blue-400">Instructions :</span> Choisissez deux versions et utilisez le slider pour comparer l'évolution de la carte.
+    </p>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Définition des versions de carte ---
+            // REMPLACER LES URLS DES IMAGES CI-DESSOUS PAR LES VÔTRES !
+            const mapVersions = [
+                { id: 'v1', name: "Alpha (v1.0)", url: "https://placehold.co/1024x576/FF5733/FFFFFF?text=CARTE+V1.0%0A(ALPHA)" },
+                { id: 'v2', name: "Beta (v2.0)", url: "https://placehold.co/1024x576/DAF7A6/333333?text=CARTE+V2.0%0A(BETA)" },
+                { id: 'v3', name: "Release (v3.0)", url: "https://placehold.co/1024x576/3399FF/FFFFFF?text=CARTE+V3.0%0A(RELEASE)" },
+                { id: 'v4', name: "Saison 1 (v4.0)", url: "https://placehold.co/1024x576/A833FF/FFFFFF?text=CARTE+V4.0%0A(SAISON+1)" },
+                { id: 'v5', name: "Saison 2 (v5.0)", url: "https://placehold.co/1024x576/F3C133/333333?text=CARTE+V5.0%0A(SAISON+2)" },
+            ];
+
+            // --- Éléments du DOM ---
+            const container = document.getElementById('comparisonContainer');
+            const handle = document.getElementById('sliderHandle');
+            const selectAvant = document.getElementById('versionAvant');
+            const selectApres = document.getElementById('versionApres');
+            const imageAvant = document.getElementById('imageAvant');
+            const imageApres = document.getElementById('imageApres');
+            const labelAvant = document.getElementById('labelAvant');
+            const labelApres = document.getElementById('labelApres');
+            const style = container.style;
+            
+            let isDragging = false;
+            let containerRect;
+
+
+            // --- Fonctions d'initialisation et de mise à jour ---
+
+            /**
+             * Rempli les menus déroulants avec les versions de carte.
+             */
+            function populateSelects() {
+                mapVersions.forEach(version => {
+                    const optionAvant = new Option(version.name, version.id);
+                    const optionApres = new Option(version.name, version.id);
+                    selectAvant.add(optionAvant);
+                    selectApres.add(optionApres);
+                });
+
+                // Définir les valeurs par défaut
+                if (mapVersions.length >= 2) {
+                    selectAvant.value = mapVersions[mapVersions.length - 2].id; // Avant-dernière version
+                    selectApres.value = mapVersions[mapVersions.length - 1].id; // Dernière version
+                } else if (mapVersions.length === 1) {
+                    selectAvant.value = mapVersions[0].id;
+                    selectApres.value = mapVersions[0].id;
+                }
+                
+                // Mettre à jour l'affichage avec les valeurs initiales
+                updateImagesAndLabels();
+            }
+
+            /**
+             * Met à jour les images et les étiquettes en fonction des sélections.
+             */
+            function updateImagesAndLabels() {
+                const idAvant = selectAvant.value;
+                const idApres = selectApres.value;
+
+                const versionA = mapVersions.find(v => v.id === idAvant);
+                const versionB = mapVersions.find(v => v.id === idApres);
+
+                if (versionA) {
+                    imageAvant.src = versionA.url;
+                    imageAvant.alt = `Carte ${versionA.name}`;
+                    labelAvant.textContent = versionA.name;
+                }
+
+                if (versionB) {
+                    imageApres.src = versionB.url;
+                    imageApres.alt = `Carte ${versionB.name}`;
+                    labelApres.textContent = versionB.name;
+                }
+            }
+            
+            /**
+             * Calcule la nouvelle position et l'applique au CSS.
+             * @param {number} clientX - Position X du curseur/doigt.
+             */
+            function updateSliderPosition(clientX) {
+                // S'assurer que les dimensions du conteneur sont à jour
+                if (!containerRect) {
+                    containerRect = container.getBoundingClientRect();
+                }
+                
+                // Calcul de la position relative à l'intérieur du conteneur
+                let position = clientX - containerRect.left;
+
+                // Clamper la position entre 0 et la largeur du conteneur
+                if (position < 0) {
+                    position = 0;
+                } else if (position > containerRect.width) {
+                    position = containerRect.width;
+                }
+                
+                // Convertir la position en pourcentage pour la variable CSS
+                const percent = (position / containerRect.width) * 100;
+                
+                // Mettre à jour la variable CSS --position. Le CSS gère le clip-path et la position du handle.
+                style.setProperty('--position', `${percent}%`);
+            }
+
+            /**
+             * Initialise la position et les dimensions au chargement et au redimensionnement
+             */
+            const initializePosition = () => {
+                // Centre le slider (50%)
+                const center = container.clientWidth / 2;
+                updateSliderPosition(container.getBoundingClientRect().left + center);
+            };
+
+
+            // --- Logique du Glisser-Déposer / Tactile ---
+
+            /**
+             * Commence le glissement (MouseDown/TouchStart).
+             */
+            const startDrag = (e) => {
+                isDragging = true;
+                // Met à jour handle pour indiquer qu'on peut relâcher
+                handle.style.cursor = 'grabbing';
+                container.style.cursor = 'grabbing';
+                // Calculer la zone de travail une seule fois au début du glissement
+                containerRect = container.getBoundingClientRect();
+                
+                // Gestion spécifique pour les événements tactiles (Touch)
+                if (e.type.startsWith('touch')) {
+                    // Empêche le défilement et le zoom sur mobile pendant le glissement
+                    e.preventDefault();
+                }
+            };
+
+            /**
+             * Gère le glissement (MouseMove/TouchMove).
+             */
+            const onDrag = (e) => {
+                if (!isDragging) return;
+
+                // Déterminer la position X (supporte la souris et le toucher)
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                
+                // Mettre à jour la position
+                updateSliderPosition(clientX);
+            };
+
+            /**
+             * Termine le glissement (MouseUp/TouchEnd).
+             */
+            const endDrag = () => {
+                isDragging = false;
+                // Restaurer le curseur par défaut
+                handle.style.cursor = 'grab';
+                container.style.cursor = 'grab';
+            };
+            
+            
+            // --- Attacher les écouteurs d'événements ---
+
+            // Écouteurs pour les changements de sélection
+            selectAvant.addEventListener('change', updateImagesAndLabels);
+            selectApres.addEventListener('change', updateImagesAndLabels);
+
+            // Logique du slider (glisser/déposer et tactile)
+            handle.addEventListener('mousedown', startDrag);
+            handle.addEventListener('touchstart', startDrag);
+            document.addEventListener('mousemove', onDrag);
+            document.addEventListener('touchmove', onDrag);
+            document.addEventListener('mouseup', endDrag);
+            document.addEventListener('touchend', endDrag);
+            
+            
+            // Initialisation de la page
+            window.addEventListener('load', () => {
+                populateSelects(); // Remplir les dropdowns avec les données
+                initializePosition(); // Centrer le slider
+            });
+            window.addEventListener('resize', initializePosition);
+        });
+
+    </script>
+
+</body>
+</html>
+
