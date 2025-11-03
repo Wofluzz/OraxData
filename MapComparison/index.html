@@ -231,6 +231,9 @@
                 Ici, vous pouvez ajouter, modifier ou supprimer les POI qui apparaissent sur la carte. Les coordonnées X et Y sont en pourcentage (0-100).
             </p>
 
+            <!-- Message d'erreur/statut Firebase -->
+             <div id="firebaseStatus" class="p-4 mb-4 text-center rounded-lg text-sm font-medium hidden"></div>
+
             <!-- Formulaire d'ajout/édition -->
             <div class="bg-gray-800 p-6 rounded-xl shadow-xl border-2 border-gray-700 mb-8">
                 <h3 class="text-xl font-semibold text-red-300 mb-4" id="formTitle">Ajouter un Nouveau POI</h3>
@@ -292,7 +295,6 @@
                         <span class="text-gray-400 ml-2">Sauvegarde en cours...</span>
                     </div>
                 </div>
-                <div id="poiError" class="text-red-500 text-center mt-4 hidden">Erreur de connexion à la base de données.</div>
             </div>
         </div>
         
@@ -306,8 +308,8 @@
     <!-- Firebase Imports -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         
         // Configuration Firebase (Variables globales fournies par l'environnement)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
@@ -319,10 +321,10 @@
         let auth;
         let userId = 'loading';
         let isAuthReady = false;
-        
-        // --- Données Centrales du Monde d'Oraxia (Mis à jour selon le fichier CSV) ---
+        let firebaseEnabled = false;
 
-        // Utilisation des ID pour l'ordre, les URLs sont des placeholders
+        // --- Données Centrales du Monde d'Oraxia ---
+
         const mapVersions = [
             { id: 'v0_alpha', name: "v0.0 Alpha (Carte Base)", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0.0%3A+Alpha+%28Base%29", 
                 story: { title: "Début des Terres Vagues", summary: "La toute première version de la carte post-collision. Terres inexplorées, peu de reliefs détaillés.", characters: ["Aucun"], quests: ["..."]}
@@ -348,50 +350,64 @@
             { id: 'v5_s5', name: "S5 Le Dieu Moldar", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=S5+Le+Dieu+Moldar", 
                 story: { title: "S5 Le Dieu Moldar", summary: "Moldar qui a tout les pouvoir est maintenant un Dieu (Al Moldar est son nom de dieu) Créé l'Orbe mais faiblit", characters: ["Al Moldar", "Les Héros"], quests: ["..."]}
             },
-            // Ajoutez les autres saisons ici si besoin, sinon l'application fonctionnera avec ces IDs
         ];
 
-        // Fiches de Personnages (Mis à jour avec les 5 héros)
         const characterFiches = [
             { name: "Kai, Léo, Caleb, Aria et Flèche", role: "Les Héros d'Oraxia", debut: "Tome 1 (Saisons 1-3)", evolution: "Jeunes aventuriers chargés de réunir les Cinq Cités divisées par le Fléau. Ils sont l'antithèse de la méthode de Moldar, cherchant l'unité par la coopération et non la force divine. Flèche est leur compagnon canin indéfectible.", color: 'bg-indigo-600' },
             { name: "Moldar / Al Moldar", role: "Alchimiste, puis Dieu", debut: "Saison 1.5", evolution: "Passe d'un chercheur à un être divin par l'acquisition du pouvoir des Pierres Runiques, puis est affaibli par le Néan. Antagoniste complexe cherchant la Stabilité par la force.", color: 'bg-yellow-600' },
             { name: "L'Armée du Fléau", role: "Force Corruptrice", debut: "Saison 6 (Révélation)", evolution: "Armée ténébreuse révélée par le Canyon du Grand Vide, responsable de la corruption des Fiefs Noirs et des divisions. La source de la menace à laquelle les Héros s'opposent.", color: 'bg-purple-600' },
         ];
         
-        // Stockage des POI (sera peuplé par Firestore)
         let poiData = []; 
         
         // --- Initialisation Firebase ---
-        try {
-            if (Object.keys(firebaseConfig).length > 0) {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug'); // Pour le débogage
+        function initializeFirebase() {
+            if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
+                try {
+                    app = initializeApp(firebaseConfig);
+                    db = getFirestore(app);
+                    auth = getAuth(app);
+                    firebaseEnabled = true;
+                    setLogLevel('debug'); 
 
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        userId = user.uid;
-                        console.log("Firebase Auth Ready. UID:", userId);
-                    } else if (initialAuthToken) {
-                        await signInWithCustomToken(auth, initialAuthToken);
-                        userId = auth.currentUser.uid;
-                    } else {
-                        await signInAnonymously(auth);
-                        userId = auth.currentUser.uid;
-                    }
-                    isAuthReady = true;
-                    // Une fois l'authentification prête, initialiser l'app
-                    initApplication(); 
-                });
+                    onAuthStateChanged(auth, async (user) => {
+                        if (user) {
+                            userId = user.uid;
+                        } else if (initialAuthToken) {
+                            try {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                                userId = auth.currentUser.uid;
+                            } catch (e) {
+                                console.warn("Custom token sign-in failed, signing anonymously.", e);
+                                await signInAnonymously(auth);
+                                userId = auth.currentUser.uid;
+                            }
+                        } else {
+                            await signInAnonymously(auth);
+                            userId = auth.currentUser.uid;
+                        }
+                        isAuthReady = true;
+                        
+                        document.getElementById('firebaseStatus').textContent = `Connexion Firebase réussie. Utilisateur ID: ${userId}`;
+                        document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-green-900 text-green-300';
+
+                        // Une fois l'authentification prête, démarrer l'écoute des POI
+                        setupPoiListener();
+                    });
+                } catch (error) {
+                    console.error("Firebase initialization failed:", error);
+                    firebaseEnabled = false;
+                    document.getElementById('firebaseStatus').textContent = `Erreur critique Firebase: ${error.message}`;
+                    document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-red-900 text-red-300';
+                    document.getElementById('firebaseStatus').classList.remove('hidden');
+                }
             } else {
-                console.error("Firebase config is missing. Running in limited mode.");
+                // Mode limité sans Firebase
+                document.getElementById('firebaseStatus').textContent = 'Firebase non configuré. Gestion des POI désactivée (Mode limité).';
+                document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-yellow-900 text-yellow-300';
+                document.getElementById('firebaseStatus').classList.remove('hidden');
                 initApplication();
             }
-        } catch (error) {
-            console.error("Firebase initialization failed:", error);
-            document.getElementById('poiError').classList.remove('hidden');
-            initApplication();
         }
         
         // --- Constantes et Variables Globales de l'App ---
@@ -399,10 +415,6 @@
         const MIN_SCALE = 1.0;
         const MAX_SCALE = 5.0;
         const SCALE_STEP = 0.15;
-        const PAN_MARGIN_PERCENT = 0.5;
-        const DOUBLE_TAP_THRESHOLD = 300; 
-        let lastTapTime = 0;
-        const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; 
             
         // Éléments du DOM
         const container = document.getElementById('comparisonContainer');
@@ -484,7 +496,22 @@
             }
         };
 
-        // --- Logique du Zoom/Panoramique (inchangée) ---
+        // --- Logique du Zoom/Panoramique (Optimisation) ---
+
+        function getClientCoords(e) {
+            return {
+                clientX: e.touches ? e.touches[0].clientX : e.clientX,
+                clientY: e.touches ? e.touches[0].clientY : e.clientY
+            };
+        }
+
+        function getCenterCoords(touches) {
+            if (touches.length < 2) return null;
+            return {
+                x: (touches[0].clientX + touches[1].clientX) / 2,
+                y: (touches[0].clientY + touches[1].clientY) / 2
+            };
+        }
         
         function getDistance(touches) {
             if (touches.length < 2) return 0;
@@ -510,16 +537,12 @@
             } else {
                 const scaledWidth = containerRect.width * viewState.scale;
                 const scaledHeight = containerRect.height * viewState.scale;
-
-                const marginX = containerRect.width * PAN_MARGIN_PERCENT;
-                const marginY = containerRect.height * PAN_MARGIN_PERCENT;
-
-                const maxPanX = marginX; 
-                const minPanX = containerRect.width - scaledWidth - marginX; 
                 
-                const maxPanY = marginY;
-                const minPanY = containerRect.height - scaledHeight - marginY;
-
+                const maxPanX = (scaledWidth - containerRect.width) / 2;
+                const minPanX = -maxPanX;
+                
+                const maxPanY = (scaledHeight - containerRect.height) / 2;
+                const minPanY = -maxPanY;
 
                 viewState.offsetX = Math.max(minPanX, Math.min(maxPanX, viewState.offsetX));
                 viewState.offsetY = Math.max(minPanY, Math.min(maxPanY, viewState.offsetY));
@@ -552,32 +575,28 @@
         }
         
         function handleDoubleTapZoom(e) {
-            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : null);
-            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : null);
+            const coords = getClientCoords(e);
             
-            if (clientX === null || clientY === null) return;
-
             if (activePoi) {
                 hidePoiInfo();
                 return;
             }
 
             containerRect = container.getBoundingClientRect();
-            const centerX = containerRect.width / 2;
-            const centerY = containerRect.height / 2;
             
             if (viewState.scale > MIN_SCALE) {
                 viewState.scale = MIN_SCALE;
                 viewState.offsetX = 0;
                 viewState.offsetY = 0;
             } else {
-                viewState.scale = ZOOM_LEVEL_ON_DOUBLE_TAP;
+                viewState.scale = 2.5; // Zoom par défaut
                 
-                const focalX = clientX - containerRect.left;
-                const focalY = clientY - containerRect.top;
+                const focalX = coords.clientX - containerRect.left;
+                const focalY = coords.clientY - containerRect.top;
 
-                viewState.offsetX = centerX - (focalX * viewState.scale);
-                viewState.offsetY = centerY - (focalY * viewState.scale);
+                // Centre l'image sur le point tapé
+                viewState.offsetX = (containerRect.width / 2) - (focalX * viewState.scale);
+                viewState.offsetY = (containerRect.height / 2) - (focalY * viewState.scale);
             }
 
             clampPan(); 
@@ -598,25 +617,27 @@
         // --- Logique de Glissement (Drag) ---
 
         const startSliderDrag = (e) => {
-            if (e.currentTarget !== handle) return;
+            if (!handle.contains(e.target)) return;
 
             isSliderDragging = true;
             handle.style.cursor = 'grabbing';
             container.style.cursor = 'grabbing';
             containerRect = container.getBoundingClientRect();
             
-            if (e.type.startsWith('touch')) { e.preventDefault(); }
-            e.stopPropagation(); 
+            if (e.type.startsWith('touch')) { e.stopPropagation(); }
+            if (e.touches && e.touches.length > 1) isSliderDragging = false; 
         };
 
         const startPanDrag = (e) => {
             if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
             
+            const coords = getClientCoords(e);
+            
             if (e.touches && e.touches.length === 1 || !e.touches) {
                 const currentTime = new Date().getTime();
                 const timeDiff = currentTime - lastTapTime;
 
-                if (timeDiff < DOUBLE_TAP_THRESHOLD && timeDiff > 0) {
+                if (timeDiff < 300 && timeDiff > 0) {
                     e.preventDefault(); 
                     handleDoubleTapZoom(e);
                     lastTapTime = 0; 
@@ -638,8 +659,8 @@
             container.classList.add('cursor-grabbing'); 
             containerRect = container.getBoundingClientRect();
 
-            lastX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-            lastY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            lastX = coords.clientX;
+            lastY = coords.clientY;
             
             if (e.touches) e.preventDefault(); 
         };
@@ -650,11 +671,7 @@
                 isSliderDragging = false; 
                 isPanDragging = false;
                 
-                if (initialDistance === 0) {
-                    initialDistance = getDistance(e.touches);
-                    initialScale = viewState.scale;
-                    return;
-                }
+                if (initialDistance === 0) return;
 
                 const newDistance = getDistance(e.touches);
                 let newScale = initialScale * (newDistance / initialDistance);
@@ -663,13 +680,11 @@
 
                 if (newScale !== viewState.scale) {
                     const previousScale = viewState.scale;
+                    const center = getCenterCoords(e.touches);
                     
                     containerRect = container.getBoundingClientRect();
-                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
-                    const focalX = centerX - containerRect.left;
-                    const focalY = centerY - containerRect.top;
+                    const focalX = center.x - containerRect.left;
+                    const focalY = center.y - containerRect.top;
                     
                     const zoomFactor = newScale / previousScale; 
                     viewState.offsetX = focalX - (focalX - viewState.offsetX) * zoomFactor;
@@ -682,13 +697,13 @@
                 return; 
             }
             
-            if (!isSliderDragging && !isPanDragging) return;
-
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            
+
             if (isSliderDragging) {
                 updateSliderPosition(clientX);
+                if (e.touches) { e.preventDefault(); }
+                return;
             }
             
             if (isPanDragging) {
@@ -702,9 +717,9 @@
 
                 lastX = clientX;
                 lastY = clientY;
+                
+                if (e.touches) { e.preventDefault(); }
             }
-            
-            if (e.touches) { e.preventDefault(); }
         };
 
         const endDrag = () => {
@@ -712,7 +727,6 @@
             isPanDragging = false;
             
             initialDistance = 0; 
-            initialScale = MIN_SCALE;
 
             handle.style.cursor = 'grab';
             container.style.cursor = 'grab';
@@ -742,12 +756,12 @@
             poiData.forEach(poi => {
                 const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
                 
-                if (currentVersionIndex >= minVersionIndex) {
+                if (currentVersionIndex >= minVersionIndex && poi.x && poi.y) {
                     const pin = document.createElement('div');
                     pin.className = 'poi-pin';
                     pin.style.left = `${poi.x}%`;
                     pin.style.top = `${poi.y}%`;
-                    pin.style.backgroundColor = poi.color;
+                    pin.style.backgroundColor = poi.color || '#3B82F6';
                     pin.title = poi.name;
                     
                     pin.innerHTML = `
@@ -756,8 +770,7 @@
                         </svg>
                     `;
 
-                    pin.addEventListener('mouseover', () => displayPoiInfo(poi));
-                    pin.addEventListener('mouseout', hidePoiInfo);
+                    // Les événements mouseover/mouseout sont sensibles au drag. Seul le click est robuste.
                     pin.addEventListener('click', (e) => {
                          e.stopPropagation(); 
                          if (activePoi && activePoi.id === poi.id) {
@@ -818,14 +831,12 @@
                 poiMinVersionInput.add(optionAdmin);
             });
 
-            // Sélection par défaut: v0.5 Beta (AVANT) et S1 Øraxia (APRÈS)
+            // Sélection par défaut
             const defaultAvantId = 'v0_beta';
             const defaultApresId = 'v1_s1';
             
             selectAvant.value = mapVersions.find(v => v.id === defaultAvantId)?.id || mapVersions[0].id;
             selectApres.value = mapVersions.find(v => v.id === defaultApresId)?.id || mapVersions[mapVersions.length - 1].id;
-            
-            updateImagesAndLabels();
         }
 
         function updateImagesAndLabels() {
@@ -849,17 +860,16 @@
                 labelElement.classList.remove(colorSet.error);
                 labelElement.classList.add(colorSet.success);
 
+                // Correction de la logique de chargement d'image
+                imgElement.src = version.url;
+                imgElement.alt = `Carte ${version.name}`;
                 imgElement.onerror = () => {
                     console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name}`);
                     imgElement.src = FALLBACK_PLACEHOLDER;
                     labelElement.textContent = `${version.name} (Erreur)`;
                     labelElement.classList.remove(colorSet.success);
                     labelElement.classList.add(colorSet.error);
-                    imgElement.onerror = null; 
                 };
-
-                imgElement.src = version.url;
-                imgElement.alt = `Carte ${version.name}`;
             };
 
             loadImage(imageAvant, versionA, labelAvant, 'avant');
@@ -940,12 +950,7 @@
         
         // --- Fonctions Firestore pour l'Admin POI ---
         
-        /**
-         * Construit le chemin de la collection pour les POI (Public data).
-         * @returns {string} Le chemin de la collection.
-         */
         function getPoiCollectionPath() {
-            // Utiliser une collection publique car les POI sont partagés entre tous les utilisateurs/visionneurs.
             return `artifacts/${appId}/public/data/poi_markers`;
         }
 
@@ -957,7 +962,6 @@
             editingPoiId = null;
             formTitle.textContent = "Ajouter un Nouveau POI";
             submitButton.textContent = "Ajouter le POI";
-            // Initialiser les coordonnées à 50,50 (centre de la carte)
             document.getElementById('poiXInput').value = 50;
             document.getElementById('poiYInput').value = 50;
         }
@@ -967,13 +971,13 @@
          */
         poiForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (!isAuthReady) {
-                console.error("Authentication not ready. Cannot save.");
+            if (!firebaseEnabled || !isAuthReady) {
+                alert("La base de données n'est pas prête ou est désactivée.");
                 return;
             }
 
             poiLoadingIndicator.classList.remove('hidden');
-            const poiId = editingPoiId || doc(collection(db, getPoiCollectionPath())).id; // Génère un nouvel ID si ce n'est pas une édition
+            const poiId = editingPoiId || doc(collection(db, getPoiCollectionPath())).id; 
 
             const newPoi = {
                 name: document.getElementById('poiNameInput').value,
@@ -984,18 +988,35 @@
                 y: parseFloat(document.getElementById('poiYInput').value),
                 updatedAt: serverTimestamp(),
             };
+            
+            // Logique de backoff exponentiel pour les tentatives d'écriture
+            let retries = 0;
+            const maxRetries = 5;
+            let success = false;
+            
+            while (retries < maxRetries) {
+                try {
+                    await setDoc(doc(db, getPoiCollectionPath(), poiId), newPoi);
+                    success = true;
+                    break;
+                } catch (error) {
+                    retries++;
+                    if (retries >= maxRetries) {
+                        console.error("Error saving POI after max retries:", error);
+                        document.getElementById('firebaseStatus').textContent = `Échec de la sauvegarde après ${maxRetries} tentatives.`;
+                        document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-red-900 text-red-300';
+                        break;
+                    }
+                    const delay = Math.pow(2, retries) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
+            }
 
-            try {
-                await setDoc(doc(db, getPoiCollectionPath(), poiId), newPoi);
+            if (success) {
                 resetForm();
                 console.log("POI saved successfully with ID: ", poiId);
-            } catch (error) {
-                console.error("Error saving POI:", error);
-                document.getElementById('poiError').textContent = `Erreur lors de la sauvegarde: ${error.message}`;
-                document.getElementById('poiError').classList.remove('hidden');
-            } finally {
-                poiLoadingIndicator.classList.add('hidden');
             }
+            poiLoadingIndicator.classList.add('hidden');
         });
 
         /**
@@ -1019,40 +1040,51 @@
          * Supprime un POI.
          */
         window.deletePoi = async (poiId) => {
-            if (!isAuthReady || !confirm("Êtes-vous sûr de vouloir supprimer ce POI ?")) return;
+            if (!firebaseEnabled || !isAuthReady) {
+                 alert("La base de données n'est pas prête ou est désactivée.");
+                 return;
+            }
+            if (!confirm("Êtes-vous sûr de vouloir supprimer ce POI ?")) return;
 
             poiLoadingIndicator.classList.remove('hidden');
-            try {
-                await deleteDoc(doc(db, getPoiCollectionPath(), poiId));
-                console.log("POI deleted successfully: ", poiId);
-            } catch (error) {
-                console.error("Error deleting POI:", error);
-                document.getElementById('poiError').textContent = `Erreur lors de la suppression: ${error.message}`;
-                document.getElementById('poiError').classList.remove('hidden');
-            } finally {
-                poiLoadingIndicator.classList.add('hidden');
+            let retries = 0;
+            const maxRetries = 5;
+            
+            while (retries < maxRetries) {
+                try {
+                    await deleteDoc(doc(db, getPoiCollectionPath(), poiId));
+                    console.log("POI deleted successfully: ", poiId);
+                    break;
+                } catch (error) {
+                    retries++;
+                    if (retries >= maxRetries) {
+                        console.error("Error deleting POI after max retries:", error);
+                        document.getElementById('firebaseStatus').textContent = `Échec de la suppression après ${maxRetries} tentatives.`;
+                        document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-red-900 text-red-300';
+                        break;
+                    }
+                    const delay = Math.pow(2, retries) * 1000;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                }
             }
+            poiLoadingIndicator.classList.add('hidden');
         }
 
         /**
          * Met en place l'écouteur en temps réel de Firestore pour les POI.
          */
         function setupPoiListener() {
-             if (!db || !isAuthReady) {
-                // S'assurer que Firebase est prêt avant de se connecter.
-                setTimeout(setupPoiListener, 100); 
-                return;
-            }
+             if (!db || !isAuthReady) return;
             
             const colRef = collection(db, getPoiCollectionPath());
 
             onSnapshot(colRef, (snapshot) => {
-                poiData = []; // Réinitialiser la liste globale des POI
+                poiData = []; 
                 poiListDiv.innerHTML = '';
                 
                 if (snapshot.empty) {
                     poiListDiv.innerHTML = '<p class="text-gray-500 italic text-center">Aucun POI n\'a été ajouté. Utilisez le formulaire ci-dessus.</p>';
-                    updateHistoryPanel(selectApres.value); // Mise à jour de la carte (aucun POI)
+                    updateHistoryPanel(selectApres.value); 
                     return;
                 }
 
@@ -1060,10 +1092,12 @@
                     const data = { id: doc.id, ...doc.data() };
                     poiData.push(data);
                     
-                    // Rendu dans la vue Admin
                     const poiItem = document.createElement('div');
                     poiItem.className = 'flex flex-col sm:flex-row justify-between items-center p-3 bg-gray-700 rounded-lg border-l-4'
                     poiItem.style.borderLeftColor = data.color;
+                    
+                    // Sérialisation du POI pour la fonction onclick
+                    const poiJson = JSON.stringify(data).replace(/"/g, '&quot;');
                     
                     poiItem.innerHTML = `
                         <div>
@@ -1071,7 +1105,7 @@
                             <p class="text-sm text-gray-400">${data.description.substring(0, 50)}...</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
-                            <button onclick="editPoi(${JSON.stringify(data).replace(/"/g, '&quot;')})" 
+                            <button onclick="editPoi('${poiJson}')" 
                                     class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm">Éditer</button>
                             <button onclick="deletePoi('${data.id}')" 
                                     class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm">Supprimer</button>
@@ -1080,13 +1114,12 @@
                     poiListDiv.appendChild(poiItem);
                 });
                 
-                // Très important : Mettre à jour la carte et l'histoire avec les nouvelles données POI
                 updateHistoryPanel(selectApres.value); 
 
             }, (error) => {
                 console.error("Firestore POI listener failed:", error);
-                document.getElementById('poiError').textContent = "Erreur de connexion en temps réel aux POI.";
-                document.getElementById('poiError').classList.remove('hidden');
+                document.getElementById('firebaseStatus').textContent = "Erreur de connexion en temps réel aux POI.";
+                document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-red-900 text-red-300';
             });
         }
         
@@ -1112,18 +1145,9 @@
 
             // Charger les sélecteurs et initialiser la position
             populateSelects(); 
+            updateImagesAndLabels();
             initializePosition(); 
             showView('comparateur');
-            
-            // Si Firebase est disponible, commencer l'écoute des POI
-            if (isAuthReady) {
-                setupPoiListener();
-            } else {
-                 poiListDiv.innerHTML = '<p class="text-red-500 italic text-center">Firebase non configuré. La gestion des POI est désactivée.</p>';
-                 // Utilisation d'un POI de fallback pour tester l'affichage
-                 poiData = [{ id: 'test', name: "Zone de Test", x: 50, y: 50, color: '#00BFFF', description: "POI par défaut (Mode limité)", minVersion: 'v0_alpha' }];
-                 updateHistoryPanel(selectApres.value);
-            }
             
             // Initialiser le formulaire Admin
             resetForm();
@@ -1131,10 +1155,8 @@
 
         // Démarrage de l'application
         window.addEventListener('load', () => {
-             // L'initApplication sera appelée par onAuthStateChanged si Firebase est utilisé.
-             if (!isAuthReady && !firebaseConfig.apiKey) {
-                 initApplication();
-             }
+             // Démarrer l'initialisation de Firebase ou l'application en mode limité
+             initializeFirebase();
         });
         window.addEventListener('resize', initializePosition);
 
