@@ -84,7 +84,7 @@
             Explorateur Historique Multimédia d'Oraxia 🚀
         </h1>
         <p class="text-xl text-gray-400 mt-2">
-            Plongez dans l'évolution de la carte et de l'histoire, saison après saison.
+            Plongez dans l'évolution de la carte et de l'histoire, version par version.
         </p>
     </header>
 
@@ -257,39 +257,49 @@
             ];
 
             // Données des Saisons (Versions de Carte)
+            // Correction : Ajout des versions Alpha et Beta avant S1
             const mapVersions = [
-                // J'utilise des placeholders d'images ici pour que l'application fonctionne sans URL externe.
-                { id: 'v1', name: "S1 : Alpha (v0.0)", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=Saison+1%3A+Carte+Alpha", 
+                { id: 'v0_alpha', name: "v0.0 : Carte Alpha", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0.0%3A+Carte+Alpha+%28Base%29", 
+                    story: { title: "v0.0 : Commencement des Terres", summary: "La toute première version de la carte, juste après la grande collision. Seuls les reliefs principaux sont établis. Aucune civilisation permanente ni élément de quête n'est encore visible.", 
+                             characters: ["Aucun"],
+                             quests: ["..."]}
+                }, 
+                { id: 'v0_beta', name: "v0.5 : Carte Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0.5%3A+Beta+%28Pr%C3%A9-S1%29", 
+                    story: { title: "v0.5 : Premiers Explorateurs", summary: "Arrivée des premiers explorateurs et cartographes. Quelques routes et petits villages commencent à apparaître, surtout autour des lacs. L'île d'Oraxia est encore inexplorée.", 
+                             characters: ["Premiers Explorateurs", "Cartographes"],
+                             quests: ["..."]}
+                }, 
+                { id: 'v1', name: "S1 : Alpha (v1.0)", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=Saison+1%3A+Carte+Alpha", 
                     story: { title: "Saison 1 : Mystère chez Øraxia", summary: "Découverte des terres alentours et météorites ravageant le Royaume. Arrivée de nouveaux personnages (Cartographes, Habitants d'Oraxia). Les quêtes initiales consistent à remplir la carte et à dialoguer avec les populations régionales.", 
                              characters: ["Cartographes (exploration)", "Habitants d'Oraxia (quêtes initiales)"],
                              quests: ["Remplir la carte donnée par le cartographe en parlant à la population.", "Aider les scientifiques à analyser la pierre des météorites."]}
                 }, 
-                { id: 'v2', name: "S2 : Beta (v1.0)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=Saison+2%3A+Activation+de+l%27Oracle", 
+                { id: 'v2', name: "S2 : Beta (v1.1)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=Saison+2%3A+Activation+de+l%27Oracle", 
                     story: { title: "Saison 2 : Les Pierres d'Øraxia", summary: "Suite à l'union des civilisations, une pluie de météorites contenant des pierres runiques s'abat. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et activent la puissance de la Pierre d'Oracle, révélant des pierres runiques partout. Les habitants se méfient du pouvoir des pierres.", 
                              characters: ["Moldar (Alchimiste prédicteur)", "Scientifiques", "Météorologues"],
                              quests: ["Aider les scientifiques et Moldar à trouver toutes les pierres runiques et à les rassembler dans le Sanctuaire."]}
                 },
-                { id: 'v3', name: "S3 : Oraxoween (v1.1)", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=Saison+3%3A+Magie+%26+Corruption", 
+                { id: 'v3', name: "S3 : Oraxoween (v1.2)", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=Saison+3%3A+Magie+%26+Corruption", 
                     story: { title: "Saison 3 : Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux surviennent : magie, régions corrompues... Des mages et de nouveaux personnages apparaissent. Le but est de trouver toutes les pierres, mais des secrets bien cachés sur Oraxia sont révélés.", 
                              characters: ["Mages (nouveaux alliés/ennemis)", "Personnages S2"],
                              quests: ["Continuer la recherche des pierres runiques. Découvrir des secrets sur Oraxia."]}
                 },
-                { id: 'v4', name: "S4 : L'Orbe Du Néan (v1.2)", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=Saison+4%3A+L%27Orbe+Du+N%C3%A9an", 
+                { id: 'v4', name: "S4 : L'Orbe Du Néan (v1.3)", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=Saison+4%3A+L%27Orbe+Du+N%C3%A9an", 
                     story: { title: "Saison 4 : L'Orbe Du Néan", summary: "Moldar réussi à réunir toutes les pierres dans un 'Stones Container', lui conférant une partie de leur pouvoir pour créer 'L'Orbe Du Néan'. Il cherche les Clés Dimensionnelles pour entrer dans 'l'Heaven' et s'emparer du 'Socle du Néan'.", 
                              characters: ["Moldar (de plus en plus puissant)", "Héros (chercheurs de clés)"],
                              quests: ["Récupérer les Clés Dimensionnelles avant Moldar. Empêcher la création de l'Orbe."]}
                 },
-                { id: 'v5', name: "S5 : Le Dieu Moldar (v1.3)", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=Saison+5%3A+Le+Dieu+Moldar", 
+                { id: 'v5', name: "S5 : Le Dieu Moldar (v1.4)", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=Saison+5%3A+Le+Dieu+Moldar", 
                     story: { title: "Saison 5 : Le Dieu Moldar", summary: "Moldar, ayant acquis tous les pouvoirs, devient un Dieu (Al Moldar) et finalise la création de l'Orbe, mais son pouvoir le fait faiblir. Les héros décident de traverser le canyon du Grand Vide pour découvrir une nouvelle région ténébreuse.", 
                              characters: ["Al Moldar (le Dieu affaibli)", "Les Héros (explorateurs)"],
                              quests: ["Découvrir les conséquences de l'Orbe. Traverser le Grand Vide."]}
                 },
-                { id: 'v6', name: "S6 : L'Armée du Fléau (v1.4)", url: "https://placehold.co/1024x576/805AD5/D1D5DB?text=Saison+6%3A+L%27Arm%C3%A9e+du+Fl%C3%A9au", 
+                { id: 'v6', name: "S6 : L'Armée du Fléau (v1.5)", url: "https://placehold.co/1024x576/805AD5/D1D5DB?text=Saison+6%3A+L%27Arm%C3%A9e+du+Fl%C3%A9au", 
                     story: { title: "Saison 6 : L'Armée du Fléau", summary: "Le Grand Vide révèle l'armée de créatures ténébreuses : 'L'armée du Fléau', qui corrompt des zones de la carte (Les Fiefs Noirs). Une zone au milieu des Régions Froides semble immunisée, formant un cercle sans neige autour d'une cabane banale.", 
                              characters: ["L'Armée du Fléau (antagoniste principal)", "Les défenseurs d'Oraxia"],
                              quests: ["Défendre les régions contre la corruption du Fléau. Enquêter sur la zone immunisée dans les Régions Froides."]}
                 },
-                { id: 'v7', name: "S7 : Début d'Ankatar (v1.5)", url: "https://placehold.co/1024x576/D53F8C/D1D5DB?text=Saison+7%3A+T%C3%A9l%C3%A9portation+vers+Ankatar", 
+                { id: 'v7', name: "S7 : Début d'Ankatar (v1.6)", url: "https://placehold.co/1024x576/D53F8C/D1D5DB?text=Saison+7%3A+T%C3%A9l%C3%A9portation+vers+Ankatar", 
                     story: { title: "Saison 7 : Le Néan (Début d'Ankatar)", summary: "L'armée du Fléau commence à déformer la réalité et la 'Pierre' active une téléportation massive. Les habitants sont déplacés sur l'île voisine d'Ankatar. La Pierre se révèle être un ancien vaisseau extraterrestre, alimenté par le Néan qui a fossilisé.", 
                              characters: ["Les survivants d'Oraxia", "Anciens extraterrestres (révélation)"],
                              quests: ["Gérer la téléportation de masse vers Ankatar. Découvrir la véritable nature de la Pierre."]}
@@ -299,9 +309,9 @@
             // Fiches de Personnages (Agrégation des personnages mentionnés dans les histoires)
             const characterFiches = [
                 { name: "Moldar / Al Moldar", role: "Alchimiste, puis Dieu", debut: "Saison 1.5/2", evolution: "Passe d'un chercheur à un être divin par l'acquisition du pouvoir des Pierres Runiques, puis est affaibli par le Néan. Antagoniste complexe.", color: 'bg-yellow-600' },
-                { name: "Les Cartographes", role: "Explorateurs / Guides", debut: "Saison 1", evolution: "Essentiels à l'exploration initiale du royaume. Leur rôle évolue vers le conseil et la planification face aux menaces.", color: 'bg-blue-600' },
+                { name: "Les Cartographes", role: "Explorateurs / Guides", debut: "v0.5 / S1", evolution: "Essentiels à l'exploration initiale du royaume. Leur rôle évolue vers le conseil et la planification face aux menaces.", color: 'bg-blue-600' },
                 { name: "L'Armée du Fléau", role: "Force Corruptrice", debut: "Saison 6", evolution: "Armée ténébreuse révélée par le Canyon du Grand Vide, responsable de la corruption des Fiefs Noirs et de la déformation de la réalité.", color: 'bg-purple-600' },
-                { name: "Les Scientifiques", role: "Chercheurs / Analystes", debut: "Saison 1", evolution: "Initialement centrés sur les météorites, ils étudient les Pierres Runiques, l'Orbe du Néan, et sont les premiers à comprendre la nature de la Pierre/Vaisseau extraterrestre.", color: 'bg-green-600' },
+                { name: "Les Scientifiques", role: "Chercheurs / Analystes", debut: "S1", evolution: "Initialement centrés sur les météorites, ils étudient les Pierres Runiques, l'Orbe du Néan, et sont les premiers à comprendre la nature de la Pierre/Vaisseau extraterrestre.", color: 'bg-green-600' },
                 // Ajoutez d'autres personnages ici...
             ];
 
@@ -711,7 +721,7 @@
                     // Mise à jour de la liste des personnages/quêtes
                     charactersList.innerHTML = '';
                     // Combinez personnages et quêtes en une seule liste d'éléments à afficher
-                    const allDetails = [...version.story.characters.map(c => `👤 ${c}`), ...version.story.quests.map(q => `📜 ${q}`)];
+                    const allDetails = [...(version.story.characters || []).map(c => `👤 ${c}`), ...(version.story.quests || []).map(q => `📜 ${q}`)];
                     
                     if (allDetails.length > 0) {
                         allDetails.forEach(detail => {
@@ -745,11 +755,11 @@
                     selectApres.add(optionApres);
                 });
 
+                // Sélectionner la version Beta (v0.5) pour "Avant" et S1 (v1.0) pour "Après" par défaut
                 if (mapVersions.length >= 2) {
-                    // Sélectionner les deux dernières versions par défaut
-                    selectAvant.value = mapVersions[mapVersions.length - 2].id;
-                    selectApres.value = mapVersions[mapVersions.length - 1].id;
-                } else if (mapVersions.length === 1) {
+                    selectAvant.value = mapVersions[1].id; // v0.5 Beta
+                    selectApres.value = mapVersions[2].id;  // S1 Alpha (v1.0)
+                } else if (mapVersions.length > 0) {
                     selectAvant.value = mapVersions[0].id;
                     selectApres.value = mapVersions[0].id;
                 }
@@ -850,7 +860,9 @@
                     // Ajout du listener pour changer la vue sur la carte
                     eventDiv.addEventListener('click', () => {
                         selectApres.value = version.id;
-                        selectAvant.value = mapVersions[Math.max(0, index - 1)].id; // Comparer avec la version précédente
+                        // Trouver l'ID de la version précédente pour la comparaison
+                        const previousIndex = Math.max(0, index - 1);
+                        selectAvant.value = mapVersions[previousIndex].id; 
                         updateImagesAndLabels();
                         showView('comparateur');
                     });
