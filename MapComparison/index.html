@@ -23,9 +23,10 @@
         }
         
         /* Conteneur de l'image "Après" - Sa largeur est coupée par le clip-path */
+        /* NOTE: La logique clip-path est inversée pour que l'image "APRÈS" soit à droite de la poignée */
         .image-apres-wrapper {
-            /* Coupe la partie droite de l'image. Plus le pourcentage est petit, plus l'image "avant" est visible. */
-            clip-path: inset(0 calc(100% - var(--position)) 0 0);
+            /* Coupe la partie gauche de l'image. L'image "APRES" est visible de --position à 100% (c'est-à-dire à droite) */
+            clip-path: inset(0 0 0 var(--position));
         }
 
         /* La poignée (handle) se positionne à la valeur de la variable */
@@ -110,13 +111,13 @@
         <div id="comparisonContainer" 
              class="comparison-slider-container relative w-full aspect-video shadow-2xl rounded-xl overflow-hidden border-4 border-gray-700 bg-gray-800 transition-all duration-300 ease-in-out">
 
-            <!-- 1. Image de base (VERSION AVANT) - Z-index 10 -->
+            <!-- 1. Image de base (VERSION AVANT) - Z-index 10. Visible à gauche de la poignée. -->
             <img id="imageAvant" 
                  class="comparison-image absolute inset-0 z-10" 
                  src="" 
                  alt="Carte Avant Mise à Jour">
             
-            <!-- 2. Conteneur de l'image de dessus (VERSION APRÈS) - Z-index 20 -->
+            <!-- 2. Conteneur de l'image de dessus (VERSION APRÈS) - Z-index 20. Clippé pour être visible à droite. -->
             <div class="image-apres-wrapper absolute inset-0 z-20 overflow-hidden bg-gray-600">
                 <img id="imageApres" 
                      class="comparison-image absolute inset-0" 
@@ -157,7 +158,8 @@
         <span class="text-blue-400 font-bold">Instructions :</span> 
         Choisissez deux versions et utilisez le séparateur pour comparer l'évolution. 
         Pour **zoomer/dézoomer** (Desktop), utilisez la molette de la souris. 
-        Pour **déplacer la carte** (Panoramique / Mobile), maintenez le bouton gauche de la souris enfoncé ou utilisez un doigt pour glisser (le zoom doit être supérieur à 1.0).
+        Pour **déplacer la carte** (Panoramique / Mobile), utilisez un doigt pour glisser (le zoom doit être supérieur à 1.0).
+        Utilisez **deux doigts** pour le **Zoom Tactile (Pinch-to-Zoom)** sur mobile.
     </p>
 
     <script>
@@ -194,7 +196,23 @@
             let isPanDragging = false;    
             let containerRect;            
             let lastX = 0;
-            let lastY = 0;                
+            let lastY = 0;   
+            
+            // Variables pour le Pinch-to-Zoom
+            let initialDistance = 0;
+            let initialScale = MIN_SCALE;
+
+            /**
+             * Calcule la distance euclidienne entre deux points de contact.
+             * @param {TouchList} touches - Liste des points de contact.
+             */
+            function getDistance(touches) {
+                if (touches.length < 2) return 0;
+                return Math.hypot(
+                    touches[1].clientX - touches[0].clientX, 
+                    touches[1].clientY - touches[0].clientY
+                );
+            }
 
             // État de la vue (Zoom et Panoramique)
             let viewState = {
@@ -312,16 +330,26 @@
                 if (e.type.startsWith('touch')) {
                     e.preventDefault(); 
                 }
-                e.stopPropagation(); // Empêche l'événement de remonter et de déclencher un Pan Drag
+                e.stopPropagation(); 
             };
 
             /**
-             * Commence le panoramique (Pan Drag) (MouseDown/TouchStart sur le conteneur).
+             * Commence le panoramique (Pan Drag) ou le Pinch-to-Zoom (MouseDown/TouchStart sur le conteneur).
              */
             const startPanDrag = (e) => {
-                // Si le clic vient de la poignée ou si le zoom est à 1.0, on n'autorise pas le panoramique
+                // Si le clic vient de la poignée ou si le glissement de slider est déjà actif, on sort.
                 if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
                 
+                // LOGIQUE PINCH START (2 doigts)
+                if (e.touches && e.touches.length === 2) {
+                    // Initialiser les états de pincement
+                    initialDistance = getDistance(e.touches);
+                    initialScale = viewState.scale;
+                    e.preventDefault(); 
+                    return;
+                }
+                
+                // LOGIQUE PAN START (1 doigt ou souris)
                 if (viewState.scale === MIN_SCALE) return;
 
                 isPanDragging = true;
@@ -332,16 +360,57 @@
                 lastX = e.clientX || e.touches[0].clientX;
                 lastY = e.clientY || e.touches[0].clientY;
                 
-                if (e.touches) e.preventDefault(); // Empêcher le défilement sur mobile
+                if (e.touches) e.preventDefault(); 
             };
             
             /**
-             * Gère le glissement du slider OU le Panoramique (MouseMove/TouchMove).
+             * Gère le glissement du slider, le Panoramique OU le Pinch-to-Zoom (MouseMove/TouchMove).
              */
             const onDrag = (e) => {
+                // LOGIQUE PINCH-TO-ZOOM (2 doigts)
+                if (e.touches && e.touches.length === 2) {
+                    e.preventDefault(); 
+                    isSliderDragging = false; 
+                    isPanDragging = false;
+                    
+                    if (initialDistance === 0) {
+                        initialDistance = getDistance(e.touches);
+                        initialScale = viewState.scale;
+                        return; // Éviter les sauts lors du premier mouvement
+                    }
+
+                    const newDistance = getDistance(e.touches);
+                    let newScale = initialScale * (newDistance / initialDistance);
+                    
+                    newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+                    if (newScale !== viewState.scale) {
+                        const previousScale = viewState.scale;
+                        
+                        // Calcul du point focal (milieu du pincement)
+                        containerRect = container.getBoundingClientRect();
+                        const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                        const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+                        const focalX = centerX - containerRect.left;
+                        const focalY = centerY - containerRect.top;
+                        
+                        // Ajustement du décalage pour maintenir le point focal
+                        const zoomFactor = newScale / previousScale; 
+                        viewState.offsetX = focalX - (focalX - viewState.offsetX) * zoomFactor;
+                        viewState.offsetY = focalY - (focalY - viewState.offsetY) * zoomFactor;
+                        
+                        viewState.scale = newScale;
+                    }
+                    
+                    clampPan();
+                    return; 
+                }
+                
+                // LOGIQUE SLIDER/PAN DRAG (1 doigt ou souris)
                 if (!isSliderDragging && !isPanDragging) return;
 
-                // Récupérer les coordonnées X/Y (compatible Souris et Tactile)
+                // Récupérer les coordonnées X/Y (compatible Souris et Tactile 1 doigt)
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
@@ -367,7 +436,6 @@
                 }
                 
                 if (e.touches) {
-                    // Empêche le défilement du navigateur pendant le glissement sur écran tactile
                     e.preventDefault(); 
                 }
             };
@@ -379,6 +447,10 @@
                 isSliderDragging = false;
                 isPanDragging = false;
                 
+                // Réinitialisation de l'état de pincement
+                initialDistance = 0; 
+                initialScale = MIN_SCALE;
+
                 handle.style.cursor = 'grab';
                 container.style.cursor = 'grab';
                 container.classList.remove('cursor-grabbing');
@@ -485,16 +557,15 @@
             handle.addEventListener('mousedown', startSliderDrag);
             handle.addEventListener('touchstart', startSliderDrag);
 
-            // Logique de Panoramique (déplacement)
+            // Logique de Panoramique et Pinch-to-Zoom (déplacement)
             container.addEventListener('mousedown', startPanDrag);
             container.addEventListener('touchstart', startPanDrag);
 
             // Logique de Zoom (molette/Desktop)
-            container.addEventListener('wheel', handleZoom);
+            container.addEventListener('wheel', handleZoom, { passive: false });
             
             // Écouteurs globaux pour le déplacement et la fin du glissement (Tactile et Souris)
             document.addEventListener('mousemove', onDrag);
-            // `{ passive: false }` est essentiel pour que e.preventDefault() fonctionne correctement sur mobile
             document.addEventListener('touchmove', onDrag, { passive: false }); 
             document.addEventListener('mouseup', endDrag);
             document.addEventListener('touchend', endDrag);
