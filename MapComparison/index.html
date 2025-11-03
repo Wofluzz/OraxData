@@ -160,6 +160,7 @@
         Pour **zoomer/dézoomer** (Desktop), utilisez la molette de la souris. 
         Pour **déplacer la carte** (Panoramique / Mobile), utilisez un doigt pour glisser (le zoom doit être supérieur à 1.0).
         Utilisez **deux doigts** pour le **Zoom Tactile (Pinch-to-Zoom)** sur mobile.
+        **Nouveau !** Effectuez un **double-tap** (ou double-clic) sur la carte pour zoomer/dézoomer rapidement.
     </p>
 
     <script>
@@ -179,7 +180,12 @@
             const MIN_SCALE = 1.0;
             const MAX_SCALE = 5.0;
             const SCALE_STEP = 0.15;
-            const PAN_MARGIN_PERCENT = 0.5; // 50% de marge de dépassement demandé par l'utilisateur
+            const PAN_MARGIN_PERCENT = 0.5; // 50% de marge de dépassement
+            
+            // --- Variables pour le double-tap/double-clic ---
+            const DOUBLE_TAP_THRESHOLD = 300; // temps max entre deux taps pour être considéré comme double-tap
+            let lastTapTime = 0;
+            const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; // Niveau de zoom à atteindre
             
             // --- Éléments du DOM ---
             const container = document.getElementById('comparisonContainer');
@@ -304,6 +310,44 @@
                 viewState.scale = newScale;
                 clampPan(); 
             }
+            
+            /**
+             * Gère le zoom/dézoom suite à un double-tap/double-clic.
+             * @param {Event} e - L'événement (mousedown ou touchstart).
+             */
+            function handleDoubleTapZoom(e) {
+                // Déterminer la position du clic/tap (utilise clientX/Y ou le premier point de contact)
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : null);
+                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : null);
+                
+                if (clientX === null || clientY === null) return;
+
+                containerRect = container.getBoundingClientRect();
+                const centerX = containerRect.width / 2;
+                const centerY = containerRect.height / 2;
+                
+                if (viewState.scale > MIN_SCALE) {
+                    // Si déjà zoomé, dézoomer
+                    viewState.scale = MIN_SCALE;
+                    viewState.offsetX = 0;
+                    viewState.offsetY = 0;
+                } else {
+                    // Si non zoomé, zoomer au niveau prédéfini (2.5x)
+                    viewState.scale = ZOOM_LEVEL_ON_DOUBLE_TAP;
+                    
+                    // Calcul du point focal (position relative dans le conteneur)
+                    const focalX = clientX - containerRect.left;
+                    const focalY = clientY - containerRect.top;
+
+                    // Centrer le point focal au milieu de l'écran après le zoom
+                    // offsetX = position_souhaitée - (position_cliquée * scale)
+                    viewState.offsetX = centerX - (focalX * viewState.scale);
+                    viewState.offsetY = centerY - (focalY * viewState.scale);
+                }
+
+                clampPan(); // Appliquer les contraintes et mettre à jour l'affichage
+            }
+
 
             /**
              * Calcule la nouvelle position du slider de comparaison et l'applique au CSS.
@@ -346,11 +390,27 @@
 
             /**
              * Commence le panoramique (Pan Drag) ou le Pinch-to-Zoom (MouseDown/TouchStart sur le conteneur).
+             * Gère également le double-tap/double-clic pour le zoom.
              */
             const startPanDrag = (e) => {
                 // Si le clic vient de la poignée ou si le glissement de slider est déjà actif, on sort.
                 if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
                 
+                // --- LOGIQUE DOUBLE TAP/CLICK ---
+                if (e.touches && e.touches.length === 1 || !e.touches) { // Souris ou 1 doigt
+                    const currentTime = new Date().getTime();
+                    const timeDiff = currentTime - lastTapTime;
+
+                    if (timeDiff < DOUBLE_TAP_THRESHOLD && timeDiff > 0) {
+                        e.preventDefault(); 
+                        handleDoubleTapZoom(e);
+                        lastTapTime = 0; // Réinitialiser le temps après un double-tap réussi
+                        return;
+                    }
+                    lastTapTime = currentTime;
+                }
+                // --- FIN LOGIQUE DOUBLE TAP/CLICK ---
+
                 // LOGIQUE PINCH START (2 doigts)
                 if (e.touches && e.touches.length === 2) {
                     // Initialiser les états de pincement
@@ -368,8 +428,8 @@
                 containerRect = container.getBoundingClientRect();
 
                 // Initialiser les dernières positions (compatible Souris et Tactile)
-                lastX = e.clientX || e.touches[0].clientX;
-                lastY = e.clientY || e.touches[0].clientY;
+                lastX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                lastY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
                 
                 if (e.touches) e.preventDefault(); 
             };
@@ -568,7 +628,7 @@
             handle.addEventListener('mousedown', startSliderDrag);
             handle.addEventListener('touchstart', startSliderDrag);
 
-            // Logique de Panoramique et Pinch-to-Zoom (déplacement)
+            // Logique de Panoramique, Pinch-to-Zoom et Double-Tap (déplacement)
             container.addEventListener('mousedown', startPanDrag);
             container.addEventListener('touchstart', startPanDrag);
 
