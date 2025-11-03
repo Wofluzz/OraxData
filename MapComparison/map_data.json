@@ -4,8 +4,8 @@
         "name": "Alpha (v0.0)", 
         "url": "./Maps/alpha.png",
         "story": { 
-            "title": "Phase Alpha : Début des Terres Vagues", 
-            "summary": "La toute première version de la carte, post-collision initiale. Terres inexplorées, peu de reliefs détaillés, principalement des emplacements temporaires.", 
+            "title": "Phase Alpha : Première ébauche de la map", 
+            "summary": "La toute première version de la carte. Peu de reliefs détaillés, principalement des emplacements temporaires.", 
             "characters": ["Aucun"], 
             "quests": ["..."]
         }
@@ -15,58 +15,69 @@
         "name": "Beta (v1.0)", 
         "url": "./Maps/beta.png",
         "story": { 
-            "title": "Beta v1.0 : Premières Structures", 
+            "title": "Beta v0.1 : Premières Structures", 
             "summary": "Les premières structures permanentes et les chemins de base sont établis. Cette version marque la préparation pour les premiers événements narratifs majeurs.", 
-            "characters": ["Premiers Explorateurs", "Cartographes"], 
+            "characters": ["Aucun"], 
             "quests": ["..."]
         }
     },
     { 
         "id": "v3_oraxoween", 
-        "name": "Beta v1 - Oraxoween (v1.1)", 
+        "name": "Beta v1 - Test biomes Oraxoween (v1.1)", 
         "url": "./Maps/beta-v2.png",
         "story": { 
-            "title": "Beta v1.1 : L'événement d'Oraxoween", 
+            "title": "Beta v0.1 : Ajout de biome dynamique par saisons, test biome automne", 
             "summary": "Introduction d'un événement saisonnier ou temporaire (Oraxoween). Des zones spécifiques de la carte subissent des modifications cosmétiques et d'ambiance.", 
-            "characters": ["Habitants festifs"], 
-            "quests": ["Événement spécial Oraxoween"]
+            "characters": ["Aucun"], 
+            "quests": ["..."]
         }
     },
     { 
         "id": "v4_beta_v2", 
-        "name": "Beta v2 (v1.2)", 
+        "name": "Beta v2 (v0.2)", 
         "url": "./Maps/beta-v3.png",
         "story": { 
-            "title": "Beta v1.2 : Raffinement des Zones", 
+            "title": "Beta v0.2 : Raffinement des Zones", 
             "summary": "Raffinement général de la géographie et des limites des zones. Ajustements basés sur les retours des premiers tests.", 
-            "characters": ["Développeurs"], 
+            "characters": ["Lykos"], 
             "quests": ["..."]
         }
     },
     { 
         "id": "v5_beta_v3", 
-        "name": "Beta v3 (v1.3)", 
+        "name": "Beta v3 (v0.3)", 
         "url": "./Maps/beta-v4.png",
         "story": { 
-            "title": "Beta v1.3 : Déploiement des POI Clés", 
+            "title": "Beta v0.3 : Déploiement des POI Clés", 
             "summary": "Les Points d'Intérêt majeurs permanents (villes, donjons principaux) commencent à être placés et finalisés sur la carte.", 
-            "characters": ["Architectes"], 
+            "characters": ["Aucun"], 
             "quests": ["..."]
         }
     },
     { 
         "id": "v6_biomes", 
-        "name": "Beta v4 - Biomes Classics (v1.4)", 
+        "name": "Beta v4 - Biomes Classics (v0.4)", 
         "url": "./Maps/beta-v5.png",
         "story": { 
-            "title": "Beta v1.4 : Finalisation des Biomes", 
+            "title": "Beta v0.4 : Finalisation des Biomes", 
             "summary": "Les biomes reçoivent leur apparence finale et leurs limites définitives. Préparation de la carte pour le lancement de la Saison 1.", 
-            "characters": ["Spécialistes des Biomes"], 
+            "characters": ["Aucun"], 
             "quests": ["..."]
         }
     },
     { 
-        "id": "v7_s1", 
+        "id": "v7_debut_ankatar", 
+        "name": "Beta v5 - Création d'Ankatar (v0.5)", 
+        "url": "./Maps/beta-v6.png",
+        "story": { 
+            "title": "Beta v0.5: Création d'Ankatar", 
+            "summary": "Development de la ville desertique d'Ankatar. Préparation de la carte pour le lancement de la Saison 1.", 
+            "characters": ["Aucun"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v8_s1", 
         "name": "S1 Øraxia", 
         "url": "1000069803.png", 
         "story": { 
@@ -77,7 +88,7 @@
         }
     }, 
     { 
-        "id": "v8_s2", 
+        "id": "v9_s2", 
         "name": "S2 Les Pierres d'Øraxia", 
         "url": "https://placehold.co/1024x576/2D3748/D1D5DB?text=v8_s2+%28S2%29", 
         "story": { 
@@ -88,7 +99,7 @@
         }
     },
     { 
-        "id": "v9_s3", 
+        "id": "v10_s3", 
         "name": "S3 Aux Pierres et à la baguette", 
         "url": "1000069879.png",
         "story": { 
