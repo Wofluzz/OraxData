@@ -23,7 +23,6 @@
         }
         
         /* Conteneur de l'image "Après" - Sa largeur est coupée par le clip-path */
-        /* NOTE: La logique clip-path est inversée pour que l'image "APRÈS" soit à droite de la poignée */
         .image-apres-wrapper {
             /* Coupe la partie gauche de l'image. L'image "APRES" est visible de --position à 100% (c'est-à-dire à droite) */
             clip-path: inset(0 0 0 var(--position));
@@ -65,6 +64,19 @@
             /* Le zoom commence depuis le coin haut-gauche (0 0) */
             transform-origin: 0 0; 
         }
+        
+        /* Style pour l'indicateur de chargement de l'histoire */
+        .loading-dot {
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
 
     </style>
 </head>
@@ -97,7 +109,7 @@
             <!-- Sélecteur APRÈS -->
             <div class="flex-1">
                 <label for="versionApres" class="block text-sm font-medium text-green-400 mb-1">
-                    Version APRÈS :
+                    Version APRÈS (Histoire affichée) :
                 </label>
                 <select id="versionApres" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-green-500 focus:border-green-500 transition-colors">
                     <!-- Les options seront remplies par JavaScript -->
@@ -152,28 +164,68 @@
             
         </div>
         
+        <!-- Panneau d'Information d'Histoire -->
+        <div class="mt-8 p-6 w-full bg-gray-800 rounded-xl shadow-xl border-2 border-gray-700">
+            <h2 id="historyTitle" class="text-2xl font-bold text-green-400 mb-4">
+                Histoire de la version : <span id="currentVersionName" class="text-white">...</span>
+            </h2>
+            <div id="historyContent" class="text-gray-300 leading-relaxed min-h-[5rem]">
+                <!-- Contenu dynamique de l'histoire -->
+                <div class="text-center p-4 text-gray-500 italic">
+                    <div class="flex justify-center space-x-2">
+                        <div class="loading-dot w-3 h-3 bg-green-400 rounded-full"></div>
+                        <div class="loading-dot w-3 h-3 bg-green-400 rounded-full"></div>
+                        <div class="loading-dot w-3 h-3 bg-green-400 rounded-full"></div>
+                    </div>
+                    Chargement de l'histoire...
+                </div>
+            </div>
+        </div>
+
     </main>
     
     <p class="mt-6 text-sm text-gray-500 max-w-4xl text-center">
         <span class="text-blue-400 font-bold">Instructions :</span> 
-        Choisissez deux versions et utilisez le séparateur pour comparer l'évolution. 
-        Pour **zoomer/dézoomer** (Desktop), utilisez la molette de la souris. 
-        Pour **déplacer la carte** (Panoramique / Mobile), utilisez un doigt pour glisser (le zoom doit être supérieur à 1.0).
-        Utilisez **deux doigts** pour le **Zoom Tactile (Pinch-to-Zoom)** sur mobile.
-        **Nouveau !** Effectuez un **double-tap** (ou double-clic) sur la carte pour zoomer/dézoomer rapidement.
+        Utilisez le séparateur pour comparer l'évolution.
+        <br>
+        **Zoom/Panoramique :** Molette (Desktop) / Pinch-to-Zoom (Mobile) / Glisser (zoom > 1.0).
+        <br>
+        **Double-Tap/Clic :** Zoomer à 2.5x sur le point de contact, ou dézoomer si déjà zoomé.
     </p>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Définition des versions de carte (CHEMINS D'ACCÈS RELATIFS RÉTABLIS) ---
+            // --- Définition des versions de carte et de l'histoire intégrée ---
+            // Les descriptions sont basées sur le contenu des fichiers CSV fournis par l'utilisateur.
             const mapVersions = [
-                { id: 'v1', name: "Alpha (v0.0)", url: "./Maps/alpha.png" }, 
-                { id: 'v2', name: "Beta (v1.0)", url: "./Maps/beta.png" },
-                { id: 'v3', name: "Beta v1 - Oraxoween (v1.1)", url: "./Maps/beta-v2.png" },
-                { id: 'v4', name: "Beta v2 (v1.2)", url: "./Maps/beta-v3.png" },
-                { id: 'v5', name: "Beta v3 (v1.3)", url: "./Maps/beta-v4.png" },
-                { id: 'v6', name: "Beta v4 - Biomes Classics (v1.4)", url: "./Maps/beta-v5.png" },
-                { id: 'v7', name: "Beta v5 - Debut d'Ankatar (v1.5)", url: "./Maps/beta-v6.png" },
+                { id: 'v1', name: "Alpha (v0.0)", url: "./Maps/alpha.png", story: {
+                    title: "Saison 1 : Mystère chez Øraxia",
+                    summary: "Découverte des terres alentours et météorites ravageant le Royaume. Arrivée de nouveaux personnages (Cartographes, Habitants d'oraxia). Les quêtes initiales consistent à remplir la carte et à dialoguer avec les populations régionales."
+                }}, 
+                { id: 'v2', name: "Beta (v1.0)", url: "./Maps/beta.png", story: {
+                    title: "Saison 2 : Les Pierres d'Øraxia",
+                    summary: "Suite à l'union des civilisations, une pluie de météorites contenant des pierres runiques s'abat. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et activent la puissance de la Pierre d'Oracle, révélant des pierres runiques partout dans le royaume. Les habitants se méfient du pouvoir des pierres."
+                }},
+                { id: 'v3', name: "Beta v1 - Oraxoween (v1.1)", url: "./Maps/beta-v2.png", story: {
+                    title: "Saison 3 : Aux Pierres et à la baguette",
+                    summary: "De nouveaux événements paranormaux surviennent : magie, régions corrompues... Des mages et de nouveaux personnages apparaissent. Le but est de trouver toutes les pierres, mais des secrets bien cachés sur Oraxia sont révélés."
+                }},
+                { id: 'v4', name: "Beta v2 (v1.2)", url: "./Maps/beta-v3.png", story: {
+                    title: "Saison 4 : L'Orbe Du Néan",
+                    summary: "Moldar réussit à réunir toutes les pierres dans un 'Stones Container', lui conférant une partie de leur pouvoir. Il crée 'L'Orbe Du Néan'. Il cherche ensuite à récupérer les Clés Dimensionnelles pour entrer dans l'Heaven et s'emparer du 'Socle du Néan'."
+                }},
+                { id: 'v5', name: "Beta v3 (v1.3)", url: "./Maps/beta-v4.png", story: {
+                    title: "Saison 5 : Le Dieu Moldar",
+                    summary: "Moldar, ayant acquis tous les pouvoirs, devient un Dieu (Al Moldar) et finalise la création de l'Orbe. Cependant, son pouvoir le fait faiblir. Les héros décident de traverser le canyon du Grand Vide pour découvrir une nouvelle région ténébreuse."
+                }},
+                { id: 'v6', name: "Beta v4 - Biomes Classics (v1.4)", url: "./Maps/beta-v5.png", story: {
+                    title: "Saison 6 : L'Armée du Fléau",
+                    summary: "Le Grand Vide révèle une armée de créatures ténébreuses appelée 'L'armée du Fléau', qui corrompt des zones de la carte (Les Fiefs Noirs). Une zone au milieu des Régions Froides semble immunisée, formant un cercle sans neige autour d'une cabane banale."
+                }},
+                { id: 'v7', name: "Beta v5 - Debut d'Ankatar (v1.5)", url: "./Maps/beta-v6.png", story: {
+                    title: "Saison 7 : Le Néan (Début d'Ankatar)",
+                    summary: "L'armée du Fléau commence à déformer la réalité et la 'Pierre' active une téléportation massive. Les habitants sont déplacés sur l'île voisine d'Ankatar. La Pierre se révèle être un ancien vaisseau extraterrestre, alimenté par le Néan qui a fossilisé."
+                }},
             ];
 
             const FALLBACK_PLACEHOLDER = "https://placehold.co/1024x576/374151/D1D5DB?text=ERREUR+DE+CHARGEMENT";
@@ -183,9 +235,9 @@
             const PAN_MARGIN_PERCENT = 0.5; // 50% de marge de dépassement
             
             // --- Variables pour le double-tap/double-clic ---
-            const DOUBLE_TAP_THRESHOLD = 300; // temps max entre deux taps pour être considéré comme double-tap
+            const DOUBLE_TAP_THRESHOLD = 300; 
             let lastTapTime = 0;
-            const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; // Niveau de zoom à atteindre
+            const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; 
             
             // --- Éléments du DOM ---
             const container = document.getElementById('comparisonContainer');
@@ -197,6 +249,10 @@
             const labelAvant = document.getElementById('labelAvant');
             const labelApres = document.getElementById('labelApres');
             const style = container.style;
+            // Nouveaux éléments d'histoire
+            const historyTitle = document.getElementById('historyTitle');
+            const currentVersionName = document.getElementById('currentVersionName');
+            const historyContent = document.getElementById('historyContent');
             
             // --- Variables de l'état du composant ---
             let isSliderDragging = false; 
@@ -228,7 +284,7 @@
                 offsetY: 0        
             };
 
-            // --- Fonctions utilitaires ---
+            // --- Fonctions utilitaires de vue ---
 
             /**
              * Applique les transformations de zoom et de panoramique aux deux images via CSS transform.
@@ -241,13 +297,11 @@
 
             /**
              * Applique les contraintes de déplacement pour ne pas sortir du cadre.
-             * Empêche l'image zoomée de laisser un espace vide dans le conteneur.
              */
             function clampPan() {
                 if (!containerRect) containerRect = container.getBoundingClientRect();
 
                 if (viewState.scale <= MIN_SCALE) {
-                    // Si non zoomé, on réinitialise les décalages
                     viewState.offsetX = 0;
                     viewState.offsetY = 0;
                 } else {
@@ -259,14 +313,10 @@
                     const marginY = containerRect.height * PAN_MARGIN_PERCENT;
 
                     // Limites avec marge :
-                    // maxPanX (déplacement à droite): permet au bord gauche de l'image de dépasser jusqu'à marginX
                     const maxPanX = marginX; 
-                    // minPanX (déplacement à gauche): permet au bord droit de l'image de dépasser jusqu'à marginX
                     const minPanX = containerRect.width - scaledWidth - marginX; 
                     
-                    // maxPanY (déplacement vers le bas): permet au bord supérieur de l'image de dépasser jusqu'à marginY
                     const maxPanY = marginY;
-                    // minPanY (déplacement vers le haut): permet au bord inférieur de l'image de dépasser jusqu'à marginY
                     const minPanY = containerRect.height - scaledHeight - marginY;
 
 
@@ -279,44 +329,34 @@
 
             /**
              * Gère l'événement de la molette pour zoomer/dézoomer (Desktop).
-             * @param {WheelEvent} e - L'événement molette.
              */
             function handleZoom(e) {
-                // Empêcher le défilement de la page
                 e.preventDefault(); 
                 
-                // Déterminer la direction du zoom (deltaY est négatif si on scroll vers le haut = zoom)
                 const delta = e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP;
 
                 let newScale = viewState.scale + delta;
-                // Clamper le zoom entre les limites min et max
                 newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
                 if (newScale === viewState.scale) return;
 
-                // Calculer le point focal pour le zoom
                 containerRect = container.getBoundingClientRect();
                 const mouseX = e.clientX - containerRect.left;
                 const mouseY = e.clientY - containerRect.top;
 
-                // Facteur de changement de zoom
                 const zoomFactor = newScale / viewState.scale;
 
-                // Appliquer la correction de panoramique pour centrer le zoom sur le curseur
                 viewState.offsetX = mouseX - (mouseX - viewState.offsetX) * zoomFactor;
                 viewState.offsetY = mouseY - (mouseY - viewState.offsetY) * zoomFactor;
                 
-                // Mettre à jour l'état et appliquer les contraintes
                 viewState.scale = newScale;
                 clampPan(); 
             }
             
             /**
              * Gère le zoom/dézoom suite à un double-tap/double-clic.
-             * @param {Event} e - L'événement (mousedown ou touchstart).
              */
             function handleDoubleTapZoom(e) {
-                // Déterminer la position du clic/tap (utilise clientX/Y ou le premier point de contact)
                 const clientX = e.clientX || (e.touches ? e.touches[0].clientX : null);
                 const clientY = e.clientY || (e.touches ? e.touches[0].clientY : null);
                 
@@ -327,12 +367,12 @@
                 const centerY = containerRect.height / 2;
                 
                 if (viewState.scale > MIN_SCALE) {
-                    // Si déjà zoomé, dézoomer
+                    // Dézoomer
                     viewState.scale = MIN_SCALE;
                     viewState.offsetX = 0;
                     viewState.offsetY = 0;
                 } else {
-                    // Si non zoomé, zoomer au niveau prédéfini (2.5x)
+                    // Zoomer au niveau prédéfini (2.5x)
                     viewState.scale = ZOOM_LEVEL_ON_DOUBLE_TAP;
                     
                     // Calcul du point focal (position relative dans le conteneur)
@@ -340,18 +380,16 @@
                     const focalY = clientY - containerRect.top;
 
                     // Centrer le point focal au milieu de l'écran après le zoom
-                    // offsetX = position_souhaitée - (position_cliquée * scale)
                     viewState.offsetX = centerX - (focalX * viewState.scale);
                     viewState.offsetY = centerY - (focalY * viewState.scale);
                 }
 
-                clampPan(); // Appliquer les contraintes et mettre à jour l'affichage
+                clampPan(); 
             }
 
 
             /**
              * Calcule la nouvelle position du slider de comparaison et l'applique au CSS.
-             * @param {number} clientX - Position X du curseur/doigt.
              */
             function updateSliderPosition(clientX) {
                 if (!containerRect) {
@@ -359,22 +397,15 @@
                 }
                 
                 let position = clientX - containerRect.left;
-
-                // Clamper la position entre 0 et la largeur du conteneur
                 position = Math.max(0, Math.min(position, containerRect.width));
                 
                 const percent = (position / containerRect.width) * 100;
-                // Met à jour la variable CSS pour l'effet de coupe
                 style.setProperty('--position', `${percent}%`);
             }
 
             // --- Gestion des événements de glissement (Drag) ---
-
-            /**
-             * Commence le glissement du slider de comparaison (MouseDown/TouchStart sur la poignée).
-             */
+            
             const startSliderDrag = (e) => {
-                // Vérifie si l'événement provient bien de la poignée
                 if (e.currentTarget !== handle) return;
 
                 isSliderDragging = true;
@@ -388,32 +419,25 @@
                 e.stopPropagation(); 
             };
 
-            /**
-             * Commence le panoramique (Pan Drag) ou le Pinch-to-Zoom (MouseDown/TouchStart sur le conteneur).
-             * Gère également le double-tap/double-clic pour le zoom.
-             */
             const startPanDrag = (e) => {
-                // Si le clic vient de la poignée ou si le glissement de slider est déjà actif, on sort.
                 if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
                 
-                // --- LOGIQUE DOUBLE TAP/CLICK ---
-                if (e.touches && e.touches.length === 1 || !e.touches) { // Souris ou 1 doigt
+                // LOGIQUE DOUBLE TAP/CLICK
+                if (e.touches && e.touches.length === 1 || !e.touches) {
                     const currentTime = new Date().getTime();
                     const timeDiff = currentTime - lastTapTime;
 
                     if (timeDiff < DOUBLE_TAP_THRESHOLD && timeDiff > 0) {
                         e.preventDefault(); 
                         handleDoubleTapZoom(e);
-                        lastTapTime = 0; // Réinitialiser le temps après un double-tap réussi
+                        lastTapTime = 0; 
                         return;
                     }
                     lastTapTime = currentTime;
                 }
-                // --- FIN LOGIQUE DOUBLE TAP/CLICK ---
-
+                
                 // LOGIQUE PINCH START (2 doigts)
                 if (e.touches && e.touches.length === 2) {
-                    // Initialiser les états de pincement
                     initialDistance = getDistance(e.touches);
                     initialScale = viewState.scale;
                     e.preventDefault(); 
@@ -427,16 +451,12 @@
                 container.classList.add('cursor-grabbing'); 
                 containerRect = container.getBoundingClientRect();
 
-                // Initialiser les dernières positions (compatible Souris et Tactile)
                 lastX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
                 lastY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
                 
                 if (e.touches) e.preventDefault(); 
             };
             
-            /**
-             * Gère le glissement du slider, le Panoramique OU le Pinch-to-Zoom (MouseMove/TouchMove).
-             */
             const onDrag = (e) => {
                 // LOGIQUE PINCH-TO-ZOOM (2 doigts)
                 if (e.touches && e.touches.length === 2) {
@@ -447,7 +467,7 @@
                     if (initialDistance === 0) {
                         initialDistance = getDistance(e.touches);
                         initialScale = viewState.scale;
-                        return; // Éviter les sauts lors du premier mouvement
+                        return;
                     }
 
                     const newDistance = getDistance(e.touches);
@@ -458,7 +478,6 @@
                     if (newScale !== viewState.scale) {
                         const previousScale = viewState.scale;
                         
-                        // Calcul du point focal (milieu du pincement)
                         containerRect = container.getBoundingClientRect();
                         const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
                         const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
@@ -466,7 +485,6 @@
                         const focalX = centerX - containerRect.left;
                         const focalY = centerY - containerRect.top;
                         
-                        // Ajustement du décalage pour maintenir le point focal
                         const zoomFactor = newScale / previousScale; 
                         viewState.offsetX = focalX - (focalX - viewState.offsetX) * zoomFactor;
                         viewState.offsetY = focalY - (focalY - viewState.offsetY) * zoomFactor;
@@ -481,7 +499,6 @@
                 // LOGIQUE SLIDER/PAN DRAG (1 doigt ou souris)
                 if (!isSliderDragging && !isPanDragging) return;
 
-                // Récupérer les coordonnées X/Y (compatible Souris et Tactile 1 doigt)
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
                 
@@ -490,18 +507,14 @@
                 }
                 
                 if (isPanDragging) {
-                    // Calcul du déplacement
                     const dx = clientX - lastX;
                     const dy = clientY - lastY;
                     
-                    // Appliquer le déplacement
                     viewState.offsetX += dx;
                     viewState.offsetY += dy;
 
-                    // Clamper les valeurs et appliquer la transformation
                     clampPan();
 
-                    // Mise à jour des dernières positions
                     lastX = clientX;
                     lastY = clientY;
                 }
@@ -511,14 +524,10 @@
                 }
             };
 
-            /**
-             * Termine le glissement (MouseUp/TouchEnd).
-             */
             const endDrag = () => {
                 isSliderDragging = false;
                 isPanDragging = false;
                 
-                // Réinitialisation de l'état de pincement
                 initialDistance = 0; 
                 initialScale = MIN_SCALE;
 
@@ -530,7 +539,26 @@
             // --- Fonctions d'initialisation et de mise à jour ---
 
             /**
-             * Rempli les menus déroulants avec les versions de carte.
+             * Met à jour le panneau d'histoire en fonction de la version sélectionnée.
+             * @param {string} versionId - L'ID de la version APRÈS.
+             */
+            function updateHistoryPanel(versionId) {
+                const version = mapVersions.find(v => v.id === versionId);
+                
+                if (version && version.story) {
+                    currentVersionName.textContent = version.name;
+                    historyTitle.textContent = version.story.title || `Histoire de la version : ${version.name}`;
+                    historyContent.textContent = version.story.summary;
+                } else {
+                    currentVersionName.textContent = 'Non définie';
+                    historyTitle.textContent = 'Histoire de la version : ...';
+                    historyContent.textContent = 'Aucune information d\'histoire disponible pour cette version.';
+                }
+            }
+
+
+            /**
+             * Rempli les menus déroulants et définit l'état initial.
              */
             function populateSelects() {
                 mapVersions.forEach(version => {
@@ -549,7 +577,9 @@
                     selectApres.value = mapVersions[0].id;
                 }
                 
+                // Mise à jour de la vue initiale (images et panneau)
                 updateImagesAndLabels();
+                updateHistoryPanel(selectApres.value);
             }
 
             /**
@@ -599,19 +629,20 @@
 
                 loadImage(imageAvant, versionA, labelAvant, 'avant');
                 loadImage(imageApres, versionB, labelApres, 'apres');
+                
+                // Mettre à jour le panneau d'histoire lorsque la version APRÈS change
+                updateHistoryPanel(idApres);
             }
             
             /**
              * Initialise la position et les dimensions au chargement et au redimensionnement
              */
             const initializePosition = () => {
-                // Réinitialiser l'état du zoom/panoramique
                 viewState.scale = MIN_SCALE;
                 viewState.offsetX = 0;
                 viewState.offsetY = 0;
                 updateImageTransform();
                 
-                // Recalculer la position du conteneur et centrer le slider (50%)
                 containerRect = container.getBoundingClientRect();
                 const center = containerRect.width / 2;
                 updateSliderPosition(containerRect.left + center);
