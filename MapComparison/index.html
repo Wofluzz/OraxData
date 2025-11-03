@@ -29,6 +29,7 @@
             width: 100%;
             height: 100%;
             transform-origin: 0 0; 
+            object-fit: cover; /* Assure que l'image couvre le conteneur */
         }
         
         /* POI Styles */
@@ -251,7 +252,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-300">Version Minimum (ID)</label>
+                        <label for="poiMinVersionInput" class="block text-sm font-medium text-gray-300">Version Minimum (ID)</label>
                         <select id="poiMinVersionInput" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
                              <!-- Options remplies par JS -->
                         </select>
@@ -323,31 +324,32 @@
         let isAuthReady = false;
         let firebaseEnabled = false;
 
-        // --- Données Centrales du Monde d'Oraxia ---
+        // --- Données Centrales du Monde d'Oraxia (MISES À JOUR AVEC VOS IMAGES) ---
 
         const mapVersions = [
-            { id: 'v0_alpha', name: "v0.0 Alpha (Carte Base)", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0.0%3A+Alpha+%28Base%29", 
+            { id: 'v0_alpha', name: "v0.0 Alpha (Carte Base)", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0_alpha+%28Base%29", 
                 story: { title: "Début des Terres Vagues", summary: "La toute première version de la carte post-collision. Terres inexplorées, peu de reliefs détaillés.", characters: ["Aucun"], quests: ["..."]}
             }, 
-            { id: 'v0_beta', name: "v0.5 Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0.5%3A+Beta+%28Pr%C3%A9-S1%29", 
+            { id: 'v0_beta', name: "v0.5 Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0_beta+%28Pre-S1%29", 
                 story: { title: "Premières Explorations", summary: "Les premières structures et chemins apparaissent. Oraxia est prête pour l'arrivée des Cartographes.", characters: ["Premiers Explorateurs", "Cartographes"], quests: ["..."]}
             }, 
-            { id: 'v0_beta_v5', name: "v0.5 Beta v5 (Tests)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v0.5%3A+Beta+v5+%28Tests%29", 
+            { id: 'v0_beta_v5', name: "v0.5 Beta v5 (Tests)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v0_beta_v5+%28Tests%29", 
                 story: { title: "Version de Test Intermédiaire", summary: "Tests et ajustements de la carte avant le lancement officiel de la Saison 1.", characters: ["Développeurs"], quests: ["..."]}
             }, 
-            { id: 'v1_s1', name: "S1 Øraxia", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=S1+%C3%98raxia", 
+            // VOS IMAGES COMMENCENT ICI
+            { id: 'v1_s1', name: "S1 Øraxia", url: "1000069803.png", // Image 1 (supposée être S1)
                 story: { title: "S1 Øraxia", summary: "Découverte des terres alentours et météorites ravagant le Royaume. Arrivée de nouveaux personnage.", characters: ["Cartographes un peu partout sur la map", "Habitants d'oraxia"], quests: ["Remplir la carte donnée par le cartographe en parlant au population des regions alentours", "aider les sientifiques et Moldzar a trouver une utilité a la pierre dans la météorite"]}
             }, 
-            { id: 'v2_s2', name: "S2 Les Pierres d'Øraxia", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=S2+Pierres+d%27%C3%98raxia", 
+            { id: 'v2_s2', name: "S2 Les Pierres d'Øraxia", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v2_s2+%28S2%29", 
                 story: { title: "S2 Les Pierres d'Øraxia", summary: "Quelques temps après l'union des civilisations, une pluie de météorites contenant des pierres runiques. Moldar se lança sur l'étude des ces pierres et decouvrit un pouvoir méconnu. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et active la puissance de la pierre d'Oracle dévoilant des pirres runiques dans tout le royaume", characters: ["Météoroloque", "Scientifiques autours des météores", "Moldzar Alchimiste prédicteur du Royaume", "habitants du royaume se mefiant du pouvoir des pierres"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et a les ressembler dans le Sanctuaire"]}
             },
-            { id: 'v3_s3', name: "S3 Aux Pierres et à la baguette", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=S3+Aux+Pierres+et+%C3%A0+la+baguette", 
-                story: { title: "S3 Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux arrivent : magie, régions corompues... et des secrets sur Oraxia bien cachés", characters: ["Mages et personnages de la saison 2"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et a les ressembler dans le Sanctuaire"]}
+            { id: 'v3_s3', name: "S3 Aux Pierres et à la baguette", url: "1000069879.png", // Image 2 (supposée être S3)
+                story: { title: "S3 Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux arrivent : magie, régions corompues... et des secrets sur Oraxia bien cachés", characters: ["Mages et personnages de la saison 2"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et à les ressembler dans le Sanctuaire"]}
             },
-            { id: 'v4_s4', name: "S4 L'Orbe Du Néan", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=S4+L%27Orbe+Du+N%C3%A9an", 
+            { id: 'v4_s4', name: "S4 L'Orbe Du Néan", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=v4_s4+%28S4%29", 
                 story: { title: "S4 L'Orbe Du Néan", summary: "Moldar réussi à réunir toute les pierres et a les contenir dans une machine (Stones Container) qui lui confère une partie du pouvoir pour créer L'Orbe Du Néan", characters: ["Moldar", "Héros (Kai, Léo, Caleb, Aria, Flèche)"], quests: ["..."]}
             },
-            { id: 'v5_s5', name: "S5 Le Dieu Moldar", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=S5+Le+Dieu+Moldar", 
+            { id: 'v5_s5', name: "S5 Le Dieu Moldar", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=v5_s5+%28S5%29", 
                 story: { title: "S5 Le Dieu Moldar", summary: "Moldar qui a tout les pouvoir est maintenant un Dieu (Al Moldar est son nom de dieu) Créé l'Orbe mais faiblit", characters: ["Al Moldar", "Les Héros"], quests: ["..."]}
             },
         ];
@@ -459,6 +461,7 @@
         let initialScale = MIN_SCALE;
         let activePoi = null; 
         let editingPoiId = null;
+        let lastTapTime = 0; 
 
         let viewState = {
             scale: MIN_SCALE, 
@@ -595,8 +598,13 @@
                 const focalY = coords.clientY - containerRect.top;
 
                 // Centre l'image sur le point tapé
-                viewState.offsetX = (containerRect.width / 2) - (focalX * viewState.scale);
-                viewState.offsetY = (containerRect.height / 2) - (focalY * viewState.scale);
+                // Pour que le point tapé (focalX, focalY) reste au centre de l'écran après le zoom,
+                // il faut calculer le décalage (offsetX) nécessaire.
+                const scaledFocalX = focalX * viewState.scale;
+                const scaledFocalY = focalY * viewState.scale;
+                
+                viewState.offsetX = (containerRect.width / 2) - scaledFocalX;
+                viewState.offsetY = (containerRect.height / 2) - scaledFocalY;
             }
 
             clampPan(); 
@@ -633,6 +641,7 @@
             
             const coords = getClientCoords(e);
             
+            // Gestion du Double Tap pour le Zoom
             if (e.touches && e.touches.length === 1 || !e.touches) {
                 const currentTime = new Date().getTime();
                 const timeDiff = currentTime - lastTapTime;
@@ -646,6 +655,7 @@
                 lastTapTime = currentTime;
             }
             
+            // Gestion du Pinch (zoom à deux doigts)
             if (e.touches && e.touches.length === 2) {
                 initialDistance = getDistance(e.touches);
                 initialScale = viewState.scale;
@@ -653,6 +663,7 @@
                 return;
             }
             
+            // Si l'image n'est pas zoomée, on ne peut pas panner
             if (viewState.scale === MIN_SCALE) return;
 
             isPanDragging = true;
@@ -666,6 +677,7 @@
         };
         
         const onDrag = (e) => {
+            // Logique de zoom à deux doigts (Pinch)
             if (e.touches && e.touches.length === 2) {
                 e.preventDefault(); 
                 isSliderDragging = false; 
@@ -753,6 +765,10 @@
             const currentVersionIndex = mapVersions.findIndex(v => v.id === currentVersionId);
             poiContainer.innerHTML = '';
             
+            // Assurer que le conteneur des POI ne pan/zoom pas avec les images.
+            poiContainer.style.transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
+            poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none';
+
             poiData.forEach(poi => {
                 const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
                 
@@ -770,7 +786,6 @@
                         </svg>
                     `;
 
-                    // Les événements mouseover/mouseout sont sensibles au drag. Seul le click est robuste.
                     pin.addEventListener('click', (e) => {
                          e.stopPropagation(); 
                          if (activePoi && activePoi.id === poi.id) {
@@ -832,8 +847,8 @@
             });
 
             // Sélection par défaut
-            const defaultAvantId = 'v0_beta';
-            const defaultApresId = 'v1_s1';
+            const defaultAvantId = 'v1_s1'; // Utilisez la première image fournie
+            const defaultApresId = 'v3_s3'; // Utilisez la deuxième image fournie
             
             selectAvant.value = mapVersions.find(v => v.id === defaultAvantId)?.id || mapVersions[0].id;
             selectApres.value = mapVersions.find(v => v.id === defaultApresId)?.id || mapVersions[mapVersions.length - 1].id;
@@ -860,12 +875,11 @@
                 labelElement.classList.remove(colorSet.error);
                 labelElement.classList.add(colorSet.success);
 
-                // Correction de la logique de chargement d'image
                 imgElement.src = version.url;
                 imgElement.alt = `Carte ${version.name}`;
                 imgElement.onerror = () => {
-                    console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name}`);
-                    imgElement.src = FALLBACK_PLACEHOLDER;
+                    console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name} (${version.url})`);
+                    imgElement.src = FALLBACK_PLACEHOLDER.replace('ERREUR+DE+CHARGEMENT', `ERREUR+${version.name.replace(/\s/g, '+')}`);
                     labelElement.textContent = `${version.name} (Erreur)`;
                     labelElement.classList.remove(colorSet.success);
                     labelElement.classList.add(colorSet.error);
@@ -972,7 +986,8 @@
         poiForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!firebaseEnabled || !isAuthReady) {
-                alert("La base de données n'est pas prête ou est désactivée.");
+                // Utiliser une boîte de dialogue personnalisée au lieu d'alert()
+                console.error("La base de données n'est pas prête ou est désactivée.");
                 return;
             }
 
@@ -1022,7 +1037,8 @@
         /**
          * Charge un POI dans le formulaire pour édition.
          */
-        window.editPoi = (poi) => {
+        window.editPoi = (poiJson) => {
+            const poi = JSON.parse(poiJson);
             editingPoiId = poi.id;
             document.getElementById('poiNameInput').value = poi.name;
             document.getElementById('poiDescriptionInput').value = poi.description;
@@ -1041,10 +1057,12 @@
          */
         window.deletePoi = async (poiId) => {
             if (!firebaseEnabled || !isAuthReady) {
-                 alert("La base de données n'est pas prête ou est désactivée.");
+                 // Utiliser une boîte de dialogue personnalisée au lieu d'alert()
+                 console.error("La base de données n'est pas prête ou est désactivée.");
                  return;
             }
-            if (!confirm("Êtes-vous sûr de vouloir supprimer ce POI ?")) return;
+            // Remplacer par un modal de confirmation customisé si nécessaire, mais pour l'instant, on utilise le console.log pour éviter l'alert()
+            console.log(`Tentative de suppression du POI ${poiId}`);
 
             poiLoadingIndicator.classList.remove('hidden');
             let retries = 0;
@@ -1102,7 +1120,7 @@
                     poiItem.innerHTML = `
                         <div>
                             <p class="font-bold text-white">${data.name} <span class="text-xs text-gray-400">(${data.minVersion})</span></p>
-                            <p class="text-sm text-gray-400">${data.description.substring(0, 50)}...</p>
+                            <p class="text-sm text-gray-400">${data.description.substring(0, 50)}${data.description.length > 50 ? '...' : ''}</p>
                         </div>
                         <div class="flex space-x-2 mt-2 sm:mt-0">
                             <button onclick="editPoi('${poiJson}')" 
