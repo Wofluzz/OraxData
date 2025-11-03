@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <!-- Méta tag essentiel pour le responsive sur mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comparaison d'Évolution de Carte Dynamique</title>
+    <title>Évolution d'Oraxia (Tale of Oraxia)</title>
     <!-- Chargement de Tailwind CSS pour un design moderne et responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -72,7 +72,7 @@
 
     <header class="text-center mb-8 w-full max-w-4xl">
         <h1 class="text-4xl font-extrabold text-blue-400">
-            Comparateur d'Évolution de Carte 🗺️
+            Évolution d'Oraxia (Tale of Oraxia) 🗺️
         </h1>
         <p class="text-xl text-gray-400 mt-2">
             Visualisez les changements entre les mises à jour.
@@ -179,6 +179,7 @@
             const MIN_SCALE = 1.0;
             const MAX_SCALE = 5.0;
             const SCALE_STEP = 0.15;
+            const PAN_MARGIN_PERCENT = 0.5; // 50% de marge de dépassement demandé par l'utilisateur
             
             // --- Éléments du DOM ---
             const container = document.getElementById('comparisonContainer');
@@ -247,11 +248,21 @@
                     const scaledWidth = containerRect.width * viewState.scale;
                     const scaledHeight = containerRect.height * viewState.scale;
 
-                    // Limites max/min pour les coordonnées X/Y du coin supérieur gauche de l'image
-                    const maxPanX = 0; 
-                    const minPanX = containerRect.width - scaledWidth; 
-                    const maxPanY = 0;
-                    const minPanY = containerRect.height - scaledHeight;
+                    // Calcul de la marge de dépassement (50% de la taille du conteneur)
+                    const marginX = containerRect.width * PAN_MARGIN_PERCENT;
+                    const marginY = containerRect.height * PAN_MARGIN_PERCENT;
+
+                    // Limites avec marge :
+                    // maxPanX (déplacement à droite): permet au bord gauche de l'image de dépasser jusqu'à marginX
+                    const maxPanX = marginX; 
+                    // minPanX (déplacement à gauche): permet au bord droit de l'image de dépasser jusqu'à marginX
+                    const minPanX = containerRect.width - scaledWidth - marginX; 
+                    
+                    // maxPanY (déplacement vers le bas): permet au bord supérieur de l'image de dépasser jusqu'à marginY
+                    const maxPanY = marginY;
+                    // minPanY (déplacement vers le haut): permet au bord inférieur de l'image de dépasser jusqu'à marginY
+                    const minPanY = containerRect.height - scaledHeight - marginY;
+
 
                     viewState.offsetX = Math.max(minPanX, Math.min(maxPanX, viewState.offsetX));
                     viewState.offsetY = Math.max(minPanY, Math.min(maxPanY, viewState.offsetY));
