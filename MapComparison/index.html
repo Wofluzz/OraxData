@@ -6,7 +6,7 @@
     <title>Explorateur Historique Multimédia d'Oraxia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Styles Globaux */
+        /* Styles Globaux pour le Comparateur */
         .comparison-slider-container {
             --position: 50%;
             user-select: none;
@@ -15,41 +15,35 @@
         }
 
         .cursor-grabbing { cursor: grabbing !important; }
-        
         .image-apres-wrapper { clip-path: inset(0 0 0 var(--position)); }
-
         .slider-handle {
             left: var(--position);
             transform: translateX(-50%); 
             touch-action: none; 
         }
-
         .handle-line { width: 4px; }
         .handle-circle { width: 40px; height: 40px; }
         .handle-content { display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
-        
         .comparison-image {
             position: absolute;
             width: 100%;
             height: 100%;
-            /* Retire la transition pour le pan/zoom pour une meilleure performance */
-            /* transition: transform 0.15s ease-out; */ 
             transform-origin: 0 0; 
         }
         
         /* POI Styles */
         .poi-pin {
             position: absolute;
-            width: 28px; /* Taille légèrement augmentée pour le mobile */
+            width: 28px; 
             height: 28px;
             cursor: pointer;
-            z-index: 50; /* Au-dessus de tout */
-            transform: translate(-50%, -100%); /* Positionnement du centre bas de l'épingle */
+            z-index: 50; 
+            transform: translate(-50%, -100%); 
             transition: transform 0.2s ease-in-out;
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             animation: pulse 1.5s infinite;
-            pointer-events: auto; /* IMPORTANT pour les clics */
+            pointer-events: auto; 
         }
 
         .poi-pin:hover {
@@ -63,7 +57,7 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
         }
 
-        /* Styles pour l'indicateur de chargement */
+        /* Loading Dots */
         .loading-dot {
             animation: bounce 1.4s infinite ease-in-out both;
         }
@@ -91,18 +85,22 @@
     <main class="w-full max-w-6xl mx-auto">
         
         <!-- Onglets de Navigation -->
-        <div class="flex border-b border-gray-700 mb-6">
+        <div class="flex border-b border-gray-700 mb-6 overflow-x-auto">
             <button onclick="showView('comparateur')" id="tab-comparateur"
-                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-white border-b-4 border-blue-400 transition-colors duration-200 bg-gray-800 rounded-t-lg">
+                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-white border-b-4 border-blue-400 transition-colors duration-200 bg-gray-800 rounded-t-lg whitespace-nowrap">
                 Carte & Comparaison
             </button>
             <button onclick="showView('chronologie')" id="tab-chronologie"
-                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-gray-400 border-b-4 border-transparent hover:border-blue-600 transition-colors duration-200 hover:text-white">
+                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-gray-400 border-b-4 border-transparent hover:border-blue-600 transition-colors duration-200 hover:text-white whitespace-nowrap">
                 Chronologie des Saisons
             </button>
             <button onclick="showView('personnages')" id="tab-personnages"
-                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-gray-400 border-b-4 border-transparent hover:border-blue-600 transition-colors duration-200 hover:text-white">
-                Fiches Personnages
+                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-gray-400 border-b-4 border-transparent hover:border-blue-600 transition-colors duration-200 hover:text-white whitespace-nowrap">
+                Héros & Lore
+            </button>
+            <button onclick="showView('admin')" id="tab-admin"
+                    class="tab-button py-2 px-4 text-sm sm:text-base font-medium text-gray-400 border-b-4 border-transparent hover:border-red-600 transition-colors duration-200 hover:text-white whitespace-nowrap">
+                ⚙️ Admin POI
             </button>
         </div>
 
@@ -113,7 +111,7 @@
                 
                 <div class="flex-1">
                     <label for="versionAvant" class="block text-sm font-medium text-red-400 mb-1">
-                        Version AVANT (pour la comparaison) :
+                        Version AVANT (Carte de référence) :
                     </label>
                     <select id="versionAvant" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-red-500 focus:border-red-500 transition-colors">
                         <!-- Options remplies par JS -->
@@ -215,15 +213,86 @@
             <div id="timelineContainer" class="relative">
                 <!-- Ligne de temps -->
                 <div class="absolute h-full w-1 bg-gray-700 left-1/2 transform -translate-x-1/2 hidden sm:block"></div>
-                <!-- Les événements de la chronologie seront générés ici par JS -->
             </div>
         </div>
 
-        <!-- Vue Fiches Personnages -->
+        <!-- Vue Fiches Personnages (Héros & Lore) -->
         <div id="personnages-view" class="view hidden">
-            <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">Fiches de Personnages Clés</h2>
+            <h2 class="text-3xl font-bold text-blue-400 mb-6 text-center">Les Héros d'Oraxia et le Lore Fondamental</h2>
             <div id="charactersGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Les fiches de personnages seront générées ici par JS -->
+            </div>
+        </div>
+        
+        <!-- Vue Admin des POI (Gestion de Base de Données) -->
+        <div id="admin-view" class="view hidden">
+            <h2 class="text-3xl font-bold text-red-400 mb-6 text-center">⚙️ Administration des Points d'Intérêt (POI)</h2>
+            <p class="text-gray-400 mb-4 text-center">
+                Ici, vous pouvez ajouter, modifier ou supprimer les POI qui apparaissent sur la carte. Les coordonnées X et Y sont en pourcentage (0-100).
+            </p>
+
+            <!-- Formulaire d'ajout/édition -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-xl border-2 border-gray-700 mb-8">
+                <h3 class="text-xl font-semibold text-red-300 mb-4" id="formTitle">Ajouter un Nouveau POI</h3>
+                <form id="poiForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="hidden" id="poiId">
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Nom du POI</label>
+                        <input type="text" id="poiNameInput" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Description</label>
+                        <input type="text" id="poiDescriptionInput" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Version Minimum (ID)</label>
+                        <select id="poiMinVersionInput" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+                             <!-- Options remplies par JS -->
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Couleur (Hex Code)</label>
+                        <input type="color" id="poiColorInput" value="#3B82F6" required class="w-full h-10 rounded-lg bg-gray-700 text-white border border-gray-600">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Coord. X (%)</label>
+                        <input type="number" id="poiXInput" min="0" max="100" step="0.1" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300">Coord. Y (%)</label>
+                        <input type="number" id="poiYInput" min="0" max="100" step="0.1" required class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600">
+                    </div>
+                    
+                    <button type="submit" class="md:col-span-2 mt-4 p-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition-colors" id="submitButton">
+                        Ajouter le POI
+                    </button>
+                    <button type="button" onclick="resetForm()" class="md:col-span-2 p-3 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg transition-colors">
+                        Annuler / Nouveau POI
+                    </button>
+                </form>
+            </div>
+
+            <!-- Liste des POI existants -->
+            <div class="bg-gray-800 p-6 rounded-xl shadow-xl border-2 border-gray-700">
+                <h3 class="text-xl font-semibold text-blue-300 mb-4">Liste des POI Enregistrés</h3>
+                <div id="poiList" class="space-y-4">
+                    <p class="text-gray-500 italic text-center">Chargement des POI...</p>
+                </div>
+                <div id="poiLoadingIndicator" class="text-center mt-4 hidden">
+                    <div class="flex justify-center items-center space-x-2">
+                        <div class="loading-dot w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div class="loading-dot w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div class="loading-dot w-3 h-3 bg-green-500 rounded-full"></div>
+                        <span class="text-gray-400 ml-2">Sauvegarde en cours...</span>
+                    </div>
+                </div>
+                <div id="poiError" class="text-red-500 text-center mt-4 hidden">Erreur de connexion à la base de données.</div>
             </div>
         </div>
         
@@ -231,675 +300,800 @@
     
     <p class="mt-6 text-sm text-gray-500 max-w-4xl text-center">
         <span class="text-blue-400 font-bold">Conseil :</span> 
-        Utilisez les onglets pour explorer l'histoire complète d'Oraxia. Dans la vue carte, cliquez sur les marqueurs pour voir les détails des Points d'Intérêt !
+        Dans la vue carte, utilisez la molette ou deux doigts sur mobile pour **Zoomer/Panner** et cliquez sur les marqueurs pour voir les détails des Points d'Intérêt !
     </p>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Données Centrales du Monde d'Oraxia ---
-            
-            // Points d'Intérêt (POI) - Coordonnées en pourcentage (X=gauche, Y=haut)
-            const poiData = [
-                // POI pour toutes les versions
-                { id: 'sanctuary', name: "Sanctuaire des Montagnes Divines", x: 65, y: 15, color: '#FCD34D', 
-                  description: "Lieu où Moldar active la Pierre d'Oracle. Point de concentration d'énergie.", minVersion: 'v2' },
-                { id: 'meteors', name: "Zone d'Impact des Météorites", x: 30, y: 70, color: '#EF4444', 
-                  description: "Zone des premiers impacts, berceau des Pierres Runiques.", minVersion: 'v1' },
-                { id: 'leaky_lake', name: "Leaky Lake (Laboratoires)", x: 45, y: 40, color: '#3B82F6', 
-                  description: "Zone où les scientifiques ont mené des études, notamment sous le lac.", minVersion: 'v1' },
-                // POI spécifiques aux versions ultérieures
-                { id: 'grand_vide', name: "Canyon du Grand Vide", x: 75, y: 55, color: '#A855F7', 
-                  description: "Portail vers la nouvelle région ténébreuse et l'Armée du Fléau.", minVersion: 'v6' },
-                { id: 'fiefs_noirs', name: "Fiefs Noirs (Corruption)", x: 20, y: 25, color: '#10B981', 
-                  description: "Zones corrompues par l'Armée du Fléau et l'énergie du Néan.", minVersion: 'v6' },
-                { id: 'ankatar_teleport', name: "Début de la téléportation vers Ankatar", x: 55, y: 65, color: '#D946EF', 
-                  description: "Point de la téléportation massive vers l'île voisine à la fin de la Saison 7.", minVersion: 'v7' },
-            ];
+    <!-- Firebase Imports -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, onSnapshot, setDoc, deleteDoc, updateDoc, serverTimestamp, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        
+        // Configuration Firebase (Variables globales fournies par l'environnement)
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
+        let app;
+        let db;
+        let auth;
+        let userId = 'loading';
+        let isAuthReady = false;
+        
+        // --- Données Centrales du Monde d'Oraxia (Mis à jour selon le fichier CSV) ---
 
-            // Données des Saisons (Versions de Carte)
-            // Correction : Ajout des versions Alpha et Beta avant S1
-            const mapVersions = [
-                { id: 'v0_alpha', name: "v0.0 : Carte Alpha", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0.0%3A+Carte+Alpha+%28Base%29", 
-                    story: { title: "v0.0 : Commencement des Terres", summary: "La toute première version de la carte, juste après la grande collision. Seuls les reliefs principaux sont établis. Aucune civilisation permanente ni élément de quête n'est encore visible.", 
-                             characters: ["Aucun"],
-                             quests: ["..."]}
-                }, 
-                { id: 'v0_beta', name: "v0.5 : Carte Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0.5%3A+Beta+%28Pr%C3%A9-S1%29", 
-                    story: { title: "v0.5 : Premiers Explorateurs", summary: "Arrivée des premiers explorateurs et cartographes. Quelques routes et petits villages commencent à apparaître, surtout autour des lacs. L'île d'Oraxia est encore inexplorée.", 
-                             characters: ["Premiers Explorateurs", "Cartographes"],
-                             quests: ["..."]}
-                }, 
-                { id: 'v1', name: "S1 : Alpha (v1.0)", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=Saison+1%3A+Carte+Alpha", 
-                    story: { title: "Saison 1 : Mystère chez Øraxia", summary: "Découverte des terres alentours et météorites ravageant le Royaume. Arrivée de nouveaux personnages (Cartographes, Habitants d'Oraxia). Les quêtes initiales consistent à remplir la carte et à dialoguer avec les populations régionales.", 
-                             characters: ["Cartographes (exploration)", "Habitants d'Oraxia (quêtes initiales)"],
-                             quests: ["Remplir la carte donnée par le cartographe en parlant à la population.", "Aider les scientifiques à analyser la pierre des météorites."]}
-                }, 
-                { id: 'v2', name: "S2 : Beta (v1.1)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=Saison+2%3A+Activation+de+l%27Oracle", 
-                    story: { title: "Saison 2 : Les Pierres d'Øraxia", summary: "Suite à l'union des civilisations, une pluie de météorites contenant des pierres runiques s'abat. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et activent la puissance de la Pierre d'Oracle, révélant des pierres runiques partout. Les habitants se méfient du pouvoir des pierres.", 
-                             characters: ["Moldar (Alchimiste prédicteur)", "Scientifiques", "Météorologues"],
-                             quests: ["Aider les scientifiques et Moldar à trouver toutes les pierres runiques et à les rassembler dans le Sanctuaire."]}
-                },
-                { id: 'v3', name: "S3 : Oraxoween (v1.2)", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=Saison+3%3A+Magie+%26+Corruption", 
-                    story: { title: "Saison 3 : Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux surviennent : magie, régions corrompues... Des mages et de nouveaux personnages apparaissent. Le but est de trouver toutes les pierres, mais des secrets bien cachés sur Oraxia sont révélés.", 
-                             characters: ["Mages (nouveaux alliés/ennemis)", "Personnages S2"],
-                             quests: ["Continuer la recherche des pierres runiques. Découvrir des secrets sur Oraxia."]}
-                },
-                { id: 'v4', name: "S4 : L'Orbe Du Néan (v1.3)", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=Saison+4%3A+L%27Orbe+Du+N%C3%A9an", 
-                    story: { title: "Saison 4 : L'Orbe Du Néan", summary: "Moldar réussi à réunir toutes les pierres dans un 'Stones Container', lui conférant une partie de leur pouvoir pour créer 'L'Orbe Du Néan'. Il cherche les Clés Dimensionnelles pour entrer dans 'l'Heaven' et s'emparer du 'Socle du Néan'.", 
-                             characters: ["Moldar (de plus en plus puissant)", "Héros (chercheurs de clés)"],
-                             quests: ["Récupérer les Clés Dimensionnelles avant Moldar. Empêcher la création de l'Orbe."]}
-                },
-                { id: 'v5', name: "S5 : Le Dieu Moldar (v1.4)", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=Saison+5%3A+Le+Dieu+Moldar", 
-                    story: { title: "Saison 5 : Le Dieu Moldar", summary: "Moldar, ayant acquis tous les pouvoirs, devient un Dieu (Al Moldar) et finalise la création de l'Orbe, mais son pouvoir le fait faiblir. Les héros décident de traverser le canyon du Grand Vide pour découvrir une nouvelle région ténébreuse.", 
-                             characters: ["Al Moldar (le Dieu affaibli)", "Les Héros (explorateurs)"],
-                             quests: ["Découvrir les conséquences de l'Orbe. Traverser le Grand Vide."]}
-                },
-                { id: 'v6', name: "S6 : L'Armée du Fléau (v1.5)", url: "https://placehold.co/1024x576/805AD5/D1D5DB?text=Saison+6%3A+L%27Arm%C3%A9e+du+Fl%C3%A9au", 
-                    story: { title: "Saison 6 : L'Armée du Fléau", summary: "Le Grand Vide révèle l'armée de créatures ténébreuses : 'L'armée du Fléau', qui corrompt des zones de la carte (Les Fiefs Noirs). Une zone au milieu des Régions Froides semble immunisée, formant un cercle sans neige autour d'une cabane banale.", 
-                             characters: ["L'Armée du Fléau (antagoniste principal)", "Les défenseurs d'Oraxia"],
-                             quests: ["Défendre les régions contre la corruption du Fléau. Enquêter sur la zone immunisée dans les Régions Froides."]}
-                },
-                { id: 'v7', name: "S7 : Début d'Ankatar (v1.6)", url: "https://placehold.co/1024x576/D53F8C/D1D5DB?text=Saison+7%3A+T%C3%A9l%C3%A9portation+vers+Ankatar", 
-                    story: { title: "Saison 7 : Le Néan (Début d'Ankatar)", summary: "L'armée du Fléau commence à déformer la réalité et la 'Pierre' active une téléportation massive. Les habitants sont déplacés sur l'île voisine d'Ankatar. La Pierre se révèle être un ancien vaisseau extraterrestre, alimenté par le Néan qui a fossilisé.", 
-                             characters: ["Les survivants d'Oraxia", "Anciens extraterrestres (révélation)"],
-                             quests: ["Gérer la téléportation de masse vers Ankatar. Découvrir la véritable nature de la Pierre."]}
-                },
-            ];
-            
-            // Fiches de Personnages (Agrégation des personnages mentionnés dans les histoires)
-            const characterFiches = [
-                { name: "Moldar / Al Moldar", role: "Alchimiste, puis Dieu", debut: "Saison 1.5/2", evolution: "Passe d'un chercheur à un être divin par l'acquisition du pouvoir des Pierres Runiques, puis est affaibli par le Néan. Antagoniste complexe.", color: 'bg-yellow-600' },
-                { name: "Les Cartographes", role: "Explorateurs / Guides", debut: "v0.5 / S1", evolution: "Essentiels à l'exploration initiale du royaume. Leur rôle évolue vers le conseil et la planification face aux menaces.", color: 'bg-blue-600' },
-                { name: "L'Armée du Fléau", role: "Force Corruptrice", debut: "Saison 6", evolution: "Armée ténébreuse révélée par le Canyon du Grand Vide, responsable de la corruption des Fiefs Noirs et de la déformation de la réalité.", color: 'bg-purple-600' },
-                { name: "Les Scientifiques", role: "Chercheurs / Analystes", debut: "S1", evolution: "Initialement centrés sur les météorites, ils étudient les Pierres Runiques, l'Orbe du Néan, et sont les premiers à comprendre la nature de la Pierre/Vaisseau extraterrestre.", color: 'bg-green-600' },
-                // Ajoutez d'autres personnages ici...
-            ];
+        // Utilisation des ID pour l'ordre, les URLs sont des placeholders
+        const mapVersions = [
+            { id: 'v0_alpha', name: "v0.0 Alpha (Carte Base)", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0.0%3A+Alpha+%28Base%29", 
+                story: { title: "Début des Terres Vagues", summary: "La toute première version de la carte post-collision. Terres inexplorées, peu de reliefs détaillés.", characters: ["Aucun"], quests: ["..."]}
+            }, 
+            { id: 'v0_beta', name: "v0.5 Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0.5%3A+Beta+%28Pr%C3%A9-S1%29", 
+                story: { title: "Premières Explorations", summary: "Les premières structures et chemins apparaissent. Oraxia est prête pour l'arrivée des Cartographes.", characters: ["Premiers Explorateurs", "Cartographes"], quests: ["..."]}
+            }, 
+            { id: 'v0_beta_v5', name: "v0.5 Beta v5 (Tests)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v0.5%3A+Beta+v5+%28Tests%29", 
+                story: { title: "Version de Test Intermédiaire", summary: "Tests et ajustements de la carte avant le lancement officiel de la Saison 1.", characters: ["Développeurs"], quests: ["..."]}
+            }, 
+            { id: 'v1_s1', name: "S1 Øraxia", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=S1+%C3%98raxia", 
+                story: { title: "S1 Øraxia", summary: "Découverte des terres alentours et météorites ravagant le Royaume. Arrivée de nouveaux personnage.", characters: ["Cartographes un peu partout sur la map", "Habitants d'oraxia"], quests: ["Remplir la carte donnée par le cartographe en parlant au population des regions alentours", "aider les sientifiques et Moldzar a trouver une utilité a la pierre dans la météorite"]}
+            }, 
+            { id: 'v2_s2', name: "S2 Les Pierres d'Øraxia", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=S2+Pierres+d%27%C3%98raxia", 
+                story: { title: "S2 Les Pierres d'Øraxia", summary: "Quelques temps après l'union des civilisations, une pluie de météorites contenant des pierres runiques. Moldar se lança sur l'étude des ces pierres et decouvrit un pouvoir méconnu. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et active la puissance de la pierre d'Oracle dévoilant des pirres runiques dans tout le royaume", characters: ["Météoroloque", "Scientifiques autours des météores", "Moldzar Alchimiste prédicteur du Royaume", "habitants du royaume se mefiant du pouvoir des pierres"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et a les ressembler dans le Sanctuaire"]}
+            },
+            { id: 'v3_s3', name: "S3 Aux Pierres et à la baguette", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=S3+Aux+Pierres+et+%C3%A0+la+baguette", 
+                story: { title: "S3 Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux arrivent : magie, régions corompues... et des secrets sur Oraxia bien cachés", characters: ["Mages et personnages de la saison 2"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et a les ressembler dans le Sanctuaire"]}
+            },
+            { id: 'v4_s4', name: "S4 L'Orbe Du Néan", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=S4+L%27Orbe+Du+N%C3%A9an", 
+                story: { title: "S4 L'Orbe Du Néan", summary: "Moldar réussi à réunir toute les pierres et a les contenir dans une machine (Stones Container) qui lui confère une partie du pouvoir pour créer L'Orbe Du Néan", characters: ["Moldar", "Héros (Kai, Léo, Caleb, Aria, Flèche)"], quests: ["..."]}
+            },
+            { id: 'v5_s5', name: "S5 Le Dieu Moldar", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=S5+Le+Dieu+Moldar", 
+                story: { title: "S5 Le Dieu Moldar", summary: "Moldar qui a tout les pouvoir est maintenant un Dieu (Al Moldar est son nom de dieu) Créé l'Orbe mais faiblit", characters: ["Al Moldar", "Les Héros"], quests: ["..."]}
+            },
+            // Ajoutez les autres saisons ici si besoin, sinon l'application fonctionnera avec ces IDs
+        ];
 
+        // Fiches de Personnages (Mis à jour avec les 5 héros)
+        const characterFiches = [
+            { name: "Kai, Léo, Caleb, Aria et Flèche", role: "Les Héros d'Oraxia", debut: "Tome 1 (Saisons 1-3)", evolution: "Jeunes aventuriers chargés de réunir les Cinq Cités divisées par le Fléau. Ils sont l'antithèse de la méthode de Moldar, cherchant l'unité par la coopération et non la force divine. Flèche est leur compagnon canin indéfectible.", color: 'bg-indigo-600' },
+            { name: "Moldar / Al Moldar", role: "Alchimiste, puis Dieu", debut: "Saison 1.5", evolution: "Passe d'un chercheur à un être divin par l'acquisition du pouvoir des Pierres Runiques, puis est affaibli par le Néan. Antagoniste complexe cherchant la Stabilité par la force.", color: 'bg-yellow-600' },
+            { name: "L'Armée du Fléau", role: "Force Corruptrice", debut: "Saison 6 (Révélation)", evolution: "Armée ténébreuse révélée par le Canyon du Grand Vide, responsable de la corruption des Fiefs Noirs et des divisions. La source de la menace à laquelle les Héros s'opposent.", color: 'bg-purple-600' },
+        ];
+        
+        // Stockage des POI (sera peuplé par Firestore)
+        let poiData = []; 
+        
+        // --- Initialisation Firebase ---
+        try {
+            if (Object.keys(firebaseConfig).length > 0) {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('debug'); // Pour le débogage
 
-            const FALLBACK_PLACEHOLDER = "https://placehold.co/1024x576/374151/D1D5DB?text=ERREUR+DE+CHARGEMENT";
-            const MIN_SCALE = 1.0;
-            const MAX_SCALE = 5.0;
-            const SCALE_STEP = 0.15;
-            const PAN_MARGIN_PERCENT = 0.5;
-            
-            const DOUBLE_TAP_THRESHOLD = 300; 
-            let lastTapTime = 0;
-            const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; 
-            
-            // --- Éléments du DOM ---
-            const container = document.getElementById('comparisonContainer');
-            const handle = document.getElementById('sliderHandle');
-            const selectAvant = document.getElementById('versionAvant');
-            const selectApres = document.getElementById('versionApres');
-            const imageAvant = document.getElementById('imageAvant');
-            const imageApres = document.getElementById('imageApres');
-            const labelAvant = document.getElementById('labelAvant');
-            const labelApres = document.getElementById('labelApres');
-            const poiContainer = document.getElementById('poiContainer');
-            const style = container.style;
-            
-            // Éléments d'histoire
-            const currentVersionName = document.getElementById('currentVersionName');
-            const historyTitle = document.getElementById('historyTitle');
-            const historyContent = document.getElementById('historyContent');
-            const charactersList = document.getElementById('charactersList');
-            const activePoiInfo = document.getElementById('activePoiInfo');
-            const poiNameDisplay = document.getElementById('poiName');
-            const poiDescriptionDisplay = document.getElementById('poiDescription');
-
-            // Vues et Onglets
-            const views = document.querySelectorAll('.view');
-            const tabs = document.querySelectorAll('.tab-button');
-            const timelineContainer = document.getElementById('timelineContainer');
-            const charactersGrid = document.getElementById('charactersGrid');
-            
-            // --- Variables d'État ---
-            let isSliderDragging = false; 
-            let isPanDragging = false;    
-            let containerRect;            
-            let lastX = 0;
-            let lastY = 0;   
-            let initialDistance = 0;
-            let initialScale = MIN_SCALE;
-            let activePoi = null; // POI actuellement cliqué/survolé
-
-            let viewState = {
-                scale: MIN_SCALE, 
-                offsetX: 0,       
-                offsetY: 0        
-            };
-
-            // --- Fonctions de Navigation ---
-
-            window.showView = (viewId) => {
-                views.forEach(view => {
-                    view.classList.add('hidden');
-                });
-                document.getElementById(`${viewId}-view`).classList.remove('hidden');
-
-                tabs.forEach(tab => {
-                    tab.classList.remove('bg-gray-800', 'text-white', 'border-blue-400');
-                    tab.classList.add('text-gray-400', 'border-transparent');
-                });
-                const activeTab = document.getElementById(`tab-${viewId}`);
-                activeTab.classList.add('bg-gray-800', 'text-white', 'border-blue-400');
-                activeTab.classList.remove('text-gray-400', 'border-transparent');
-
-                if (viewId === 'chronologie' && timelineContainer.children.length === 0) {
-                    generateTimeline();
-                }
-                 if (viewId === 'personnages' && charactersGrid.children.length === 0) {
-                    generateCharacterFiches();
-                }
-            };
-
-            // --- Logique du Zoom/Panoramique (inchangée) ---
-            
-            function getDistance(touches) {
-                if (touches.length < 2) return 0;
-                return Math.hypot(
-                    touches[1].clientX - touches[0].clientX, 
-                    touches[1].clientY - touches[0].clientY
-                );
-            }
-
-            function updateImageTransform() {
-                const transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
-                imageAvant.style.transform = transform;
-                imageApres.style.transform = transform;
-                // Appliquer aussi aux POI
-                poiContainer.style.transform = transform; 
-            }
-
-            function clampPan() {
-                if (!containerRect) containerRect = container.getBoundingClientRect();
-
-                if (viewState.scale <= MIN_SCALE) {
-                    viewState.offsetX = 0;
-                    viewState.offsetY = 0;
-                } else {
-                    const scaledWidth = containerRect.width * viewState.scale;
-                    const scaledHeight = containerRect.height * viewState.scale;
-
-                    const marginX = containerRect.width * PAN_MARGIN_PERCENT;
-                    const marginY = containerRect.height * PAN_MARGIN_PERCENT;
-
-                    const maxPanX = marginX; 
-                    const minPanX = containerRect.width - scaledWidth - marginX; 
-                    
-                    const maxPanY = marginY;
-                    const minPanY = containerRect.height - scaledHeight - marginY;
-
-
-                    viewState.offsetX = Math.max(minPanX, Math.min(maxPanX, viewState.offsetX));
-                    viewState.offsetY = Math.max(minPanY, Math.min(maxPanY, viewState.offsetY));
-                }
-
-                updateImageTransform();
-            }
-
-            function handleZoom(e) {
-                e.preventDefault(); 
-                
-                const delta = e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP;
-
-                let newScale = viewState.scale + delta;
-                newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
-
-                if (newScale === viewState.scale) return;
-
-                containerRect = container.getBoundingClientRect();
-                const mouseX = e.clientX - containerRect.left;
-                const mouseY = e.clientY - containerRect.top;
-
-                const zoomFactor = newScale / viewState.scale;
-
-                viewState.offsetX = mouseX - (mouseX - viewState.offsetX) * zoomFactor;
-                viewState.offsetY = mouseY - (mouseY - viewState.offsetY) * zoomFactor;
-                
-                viewState.scale = newScale;
-                clampPan(); 
-            }
-            
-            function handleDoubleTapZoom(e) {
-                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : null);
-                const clientY = e.clientY || (e.touches ? e.touches[0].clientY : null);
-                
-                if (clientX === null || clientY === null) return;
-
-                // Si un POI est actif, le double-tap le désactive.
-                if (activePoi) {
-                    hidePoiInfo();
-                    return;
-                }
-
-                containerRect = container.getBoundingClientRect();
-                const centerX = containerRect.width / 2;
-                const centerY = containerRect.height / 2;
-                
-                if (viewState.scale > MIN_SCALE) {
-                    viewState.scale = MIN_SCALE;
-                    viewState.offsetX = 0;
-                    viewState.offsetY = 0;
-                } else {
-                    viewState.scale = ZOOM_LEVEL_ON_DOUBLE_TAP;
-                    
-                    const focalX = clientX - containerRect.left;
-                    const focalY = clientY - containerRect.top;
-
-                    viewState.offsetX = centerX - (focalX * viewState.scale);
-                    viewState.offsetY = centerY - (focalY * viewState.scale);
-                }
-
-                clampPan(); 
-            }
-
-            function updateSliderPosition(clientX) {
-                if (!containerRect) {
-                    containerRect = container.getBoundingClientRect();
-                }
-                
-                let position = clientX - containerRect.left;
-                position = Math.max(0, Math.min(position, containerRect.width));
-                
-                const percent = (position / containerRect.width) * 100;
-                style.setProperty('--position', `${percent}%`);
-            }
-            
-            // --- Logique de Glissement (Drag) ---
-
-            const startSliderDrag = (e) => {
-                // S'assurer que le drag commence sur la poignée
-                if (e.currentTarget !== handle) return;
-
-                isSliderDragging = true;
-                handle.style.cursor = 'grabbing';
-                container.style.cursor = 'grabbing';
-                containerRect = container.getBoundingClientRect();
-                
-                if (e.type.startsWith('touch')) { e.preventDefault(); }
-                e.stopPropagation(); 
-            };
-
-            const startPanDrag = (e) => {
-                // Ne pas commencer le pan si on clique sur la poignée, ou si on est déjà en train de slider
-                if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
-                
-                // Double Tap/Click Logic
-                if (e.touches && e.touches.length === 1 || !e.touches) {
-                    const currentTime = new Date().getTime();
-                    const timeDiff = currentTime - lastTapTime;
-
-                    if (timeDiff < DOUBLE_TAP_THRESHOLD && timeDiff > 0) {
-                        e.preventDefault(); 
-                        handleDoubleTapZoom(e);
-                        lastTapTime = 0; 
-                        return;
-                    }
-                    lastTapTime = currentTime;
-                }
-                
-                // Pinch Start Logic (2 fingers)
-                if (e.touches && e.touches.length === 2) {
-                    initialDistance = getDistance(e.touches);
-                    initialScale = viewState.scale;
-                    e.preventDefault(); 
-                    return;
-                }
-                
-                // Pan Start Logic (1 finger or mouse)
-                if (viewState.scale === MIN_SCALE) return;
-
-                isPanDragging = true;
-                container.classList.add('cursor-grabbing'); 
-                containerRect = container.getBoundingClientRect();
-
-                lastX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-                lastY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-                
-                if (e.touches) e.preventDefault(); 
-            };
-            
-            const onDrag = (e) => {
-                // Pinch-to-Zoom Logic (2 fingers)
-                if (e.touches && e.touches.length === 2) {
-                    e.preventDefault(); 
-                    isSliderDragging = false; 
-                    isPanDragging = false;
-                    
-                    if (initialDistance === 0) {
-                        initialDistance = getDistance(e.touches);
-                        initialScale = viewState.scale;
-                        return;
-                    }
-
-                    const newDistance = getDistance(e.touches);
-                    let newScale = initialScale * (newDistance / initialDistance);
-                    
-                    newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
-
-                    if (newScale !== viewState.scale) {
-                        const previousScale = viewState.scale;
-                        
-                        containerRect = container.getBoundingClientRect();
-                        const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                        const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
-                        const focalX = centerX - containerRect.left;
-                        const focalY = centerY - containerRect.top;
-                        
-                        const zoomFactor = newScale / previousScale; 
-                        viewState.offsetX = focalX - (focalX - viewState.offsetX) * zoomFactor;
-                        viewState.offsetY = focalY - (focalY - viewState.offsetY) * zoomFactor;
-                        
-                        viewState.scale = newScale;
-                    }
-                    
-                    clampPan();
-                    return; 
-                }
-                
-                // Slider/Pan Drag Logic (1 finger or mouse)
-                if (!isSliderDragging && !isPanDragging) return;
-
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                if (isSliderDragging) {
-                    updateSliderPosition(clientX);
-                }
-                
-                if (isPanDragging) {
-                    const dx = clientX - lastX;
-                    const dy = clientY - lastY;
-                    
-                    viewState.offsetX += dx;
-                    viewState.offsetY += dy;
-
-                    clampPan();
-
-                    lastX = clientX;
-                    lastY = clientY;
-                }
-                
-                if (e.touches) { e.preventDefault(); }
-            };
-
-            const endDrag = () => {
-                isSliderDragging = false;
-                isPanDragging = false;
-                
-                initialDistance = 0; 
-                initialScale = MIN_SCALE;
-
-                handle.style.cursor = 'grab';
-                container.style.cursor = 'grab';
-                container.classList.remove('cursor-grabbing');
-            };
-
-            // --- Logique des POI (Points d'Intérêt) ---
-
-            /**
-             * Affiche ou masque les informations du POI survolé/cliqué.
-             * @param {Object} poi - Les données du POI.
-             */
-            function displayPoiInfo(poi) {
-                activePoi = poi;
-                poiNameDisplay.textContent = poi.name;
-                poiDescriptionDisplay.textContent = poi.description;
-                activePoiInfo.classList.remove('hidden');
-            }
-
-            /**
-             * Masque les informations du POI.
-             */
-            function hidePoiInfo() {
-                activePoi = null;
-                activePoiInfo.classList.add('hidden');
-                poiNameDisplay.textContent = '';
-                poiDescriptionDisplay.textContent = '';
-            }
-            
-            /**
-             * Génère les épingles de POI pour la version de carte actuelle.
-             */
-            function renderPois(currentVersionId) {
-                // Trouver l'index de la version actuelle pour la comparaison
-                const currentVersionIndex = mapVersions.findIndex(v => v.id === currentVersionId);
-                poiContainer.innerHTML = '';
-                
-                // Le conteneur POI est en `pointer-events: none;` par défaut.
-                // Les épingles individuelles doivent être en `pointer-events: auto;` (défini dans CSS)
-                // pour capter les clics/survols.
-
-                poiData.forEach(poi => {
-                    const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
-                    
-                    // N'afficher le POI que s'il est actif dans la version courante (index >= index minimum)
-                    if (currentVersionIndex >= minVersionIndex) {
-                        const pin = document.createElement('div');
-                        pin.className = 'poi-pin';
-                        pin.style.left = `${poi.x}%`;
-                        pin.style.top = `${poi.y}%`;
-                        pin.style.backgroundColor = poi.color;
-                        pin.title = poi.name;
-                        
-                        // Ajoutez un marqueur central
-                        pin.innerHTML = `
-                            <svg class="w-full h-full text-white p-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                            </svg>
-                        `;
-
-                        // Événements pour les détails du POI
-                        pin.addEventListener('mouseover', () => displayPoiInfo(poi));
-                        pin.addEventListener('mouseout', hidePoiInfo);
-                        pin.addEventListener('click', (e) => {
-                             e.stopPropagation(); // Empêcher le clic de se propager au conteneur (pan)
-                             if (activePoi && activePoi.id === poi.id) {
-                                 hidePoiInfo();
-                             } else {
-                                 displayPoiInfo(poi);
-                             }
-                        });
-                        
-                        poiContainer.appendChild(pin);
-                    }
-                });
-            }
-
-            // --- Logique d'Initialisation et de Mise à Jour ---
-
-            function updateHistoryPanel(versionId) {
-                const version = mapVersions.find(v => v.id === versionId);
-                
-                if (version && version.story) {
-                    currentVersionName.textContent = version.name;
-                    historyTitle.textContent = version.story.title || `Histoire de la version : ${version.name}`;
-                    historyContent.textContent = version.story.summary;
-                    
-                    // Mise à jour de la liste des personnages/quêtes
-                    charactersList.innerHTML = '';
-                    // Combinez personnages et quêtes en une seule liste d'éléments à afficher
-                    const allDetails = [...(version.story.characters || []).map(c => `👤 ${c}`), ...(version.story.quests || []).map(q => `📜 ${q}`)];
-                    
-                    if (allDetails.length > 0) {
-                        allDetails.forEach(detail => {
-                            const li = document.createElement('li');
-                            li.textContent = detail;
-                            charactersList.appendChild(li);
-                        });
+                onAuthStateChanged(auth, async (user) => {
+                    if (user) {
+                        userId = user.uid;
+                        console.log("Firebase Auth Ready. UID:", userId);
+                    } else if (initialAuthToken) {
+                        await signInWithCustomToken(auth, initialAuthToken);
+                        userId = auth.currentUser.uid;
                     } else {
-                        charactersList.innerHTML = '<li>Aucun détail spécifique trouvé pour cette version.</li>';
+                        await signInAnonymously(auth);
+                        userId = auth.currentUser.uid;
                     }
-                    
-                } else {
-                    // Gestion du cas où l'histoire est manquante
-                    currentVersionName.textContent = 'Non définie';
-                    historyTitle.textContent = 'Histoire non disponible';
-                    historyContent.textContent = 'Aucune information d\'histoire disponible pour cette version.';
-                    charactersList.innerHTML = '<li>...</li>';
-                }
-                
-                // Mettre à jour les POI basés sur la version sélectionnée
-                renderPois(versionId);
-                hidePoiInfo(); // Masquer l'info POI lors du changement de version
-            }
-
-
-            function populateSelects() {
-                mapVersions.forEach(version => {
-                    const optionAvant = new Option(version.name, version.id);
-                    const optionApres = new Option(version.name, version.id);
-                    selectAvant.add(optionAvant);
-                    selectApres.add(optionApres);
+                    isAuthReady = true;
+                    // Une fois l'authentification prête, initialiser l'app
+                    initApplication(); 
                 });
-
-                // Sélectionner la version Beta (v0.5) pour "Avant" et S1 (v1.0) pour "Après" par défaut
-                if (mapVersions.length >= 2) {
-                    selectAvant.value = mapVersions[1].id; // v0.5 Beta
-                    selectApres.value = mapVersions[2].id;  // S1 Alpha (v1.0)
-                } else if (mapVersions.length > 0) {
-                    selectAvant.value = mapVersions[0].id;
-                    selectApres.value = mapVersions[0].id;
-                }
-                
-                updateImagesAndLabels();
-                updateHistoryPanel(selectApres.value);
+            } else {
+                console.error("Firebase config is missing. Running in limited mode.");
+                initApplication();
             }
-
-            function updateImagesAndLabels() {
-                const idAvant = selectAvant.value;
-                const idApres = selectApres.value;
-
-                const versionA = mapVersions.find(v => v.id === idAvant);
-                const versionB = mapVersions.find(v => v.id === idApres);
-                
-                const COLOR_CLASSES = {
-                    avant: { success: 'bg-red-800/80', error: 'bg-gray-600/90' },
-                    apres: { success: 'bg-green-800/80', error: 'bg-gray-600/90' }
-                };
-
-                const loadImage = (imgElement, version, labelElement, baseType) => {
-                    if (!version) return;
-                    
-                    const colorSet = COLOR_CLASSES[baseType];
-                    
-                    labelElement.textContent = version.name;
-                    labelElement.classList.remove(colorSet.error);
-                    labelElement.classList.add(colorSet.success);
-
-                    imgElement.onerror = () => {
-                        console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name} à ${version.url}`);
-                        imgElement.src = FALLBACK_PLACEHOLDER;
-                        imgElement.alt = `Carte ${version.name} (Erreur de chargement)`;
-                        labelElement.textContent = `${version.name} (Erreur)`;
-                        labelElement.classList.remove(colorSet.success);
-                        labelElement.classList.add(colorSet.error);
-                        imgElement.onerror = null; 
-                    };
-
-                    imgElement.onload = () => {
-                        imgElement.onerror = null; 
-                        labelElement.classList.remove(colorSet.error);
-                        labelElement.classList.add(colorSet.success);
-                        labelElement.textContent = version.name;
-                    };
-
-                    imgElement.src = version.url;
-                    imgElement.alt = `Carte ${version.name}`;
-                };
-
-                loadImage(imageAvant, versionA, labelAvant, 'avant');
-                loadImage(imageApres, versionB, labelApres, 'apres');
-                
-                updateHistoryPanel(idApres);
-            }
+        } catch (error) {
+            console.error("Firebase initialization failed:", error);
+            document.getElementById('poiError').classList.remove('hidden');
+            initApplication();
+        }
+        
+        // --- Constantes et Variables Globales de l'App ---
+        const FALLBACK_PLACEHOLDER = "https://placehold.co/1024x576/374151/D1D5DB?text=ERREUR+DE+CHARGEMENT";
+        const MIN_SCALE = 1.0;
+        const MAX_SCALE = 5.0;
+        const SCALE_STEP = 0.15;
+        const PAN_MARGIN_PERCENT = 0.5;
+        const DOUBLE_TAP_THRESHOLD = 300; 
+        let lastTapTime = 0;
+        const ZOOM_LEVEL_ON_DOUBLE_TAP = 2.5; 
             
-            const initializePosition = () => {
+        // Éléments du DOM
+        const container = document.getElementById('comparisonContainer');
+        const handle = document.getElementById('sliderHandle');
+        const selectAvant = document.getElementById('versionAvant');
+        const selectApres = document.getElementById('versionApres');
+        const imageAvant = document.getElementById('imageAvant');
+        const imageApres = document.getElementById('imageApres');
+        const labelAvant = document.getElementById('labelAvant');
+        const labelApres = document.getElementById('labelApres');
+        const poiContainer = document.getElementById('poiContainer');
+        const style = container.style;
+        const views = document.querySelectorAll('.view');
+        const tabs = document.querySelectorAll('.tab-button');
+        const timelineContainer = document.getElementById('timelineContainer');
+        const charactersGrid = document.getElementById('charactersGrid');
+        
+        // Éléments d'histoire
+        const currentVersionName = document.getElementById('currentVersionName');
+        const historyTitle = document.getElementById('historyTitle');
+        const historyContent = document.getElementById('historyContent');
+        const charactersList = document.getElementById('charactersList');
+        const activePoiInfo = document.getElementById('activePoiInfo');
+        const poiNameDisplay = document.getElementById('poiName');
+        const poiDescriptionDisplay = document.getElementById('poiDescription');
+
+        // Éléments Admin
+        const poiForm = document.getElementById('poiForm');
+        const poiListDiv = document.getElementById('poiList');
+        const poiLoadingIndicator = document.getElementById('poiLoadingIndicator');
+        const formTitle = document.getElementById('formTitle');
+        const submitButton = document.getElementById('submitButton');
+        const poiMinVersionInput = document.getElementById('poiMinVersionInput');
+
+        // Variables d'État
+        let isSliderDragging = false; 
+        let isPanDragging = false;    
+        let containerRect;            
+        let lastX = 0;
+        let lastY = 0;   
+        let initialDistance = 0;
+        let initialScale = MIN_SCALE;
+        let activePoi = null; 
+        let editingPoiId = null;
+
+        let viewState = {
+            scale: MIN_SCALE, 
+            offsetX: 0,       
+            offsetY: 0        
+        };
+        
+        // --- Fonctions de Vues ---
+
+        window.showView = (viewId) => {
+            views.forEach(view => {
+                view.classList.add('hidden');
+            });
+            document.getElementById(`${viewId}-view`).classList.remove('hidden');
+
+            tabs.forEach(tab => {
+                tab.classList.remove('bg-gray-800', 'text-white', 'border-blue-400', 'border-red-400');
+                tab.classList.add('text-gray-400', 'border-transparent');
+            });
+            const activeTab = document.getElementById(`tab-${viewId}`);
+            activeTab.classList.add('bg-gray-800', 'text-white');
+            activeTab.classList.remove('text-gray-400', 'border-transparent');
+
+            if (viewId === 'admin') {
+                 activeTab.classList.add('border-red-400');
+            } else {
+                 activeTab.classList.add('border-blue-400');
+            }
+
+            if (viewId === 'chronologie' && timelineContainer.children.length === 0) {
+                generateTimeline();
+            }
+            if (viewId === 'personnages' && charactersGrid.children.length === 0) {
+                generateCharacterFiches();
+            }
+        };
+
+        // --- Logique du Zoom/Panoramique (inchangée) ---
+        
+        function getDistance(touches) {
+            if (touches.length < 2) return 0;
+            return Math.hypot(
+                touches[1].clientX - touches[0].clientX, 
+                touches[1].clientY - touches[0].clientY
+            );
+        }
+
+        function updateImageTransform() {
+            const transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
+            imageAvant.style.transform = transform;
+            imageApres.style.transform = transform;
+            poiContainer.style.transform = transform; 
+        }
+
+        function clampPan() {
+            if (!containerRect) containerRect = container.getBoundingClientRect();
+
+            if (viewState.scale <= MIN_SCALE) {
+                viewState.offsetX = 0;
+                viewState.offsetY = 0;
+            } else {
+                const scaledWidth = containerRect.width * viewState.scale;
+                const scaledHeight = containerRect.height * viewState.scale;
+
+                const marginX = containerRect.width * PAN_MARGIN_PERCENT;
+                const marginY = containerRect.height * PAN_MARGIN_PERCENT;
+
+                const maxPanX = marginX; 
+                const minPanX = containerRect.width - scaledWidth - marginX; 
+                
+                const maxPanY = marginY;
+                const minPanY = containerRect.height - scaledHeight - marginY;
+
+
+                viewState.offsetX = Math.max(minPanX, Math.min(maxPanX, viewState.offsetX));
+                viewState.offsetY = Math.max(minPanY, Math.min(maxPanY, viewState.offsetY));
+            }
+
+            updateImageTransform();
+        }
+
+        function handleZoom(e) {
+            e.preventDefault(); 
+            
+            const delta = e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP;
+
+            let newScale = viewState.scale + delta;
+            newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+            if (newScale === viewState.scale) return;
+
+            containerRect = container.getBoundingClientRect();
+            const mouseX = e.clientX - containerRect.left;
+            const mouseY = e.clientY - containerRect.top;
+
+            const zoomFactor = newScale / viewState.scale;
+
+            viewState.offsetX = mouseX - (mouseX - viewState.offsetX) * zoomFactor;
+            viewState.offsetY = mouseY - (mouseY - viewState.offsetY) * zoomFactor;
+            
+            viewState.scale = newScale;
+            clampPan(); 
+        }
+        
+        function handleDoubleTapZoom(e) {
+            const clientX = e.clientX || (e.touches ? e.touches[0].clientX : null);
+            const clientY = e.clientY || (e.touches ? e.touches[0].clientY : null);
+            
+            if (clientX === null || clientY === null) return;
+
+            if (activePoi) {
+                hidePoiInfo();
+                return;
+            }
+
+            containerRect = container.getBoundingClientRect();
+            const centerX = containerRect.width / 2;
+            const centerY = containerRect.height / 2;
+            
+            if (viewState.scale > MIN_SCALE) {
                 viewState.scale = MIN_SCALE;
                 viewState.offsetX = 0;
                 viewState.offsetY = 0;
-                updateImageTransform();
+            } else {
+                viewState.scale = ZOOM_LEVEL_ON_DOUBLE_TAP;
                 
+                const focalX = clientX - containerRect.left;
+                const focalY = clientY - containerRect.top;
+
+                viewState.offsetX = centerX - (focalX * viewState.scale);
+                viewState.offsetY = centerY - (focalY * viewState.scale);
+            }
+
+            clampPan(); 
+        }
+
+        function updateSliderPosition(clientX) {
+            if (!containerRect) {
                 containerRect = container.getBoundingClientRect();
-                const center = containerRect.width / 2;
-                updateSliderPosition(containerRect.left + center);
+            }
+            
+            let position = clientX - containerRect.left;
+            position = Math.max(0, Math.min(position, containerRect.width));
+            
+            const percent = (position / containerRect.width) * 100;
+            style.setProperty('--position', `${percent}%`);
+        }
+        
+        // --- Logique de Glissement (Drag) ---
+
+        const startSliderDrag = (e) => {
+            if (e.currentTarget !== handle) return;
+
+            isSliderDragging = true;
+            handle.style.cursor = 'grabbing';
+            container.style.cursor = 'grabbing';
+            containerRect = container.getBoundingClientRect();
+            
+            if (e.type.startsWith('touch')) { e.preventDefault(); }
+            e.stopPropagation(); 
+        };
+
+        const startPanDrag = (e) => {
+            if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
+            
+            if (e.touches && e.touches.length === 1 || !e.touches) {
+                const currentTime = new Date().getTime();
+                const timeDiff = currentTime - lastTapTime;
+
+                if (timeDiff < DOUBLE_TAP_THRESHOLD && timeDiff > 0) {
+                    e.preventDefault(); 
+                    handleDoubleTapZoom(e);
+                    lastTapTime = 0; 
+                    return;
+                }
+                lastTapTime = currentTime;
+            }
+            
+            if (e.touches && e.touches.length === 2) {
+                initialDistance = getDistance(e.touches);
+                initialScale = viewState.scale;
+                e.preventDefault(); 
+                return;
+            }
+            
+            if (viewState.scale === MIN_SCALE) return;
+
+            isPanDragging = true;
+            container.classList.add('cursor-grabbing'); 
+            containerRect = container.getBoundingClientRect();
+
+            lastX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+            lastY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+            
+            if (e.touches) e.preventDefault(); 
+        };
+        
+        const onDrag = (e) => {
+            if (e.touches && e.touches.length === 2) {
+                e.preventDefault(); 
+                isSliderDragging = false; 
+                isPanDragging = false;
+                
+                if (initialDistance === 0) {
+                    initialDistance = getDistance(e.touches);
+                    initialScale = viewState.scale;
+                    return;
+                }
+
+                const newDistance = getDistance(e.touches);
+                let newScale = initialScale * (newDistance / initialDistance);
+                
+                newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
+
+                if (newScale !== viewState.scale) {
+                    const previousScale = viewState.scale;
+                    
+                    containerRect = container.getBoundingClientRect();
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+
+                    const focalX = centerX - containerRect.left;
+                    const focalY = centerY - containerRect.top;
+                    
+                    const zoomFactor = newScale / previousScale; 
+                    viewState.offsetX = focalX - (focalX - viewState.offsetX) * zoomFactor;
+                    viewState.offsetY = focalY - (focalY - viewState.offsetY) * zoomFactor;
+                    
+                    viewState.scale = newScale;
+                }
+                
+                clampPan();
+                return; 
+            }
+            
+            if (!isSliderDragging && !isPanDragging) return;
+
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            
+            if (isSliderDragging) {
+                updateSliderPosition(clientX);
+            }
+            
+            if (isPanDragging) {
+                const dx = clientX - lastX;
+                const dy = clientY - lastY;
+                
+                viewState.offsetX += dx;
+                viewState.offsetY += dy;
+
+                clampPan();
+
+                lastX = clientX;
+                lastY = clientY;
+            }
+            
+            if (e.touches) { e.preventDefault(); }
+        };
+
+        const endDrag = () => {
+            isSliderDragging = false;
+            isPanDragging = false;
+            
+            initialDistance = 0; 
+            initialScale = MIN_SCALE;
+
+            handle.style.cursor = 'grab';
+            container.style.cursor = 'grab';
+            container.classList.remove('cursor-grabbing');
+        };
+
+        // --- Logique des POI (Points d'Intérêt) ---
+
+        function displayPoiInfo(poi) {
+            activePoi = poi;
+            poiNameDisplay.textContent = poi.name;
+            poiDescriptionDisplay.textContent = poi.description;
+            activePoiInfo.classList.remove('hidden');
+        }
+
+        function hidePoiInfo() {
+            activePoi = null;
+            activePoiInfo.classList.add('hidden');
+            poiNameDisplay.textContent = '';
+            poiDescriptionDisplay.textContent = '';
+        }
+        
+        function renderPois(currentVersionId) {
+            const currentVersionIndex = mapVersions.findIndex(v => v.id === currentVersionId);
+            poiContainer.innerHTML = '';
+            
+            poiData.forEach(poi => {
+                const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
+                
+                if (currentVersionIndex >= minVersionIndex) {
+                    const pin = document.createElement('div');
+                    pin.className = 'poi-pin';
+                    pin.style.left = `${poi.x}%`;
+                    pin.style.top = `${poi.y}%`;
+                    pin.style.backgroundColor = poi.color;
+                    pin.title = poi.name;
+                    
+                    pin.innerHTML = `
+                        <svg class="w-full h-full text-white p-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                        </svg>
+                    `;
+
+                    pin.addEventListener('mouseover', () => displayPoiInfo(poi));
+                    pin.addEventListener('mouseout', hidePoiInfo);
+                    pin.addEventListener('click', (e) => {
+                         e.stopPropagation(); 
+                         if (activePoi && activePoi.id === poi.id) {
+                             hidePoiInfo();
+                         } else {
+                             displayPoiInfo(poi);
+                         }
+                    });
+                    
+                    poiContainer.appendChild(pin);
+                }
+            });
+        }
+
+        // --- Logique d'Initialisation et de Mise à Jour ---
+
+        function updateHistoryPanel(versionId) {
+            const version = mapVersions.find(v => v.id === versionId);
+            
+            if (version && version.story) {
+                currentVersionName.textContent = version.name;
+                historyTitle.textContent = version.story.title || `Histoire de la version : ${version.name}`;
+                historyContent.textContent = version.story.summary;
+                
+                charactersList.innerHTML = '';
+                const allDetails = [...(version.story.characters || []).map(c => `👤 ${c}`), ...(version.story.quests || []).map(q => `📜 ${q}`)];
+                
+                if (allDetails.length > 0) {
+                    allDetails.forEach(detail => {
+                        const li = document.createElement('li');
+                        li.textContent = detail;
+                        charactersList.appendChild(li);
+                    });
+                } else {
+                    charactersList.innerHTML = '<li>Aucun détail spécifique trouvé pour cette version.</li>';
+                }
+                
+            } else {
+                currentVersionName.textContent = 'Non définie';
+                historyTitle.textContent = 'Histoire non disponible';
+                historyContent.textContent = 'Aucune information d\'histoire disponible pour cette version.';
+                charactersList.innerHTML = '<li>...</li>';
+            }
+            
+            renderPois(versionId);
+            hidePoiInfo(); 
+        }
+
+        function populateSelects() {
+            mapVersions.forEach(version => {
+                const optionAvant = new Option(version.name, version.id);
+                const optionApres = new Option(version.name, version.id);
+                selectAvant.add(optionAvant);
+                selectApres.add(optionApres);
+                
+                // Remplir le sélecteur dans l'admin
+                const optionAdmin = new Option(version.name, version.id);
+                poiMinVersionInput.add(optionAdmin);
+            });
+
+            // Sélection par défaut: v0.5 Beta (AVANT) et S1 Øraxia (APRÈS)
+            const defaultAvantId = 'v0_beta';
+            const defaultApresId = 'v1_s1';
+            
+            selectAvant.value = mapVersions.find(v => v.id === defaultAvantId)?.id || mapVersions[0].id;
+            selectApres.value = mapVersions.find(v => v.id === defaultApresId)?.id || mapVersions[mapVersions.length - 1].id;
+            
+            updateImagesAndLabels();
+        }
+
+        function updateImagesAndLabels() {
+            const idAvant = selectAvant.value;
+            const idApres = selectApres.value;
+
+            const versionA = mapVersions.find(v => v.id === idAvant);
+            const versionB = mapVersions.find(v => v.id === idApres);
+            
+            const COLOR_CLASSES = {
+                avant: { success: 'bg-red-800/80', error: 'bg-gray-600/90' },
+                apres: { success: 'bg-green-800/80', error: 'bg-gray-600/90' }
             };
 
-            // --- Logique de la Chronologie (Timeline) ---
-            function generateTimeline() {
-                timelineContainer.innerHTML = '';
+            const loadImage = (imgElement, version, labelElement, baseType) => {
+                if (!version) return;
                 
-                mapVersions.forEach((version, index) => {
-                    const isLeft = index % 2 === 0;
-                    const side = isLeft ? 'left' : 'right';
-                    const versionNumber = index + 1;
+                const colorSet = COLOR_CLASSES[baseType];
+                
+                labelElement.textContent = version.name;
+                labelElement.classList.remove(colorSet.error);
+                labelElement.classList.add(colorSet.success);
 
-                    const eventDiv = document.createElement('div');
-                    eventDiv.className = `timeline-item mb-8 flex ${isLeft ? 'justify-start sm:justify-start' : 'justify-start sm:justify-end'}`;
+                imgElement.onerror = () => {
+                    console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name}`);
+                    imgElement.src = FALLBACK_PLACEHOLDER;
+                    labelElement.textContent = `${version.name} (Erreur)`;
+                    labelElement.classList.remove(colorSet.success);
+                    labelElement.classList.add(colorSet.error);
+                    imgElement.onerror = null; 
+                };
 
-                    // Décalage pour le mobile (toujours à gauche, pas de ligne centrale)
-                    eventDiv.innerHTML = `
-                        <div class="relative w-full sm:w-1/2 p-4 rounded-xl shadow-lg transition-transform duration-300 transform hover:scale-[1.02] cursor-pointer bg-gray-800 border-l-4 ${isLeft ? 'sm:border-r-4 sm:border-l-0 border-blue-400' : 'border-green-400'}">
-                            
-                            <!-- Cercle sur la ligne centrale (Desktop seulement) -->
-                            <div class="hidden sm:block absolute w-4 h-4 rounded-full ${isLeft ? 'right-[-2.35rem]' : 'left-[-2.35rem]'} top-4 bg-gray-900 border-4 border-blue-400 z-10"></div>
-                            
-                            <!-- Contenu -->
-                            <p class="text-sm font-bold text-gray-500 mb-1">${version.name}</p>
-                            <h3 class="text-xl font-semibold ${isLeft ? 'text-red-400' : 'text-green-400'}">${version.story.title}</h3>
-                            <p class="text-gray-300 mt-2 text-sm">${version.story.summary}</p>
-                            
-                            <!-- Marqueur de saison (Mobile) -->
-                            <div class="sm:hidden absolute top-0 left-[-1.5rem] w-3 h-3 rounded-full bg-blue-400 border-2 border-gray-900"></div>
+                imgElement.src = version.url;
+                imgElement.alt = `Carte ${version.name}`;
+            };
 
-                        </div>
-                    `;
-
-                    // Ajout du listener pour changer la vue sur la carte
-                    eventDiv.addEventListener('click', () => {
-                        selectApres.value = version.id;
-                        // Trouver l'ID de la version précédente pour la comparaison
-                        const previousIndex = Math.max(0, index - 1);
-                        selectAvant.value = mapVersions[previousIndex].id; 
-                        updateImagesAndLabels();
-                        showView('comparateur');
-                    });
-
-                    timelineContainer.appendChild(eventDiv);
-                });
-            }
-
-            // --- Logique des Fiches Personnages ---
-            function generateCharacterFiches() {
-                charactersGrid.innerHTML = '';
-
-                characterFiches.forEach(char => {
-                    const card = document.createElement('div');
-                    card.className = `${char.color} p-6 rounded-xl shadow-2xl transform hover:scale-[1.02] transition-transform duration-300 border-t-8 border-white/20`;
-
-                    card.innerHTML = `
-                        <div class="flex items-center mb-3">
-                            <svg class="w-8 h-8 mr-3 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                            </svg>
-                            <h3 class="text-2xl font-bold text-white">${char.name}</h3>
-                        </div>
-                        <p class="text-sm italic text-gray-200 mb-2">Rôle Principal : ${char.role}</p>
-                        <p class="text-sm font-semibold text-gray-100 mb-4">Apparaît dès : ${char.debut}</p>
-                        <p class="text-gray-300">${char.evolution}</p>
-                    `;
-
-                    charactersGrid.appendChild(card);
-                });
-            }
-
-            // --- Attacher les écouteurs d'événements ---
+            loadImage(imageAvant, versionA, labelAvant, 'avant');
+            loadImage(imageApres, versionB, labelApres, 'apres');
             
-            selectAvant.addEventListener('change', updateImagesAndLabels);
-            selectApres.addEventListener('change', updateImagesAndLabels);
+            updateHistoryPanel(idApres);
+        }
+        
+        const initializePosition = () => {
+            viewState.scale = MIN_SCALE;
+            viewState.offsetX = 0;
+            viewState.offsetY = 0;
+            updateImageTransform();
+            
+            containerRect = container.getBoundingClientRect();
+            const center = containerRect.width / 2;
+            updateSliderPosition(containerRect.left + center);
+        };
 
+        // --- Logique de la Chronologie (Timeline) ---
+        function generateTimeline() {
+            timelineContainer.innerHTML = '';
+            
+            mapVersions.forEach((version, index) => {
+                const isLeft = index % 2 === 0;
+                const eventDiv = document.createElement('div');
+                eventDiv.className = `timeline-item mb-8 flex ${isLeft ? 'justify-start sm:justify-start' : 'justify-start sm:justify-end'}`;
+
+                eventDiv.innerHTML = `
+                    <div class="relative w-full sm:w-1/2 p-4 rounded-xl shadow-lg transition-transform duration-300 transform hover:scale-[1.02] cursor-pointer bg-gray-800 border-l-4 ${isLeft ? 'sm:border-r-4 sm:border-l-0 border-blue-400' : 'border-green-400'}">
+                        
+                        <div class="hidden sm:block absolute w-4 h-4 rounded-full ${isLeft ? 'right-[-2.35rem]' : 'left-[-2.35rem]'} top-4 bg-gray-900 border-4 border-blue-400 z-10"></div>
+                        
+                        <p class="text-sm font-bold text-gray-500 mb-1">${version.name}</p>
+                        <h3 class="text-xl font-semibold ${isLeft ? 'text-red-400' : 'text-green-400'}">${version.story.title}</h3>
+                        <p class="text-gray-300 mt-2 text-sm">${version.story.summary}</p>
+                        
+                        <div class="sm:hidden absolute top-0 left-[-1.5rem] w-3 h-3 rounded-full bg-blue-400 border-2 border-gray-900"></div>
+
+                    </div>
+                `;
+
+                eventDiv.addEventListener('click', () => {
+                    selectApres.value = version.id;
+                    const previousIndex = Math.max(0, index - 1);
+                    selectAvant.value = mapVersions[previousIndex].id; 
+                    updateImagesAndLabels();
+                    showView('comparateur');
+                });
+
+                timelineContainer.appendChild(eventDiv);
+            });
+        }
+
+        // --- Logique des Fiches Personnages ---
+        function generateCharacterFiches() {
+            charactersGrid.innerHTML = '';
+
+            characterFiches.forEach(char => {
+                const card = document.createElement('div');
+                card.className = `${char.color} p-6 rounded-xl shadow-2xl transform hover:scale-[1.02] transition-transform duration-300 border-t-8 border-white/20`;
+
+                card.innerHTML = `
+                    <div class="flex items-center mb-3">
+                        <svg class="w-8 h-8 mr-3 text-white" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        <h3 class="text-2xl font-bold text-white">${char.name}</h3>
+                    </div>
+                    <p class="text-sm italic text-gray-200 mb-2">Rôle Principal : ${char.role}</p>
+                    <p class="text-sm font-semibold text-gray-100 mb-4">Apparaît dès : ${char.debut}</p>
+                    <p class="text-gray-300">${char.evolution}</p>
+                `;
+
+                charactersGrid.appendChild(card);
+            });
+        }
+        
+        // --- Fonctions Firestore pour l'Admin POI ---
+        
+        /**
+         * Construit le chemin de la collection pour les POI (Public data).
+         * @returns {string} Le chemin de la collection.
+         */
+        function getPoiCollectionPath() {
+            // Utiliser une collection publique car les POI sont partagés entre tous les utilisateurs/visionneurs.
+            return `artifacts/${appId}/public/data/poi_markers`;
+        }
+
+        /**
+         * Réinitialise le formulaire d'administration.
+         */
+        window.resetForm = () => {
+            poiForm.reset();
+            editingPoiId = null;
+            formTitle.textContent = "Ajouter un Nouveau POI";
+            submitButton.textContent = "Ajouter le POI";
+            // Initialiser les coordonnées à 50,50 (centre de la carte)
+            document.getElementById('poiXInput').value = 50;
+            document.getElementById('poiYInput').value = 50;
+        }
+
+        /**
+         * Gère l'envoi du formulaire (Ajout/Modification).
+         */
+        poiForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!isAuthReady) {
+                console.error("Authentication not ready. Cannot save.");
+                return;
+            }
+
+            poiLoadingIndicator.classList.remove('hidden');
+            const poiId = editingPoiId || doc(collection(db, getPoiCollectionPath())).id; // Génère un nouvel ID si ce n'est pas une édition
+
+            const newPoi = {
+                name: document.getElementById('poiNameInput').value,
+                description: document.getElementById('poiDescriptionInput').value,
+                minVersion: document.getElementById('poiMinVersionInput').value,
+                color: document.getElementById('poiColorInput').value,
+                x: parseFloat(document.getElementById('poiXInput').value),
+                y: parseFloat(document.getElementById('poiYInput').value),
+                updatedAt: serverTimestamp(),
+            };
+
+            try {
+                await setDoc(doc(db, getPoiCollectionPath(), poiId), newPoi);
+                resetForm();
+                console.log("POI saved successfully with ID: ", poiId);
+            } catch (error) {
+                console.error("Error saving POI:", error);
+                document.getElementById('poiError').textContent = `Erreur lors de la sauvegarde: ${error.message}`;
+                document.getElementById('poiError').classList.remove('hidden');
+            } finally {
+                poiLoadingIndicator.classList.add('hidden');
+            }
+        });
+
+        /**
+         * Charge un POI dans le formulaire pour édition.
+         */
+        window.editPoi = (poi) => {
+            editingPoiId = poi.id;
+            document.getElementById('poiNameInput').value = poi.name;
+            document.getElementById('poiDescriptionInput').value = poi.description;
+            document.getElementById('poiMinVersionInput').value = poi.minVersion;
+            document.getElementById('poiColorInput').value = poi.color;
+            document.getElementById('poiXInput').value = poi.x;
+            document.getElementById('poiYInput').value = poi.y;
+
+            formTitle.textContent = `Éditer le POI: ${poi.name}`;
+            submitButton.textContent = "Sauvegarder les Modifications";
+            showView('admin'); 
+        }
+
+        /**
+         * Supprime un POI.
+         */
+        window.deletePoi = async (poiId) => {
+            if (!isAuthReady || !confirm("Êtes-vous sûr de vouloir supprimer ce POI ?")) return;
+
+            poiLoadingIndicator.classList.remove('hidden');
+            try {
+                await deleteDoc(doc(db, getPoiCollectionPath(), poiId));
+                console.log("POI deleted successfully: ", poiId);
+            } catch (error) {
+                console.error("Error deleting POI:", error);
+                document.getElementById('poiError').textContent = `Erreur lors de la suppression: ${error.message}`;
+                document.getElementById('poiError').classList.remove('hidden');
+            } finally {
+                poiLoadingIndicator.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Met en place l'écouteur en temps réel de Firestore pour les POI.
+         */
+        function setupPoiListener() {
+             if (!db || !isAuthReady) {
+                // S'assurer que Firebase est prêt avant de se connecter.
+                setTimeout(setupPoiListener, 100); 
+                return;
+            }
+            
+            const colRef = collection(db, getPoiCollectionPath());
+
+            onSnapshot(colRef, (snapshot) => {
+                poiData = []; // Réinitialiser la liste globale des POI
+                poiListDiv.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    poiListDiv.innerHTML = '<p class="text-gray-500 italic text-center">Aucun POI n\'a été ajouté. Utilisez le formulaire ci-dessus.</p>';
+                    updateHistoryPanel(selectApres.value); // Mise à jour de la carte (aucun POI)
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    poiData.push(data);
+                    
+                    // Rendu dans la vue Admin
+                    const poiItem = document.createElement('div');
+                    poiItem.className = 'flex flex-col sm:flex-row justify-between items-center p-3 bg-gray-700 rounded-lg border-l-4'
+                    poiItem.style.borderLeftColor = data.color;
+                    
+                    poiItem.innerHTML = `
+                        <div>
+                            <p class="font-bold text-white">${data.name} <span class="text-xs text-gray-400">(${data.minVersion})</span></p>
+                            <p class="text-sm text-gray-400">${data.description.substring(0, 50)}...</p>
+                        </div>
+                        <div class="flex space-x-2 mt-2 sm:mt-0">
+                            <button onclick="editPoi(${JSON.stringify(data).replace(/"/g, '&quot;')})" 
+                                    class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm">Éditer</button>
+                            <button onclick="deletePoi('${data.id}')" 
+                                    class="p-2 bg-red-600 hover:bg-red-700 text-white rounded-md text-sm">Supprimer</button>
+                        </div>
+                    `;
+                    poiListDiv.appendChild(poiItem);
+                });
+                
+                // Très important : Mettre à jour la carte et l'histoire avec les nouvelles données POI
+                updateHistoryPanel(selectApres.value); 
+
+            }, (error) => {
+                console.error("Firestore POI listener failed:", error);
+                document.getElementById('poiError').textContent = "Erreur de connexion en temps réel aux POI.";
+                document.getElementById('poiError').classList.remove('hidden');
+            });
+        }
+        
+        // --- Initialisation Principale ---
+
+        function initApplication() {
+            // Attacher les écouteurs du comparateur/panoramique
             handle.addEventListener('mousedown', startSliderDrag);
             handle.addEventListener('touchstart', startSliderDrag);
 
@@ -913,15 +1107,36 @@
             document.addEventListener('mouseup', endDrag);
             document.addEventListener('touchend', endDrag);
             
+            selectAvant.addEventListener('change', updateImagesAndLabels);
+            selectApres.addEventListener('change', updateImagesAndLabels);
+
+            // Charger les sélecteurs et initialiser la position
+            populateSelects(); 
+            initializePosition(); 
+            showView('comparateur');
             
-            // Initialisation de la page
-            window.addEventListener('load', () => {
-                populateSelects(); 
-                initializePosition(); 
-                showView('comparateur'); // Vue par défaut
-            });
-            window.addEventListener('resize', initializePosition);
+            // Si Firebase est disponible, commencer l'écoute des POI
+            if (isAuthReady) {
+                setupPoiListener();
+            } else {
+                 poiListDiv.innerHTML = '<p class="text-red-500 italic text-center">Firebase non configuré. La gestion des POI est désactivée.</p>';
+                 // Utilisation d'un POI de fallback pour tester l'affichage
+                 poiData = [{ id: 'test', name: "Zone de Test", x: 50, y: 50, color: '#00BFFF', description: "POI par défaut (Mode limité)", minVersion: 'v0_alpha' }];
+                 updateHistoryPanel(selectApres.value);
+            }
+            
+            // Initialiser le formulaire Admin
+            resetForm();
+        }
+
+        // Démarrage de l'application
+        window.addEventListener('load', () => {
+             // L'initApplication sera appelée par onAuthStateChanged si Firebase est utilisé.
+             if (!isAuthReady && !firebaseConfig.apiKey) {
+                 initApplication();
+             }
         });
+        window.addEventListener('resize', initializePosition);
 
     </script>
 </body>
