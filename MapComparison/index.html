@@ -32,15 +32,16 @@
             position: absolute;
             width: 100%;
             height: 100%;
-            transition: transform 0.15s ease-out;
+            /* Retire la transition pour le pan/zoom pour une meilleure performance */
+            /* transition: transform 0.15s ease-out; */ 
             transform-origin: 0 0; 
         }
         
         /* POI Styles */
         .poi-pin {
             position: absolute;
-            width: 24px;
-            height: 24px;
+            width: 28px; /* Taille légèrement augmentée pour le mobile */
+            height: 28px;
             cursor: pointer;
             z-index: 50; /* Au-dessus de tout */
             transform: translate(-50%, -100%); /* Positionnement du centre bas de l'épingle */
@@ -48,10 +49,11 @@
             border-radius: 50%;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
             animation: pulse 1.5s infinite;
+            pointer-events: auto; /* IMPORTANT pour les clics */
         }
 
         .poi-pin:hover {
-            transform: translate(-50%, -100%) scale(1.2);
+            transform: translate(-50%, -100%) scale(1.3);
             box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
         }
 
@@ -256,36 +258,38 @@
 
             // Données des Saisons (Versions de Carte)
             const mapVersions = [
-                { id: 'v1', name: "S1 : Alpha (v0.0)", url: "./Maps/alpha.png", 
+                // J'utilise des placeholders d'images ici pour que l'application fonctionne sans URL externe.
+                { id: 'v1', name: "S1 : Alpha (v0.0)", url: "https://placehold.co/1024x576/4A5568/D1D5DB?text=Saison+1%3A+Carte+Alpha", 
                     story: { title: "Saison 1 : Mystère chez Øraxia", summary: "Découverte des terres alentours et météorites ravageant le Royaume. Arrivée de nouveaux personnages (Cartographes, Habitants d'Oraxia). Les quêtes initiales consistent à remplir la carte et à dialoguer avec les populations régionales.", 
                              characters: ["Cartographes (exploration)", "Habitants d'Oraxia (quêtes initiales)"],
-                             quests: ["Remplir la carte donnée par le cartographe en parlant à la population.", "Aider les scientifiques à analyser la pierre des météorites."]}}, 
-                { id: 'v2', name: "S2 : Beta (v1.0)", url: "./Maps/beta.png", 
+                             quests: ["Remplir la carte donnée par le cartographe en parlant à la population.", "Aider les scientifiques à analyser la pierre des météorites."]}
+                }, 
+                { id: 'v2', name: "S2 : Beta (v1.0)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=Saison+2%3A+Activation+de+l%27Oracle", 
                     story: { title: "Saison 2 : Les Pierres d'Øraxia", summary: "Suite à l'union des civilisations, une pluie de météorites contenant des pierres runiques s'abat. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et activent la puissance de la Pierre d'Oracle, révélant des pierres runiques partout. Les habitants se méfient du pouvoir des pierres.", 
                              characters: ["Moldar (Alchimiste prédicteur)", "Scientifiques", "Météorologues"],
                              quests: ["Aider les scientifiques et Moldar à trouver toutes les pierres runiques et à les rassembler dans le Sanctuaire."]}
                 },
-                { id: 'v3', name: "S3 : Oraxoween (v1.1)", url: "./Maps/beta-v2.png", 
+                { id: 'v3', name: "S3 : Oraxoween (v1.1)", url: "https://placehold.co/1024x576/1A202C/D1D5DB?text=Saison+3%3A+Magie+%26+Corruption", 
                     story: { title: "Saison 3 : Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux surviennent : magie, régions corrompues... Des mages et de nouveaux personnages apparaissent. Le but est de trouver toutes les pierres, mais des secrets bien cachés sur Oraxia sont révélés.", 
                              characters: ["Mages (nouveaux alliés/ennemis)", "Personnages S2"],
                              quests: ["Continuer la recherche des pierres runiques. Découvrir des secrets sur Oraxia."]}
                 },
-                { id: 'v4', name: "S4 : L'Orbe Du Néan (v1.2)", url: "./Maps/beta-v3.png", 
-                    story: { title: "Saison 4 : L'Orbe Du Néan", summary: "Moldar réussit à réunir toutes les pierres dans un 'Stones Container', lui conférant une partie de leur pouvoir pour créer 'L'Orbe Du Néan'. Il cherche les Clés Dimensionnelles pour entrer dans 'l'Heaven' et s'emparer du 'Socle du Néan'.", 
+                { id: 'v4', name: "S4 : L'Orbe Du Néan (v1.2)", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=Saison+4%3A+L%27Orbe+Du+N%C3%A9an", 
+                    story: { title: "Saison 4 : L'Orbe Du Néan", summary: "Moldar réussi à réunir toutes les pierres dans un 'Stones Container', lui conférant une partie de leur pouvoir pour créer 'L'Orbe Du Néan'. Il cherche les Clés Dimensionnelles pour entrer dans 'l'Heaven' et s'emparer du 'Socle du Néan'.", 
                              characters: ["Moldar (de plus en plus puissant)", "Héros (chercheurs de clés)"],
                              quests: ["Récupérer les Clés Dimensionnelles avant Moldar. Empêcher la création de l'Orbe."]}
                 },
-                { id: 'v5', name: "S5 : Le Dieu Moldar (v1.3)", url: "./Maps/beta-v4.png", 
+                { id: 'v5', name: "S5 : Le Dieu Moldar (v1.3)", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=Saison+5%3A+Le+Dieu+Moldar", 
                     story: { title: "Saison 5 : Le Dieu Moldar", summary: "Moldar, ayant acquis tous les pouvoirs, devient un Dieu (Al Moldar) et finalise la création de l'Orbe, mais son pouvoir le fait faiblir. Les héros décident de traverser le canyon du Grand Vide pour découvrir une nouvelle région ténébreuse.", 
                              characters: ["Al Moldar (le Dieu affaibli)", "Les Héros (explorateurs)"],
                              quests: ["Découvrir les conséquences de l'Orbe. Traverser le Grand Vide."]}
                 },
-                { id: 'v6', name: "S6 : L'Armée du Fléau (v1.4)", url: "./Maps/beta-v5.png", 
+                { id: 'v6', name: "S6 : L'Armée du Fléau (v1.4)", url: "https://placehold.co/1024x576/805AD5/D1D5DB?text=Saison+6%3A+L%27Arm%C3%A9e+du+Fl%C3%A9au", 
                     story: { title: "Saison 6 : L'Armée du Fléau", summary: "Le Grand Vide révèle l'armée de créatures ténébreuses : 'L'armée du Fléau', qui corrompt des zones de la carte (Les Fiefs Noirs). Une zone au milieu des Régions Froides semble immunisée, formant un cercle sans neige autour d'une cabane banale.", 
                              characters: ["L'Armée du Fléau (antagoniste principal)", "Les défenseurs d'Oraxia"],
                              quests: ["Défendre les régions contre la corruption du Fléau. Enquêter sur la zone immunisée dans les Régions Froides."]}
                 },
-                { id: 'v7', name: "S7 : Début d'Ankatar (v1.5)", url: "./Maps/beta-v6.png", 
+                { id: 'v7', name: "S7 : Début d'Ankatar (v1.5)", url: "https://placehold.co/1024x576/D53F8C/D1D5DB?text=Saison+7%3A+T%C3%A9l%C3%A9portation+vers+Ankatar", 
                     story: { title: "Saison 7 : Le Néan (Début d'Ankatar)", summary: "L'armée du Fléau commence à déformer la réalité et la 'Pierre' active une téléportation massive. Les habitants sont déplacés sur l'île voisine d'Ankatar. La Pierre se révèle être un ancien vaisseau extraterrestre, alimenté par le Néan qui a fossilisé.", 
                              characters: ["Les survivants d'Oraxia", "Anciens extraterrestres (révélation)"],
                              quests: ["Gérer la téléportation de masse vers Ankatar. Découvrir la véritable nature de la Pierre."]}
@@ -347,6 +351,7 @@
             let lastY = 0;   
             let initialDistance = 0;
             let initialScale = MIN_SCALE;
+            let activePoi = null; // POI actuellement cliqué/survolé
 
             let viewState = {
                 scale: MIN_SCALE, 
@@ -452,6 +457,12 @@
                 
                 if (clientX === null || clientY === null) return;
 
+                // Si un POI est actif, le double-tap le désactive.
+                if (activePoi) {
+                    hidePoiInfo();
+                    return;
+                }
+
                 containerRect = container.getBoundingClientRect();
                 const centerX = containerRect.width / 2;
                 const centerY = containerRect.height / 2;
@@ -488,6 +499,7 @@
             // --- Logique de Glissement (Drag) ---
 
             const startSliderDrag = (e) => {
+                // S'assurer que le drag commence sur la poignée
                 if (e.currentTarget !== handle) return;
 
                 isSliderDragging = true;
@@ -500,6 +512,7 @@
             };
 
             const startPanDrag = (e) => {
+                // Ne pas commencer le pan si on clique sur la poignée, ou si on est déjà en train de slider
                 if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
                 
                 // Double Tap/Click Logic
@@ -621,6 +634,7 @@
              * @param {Object} poi - Les données du POI.
              */
             function displayPoiInfo(poi) {
+                activePoi = poi;
                 poiNameDisplay.textContent = poi.name;
                 poiDescriptionDisplay.textContent = poi.description;
                 activePoiInfo.classList.remove('hidden');
@@ -630,6 +644,7 @@
              * Masque les informations du POI.
              */
             function hidePoiInfo() {
+                activePoi = null;
                 activePoiInfo.classList.add('hidden');
                 poiNameDisplay.textContent = '';
                 poiDescriptionDisplay.textContent = '';
@@ -642,13 +657,15 @@
                 // Trouver l'index de la version actuelle pour la comparaison
                 const currentVersionIndex = mapVersions.findIndex(v => v.id === currentVersionId);
                 poiContainer.innerHTML = '';
-                poiContainer.classList.remove('pointer-events-none');
-                poiContainer.classList.add('pointer-events-auto');
+                
+                // Le conteneur POI est en `pointer-events: none;` par défaut.
+                // Les épingles individuelles doivent être en `pointer-events: auto;` (défini dans CSS)
+                // pour capter les clics/survols.
 
                 poiData.forEach(poi => {
                     const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
                     
-                    // N'afficher le POI que s'il est actif dans la version courante
+                    // N'afficher le POI que s'il est actif dans la version courante (index >= index minimum)
                     if (currentVersionIndex >= minVersionIndex) {
                         const pin = document.createElement('div');
                         pin.className = 'poi-pin';
@@ -667,7 +684,14 @@
                         // Événements pour les détails du POI
                         pin.addEventListener('mouseover', () => displayPoiInfo(poi));
                         pin.addEventListener('mouseout', hidePoiInfo);
-                        pin.addEventListener('click', () => displayPoiInfo(poi));
+                        pin.addEventListener('click', (e) => {
+                             e.stopPropagation(); // Empêcher le clic de se propager au conteneur (pan)
+                             if (activePoi && activePoi.id === poi.id) {
+                                 hidePoiInfo();
+                             } else {
+                                 displayPoiInfo(poi);
+                             }
+                        });
                         
                         poiContainer.appendChild(pin);
                     }
@@ -686,7 +710,8 @@
                     
                     // Mise à jour de la liste des personnages/quêtes
                     charactersList.innerHTML = '';
-                    const allDetails = [...version.story.characters, ...version.story.quests];
+                    // Combinez personnages et quêtes en une seule liste d'éléments à afficher
+                    const allDetails = [...version.story.characters.map(c => `👤 ${c}`), ...version.story.quests.map(q => `📜 ${q}`)];
                     
                     if (allDetails.length > 0) {
                         allDetails.forEach(detail => {
@@ -708,7 +733,7 @@
                 
                 // Mettre à jour les POI basés sur la version sélectionnée
                 renderPois(versionId);
-                hidePoiInfo();
+                hidePoiInfo(); // Masquer l'info POI lors du changement de version
             }
 
 
@@ -721,6 +746,7 @@
                 });
 
                 if (mapVersions.length >= 2) {
+                    // Sélectionner les deux dernières versions par défaut
                     selectAvant.value = mapVersions[mapVersions.length - 2].id;
                     selectApres.value = mapVersions[mapVersions.length - 1].id;
                 } else if (mapVersions.length === 1) {
@@ -824,7 +850,7 @@
                     // Ajout du listener pour changer la vue sur la carte
                     eventDiv.addEventListener('click', () => {
                         selectApres.value = version.id;
-                        selectAvant.value = mapVersions[Math.max(0, index - 1)].id;
+                        selectAvant.value = mapVersions[Math.max(0, index - 1)].id; // Comparer avec la version précédente
                         updateImagesAndLabels();
                         showView('comparateur');
                     });
