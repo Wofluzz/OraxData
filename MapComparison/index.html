@@ -107,102 +107,114 @@
 
         <!-- Vues -->
         <div id="comparateur-view" class="view">
-            <!-- Sélecteurs de versions -->
-            <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6 p-4 bg-gray-800 rounded-xl shadow-lg border-2 border-gray-700">
-                
-                <div class="flex-1">
-                    <label for="versionAvant" class="block text-sm font-medium text-red-400 mb-1">
-                        Version AVANT (Carte de référence) :
-                    </label>
-                    <select id="versionAvant" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-red-500 focus:border-red-500 transition-colors">
-                        <!-- Options remplies par JS -->
-                    </select>
+            
+            <div id="loadingApp" class="p-8 text-center bg-gray-800 rounded-xl text-white">
+                <div class="flex justify-center items-center space-x-2">
+                    <div class="loading-dot w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <div class="loading-dot w-4 h-4 bg-blue-500 rounded-full"></div>
+                    <div class="loading-dot w-4 h-4 bg-blue-500 rounded-full"></div>
                 </div>
-                
-                <div class="flex-1">
-                    <label for="versionApres" class="block text-sm font-medium text-green-400 mb-1">
-                        Version APRÈS (Histoire & POI affichés) :
-                    </label>
-                    <select id="versionApres" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-green-500 focus:border-green-500 transition-colors">
-                        <!-- Options remplies par JS -->
-                    </select>
-                </div>
-
-            </div>
-
-            <!-- Conteneur principal du slider et POI -->
-            <div id="comparisonContainer" 
-                 class="comparison-slider-container relative w-full aspect-video shadow-2xl rounded-xl overflow-hidden border-4 border-gray-700 bg-gray-800 transition-all duration-300 ease-in-out">
-
-                <!-- Images de comparaison -->
-                <img id="imageAvant" class="comparison-image absolute inset-0 z-10" src="" alt="Carte Avant Mise à Jour">
-                <div class="image-apres-wrapper absolute inset-0 z-20 overflow-hidden bg-gray-600">
-                    <img id="imageApres" class="comparison-image absolute inset-0" src="" alt="Carte Après Mise à Jour">
-                </div>
-                
-                <!-- Conteneur des POI -->
-                <div id="poiContainer" class="absolute inset-0 z-40 pointer-events-none">
-                    <!-- Les épingles de POI seront ajoutées ici par JS -->
-                </div>
-
-                <!-- La poignée (Handle) draggable/tactile -->
-                <div id="sliderHandle" 
-                     class="slider-handle absolute top-0 bottom-0 z-50 flex items-center justify-center 
-                            text-white bg-transparent pointer-events-auto">
-                    
-                    <div class="handle-line h-full bg-white shadow-lg"></div>
-
-                    <div class="handle-circle absolute bg-white p-1 rounded-full shadow-xl 
-                                border-4 border-gray-900/50 hover:scale-110 transition-transform duration-150 ease-out">
-                        <div class="handle-content text-gray-900">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-                                <polyline points="15 17 20 12 15 7"></polyline>
-                                <polyline points="9 17 4 12 9 7"></polyline>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Étiquettes de version dynamiques -->
-                <div id="labelAvant" class="absolute top-3 left-3 p-1.5 bg-red-800/80 text-white text-xs font-bold rounded-lg z-60 shadow-md"></div>
-                <div id="labelApres" class="absolute top-3 right-3 p-1.5 bg-green-800/80 text-white text-xs font-bold rounded-lg z-60 shadow-md"></div>
-                
+                <p class="mt-4 text-lg">Chargement des données historiques de la carte...</p>
             </div>
             
-            <!-- Panneau d'Information d'Histoire -->
-            <div class="mt-8 p-6 w-full bg-gray-800 rounded-xl shadow-xl border-2 border-gray-700">
-                <h2 class="text-2xl font-bold text-green-400 mb-4 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Détails de l'Événement : <span id="currentVersionName" class="text-white ml-2">...</span>
-                </h2>
-                
-                <!-- Zone d'affichage des POI actifs -->
-                <div id="activePoiInfo" class="p-4 mb-4 border border-blue-600 rounded-lg bg-blue-900/50 text-white hidden">
-                    <h3 class="font-bold text-lg text-blue-300">Point d'Intérêt Actif : <span id="poiName"></span></h3>
-                    <p id="poiDescription" class="text-sm mt-1"></p>
-                </div>
-
-                <div class="grid md:grid-cols-2 gap-6">
-                    <!-- Résumé de l'Histoire -->
-                    <div>
-                        <h3 id="historyTitle" class="text-xl font-semibold text-green-300 mb-2"></h3>
-                        <p id="historyContent" class="text-gray-300 leading-relaxed min-h-[5rem]">
-                            <!-- Contenu dynamique de l'histoire -->
-                            <span class="text-center p-4 text-gray-500 italic">
-                                Chargement de l'histoire...
-                            </span>
-                        </p>
+            <div id="appContent" class="hidden">
+                <!-- Sélecteurs de versions -->
+                <div class="flex flex-col sm:flex-row justify-between gap-4 mb-6 p-4 bg-gray-800 rounded-xl shadow-lg border-2 border-gray-700">
+                    
+                    <div class="flex-1">
+                        <label for="versionAvant" class="block text-sm font-medium text-red-400 mb-1">
+                            Version AVANT (Carte de référence) :
+                        </label>
+                        <select id="versionAvant" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-red-500 focus:border-red-500 transition-colors">
+                            <!-- Options remplies par JS -->
+                        </select>
                     </div>
                     
-                    <!-- Personnages Clés de la Saison -->
-                    <div>
-                        <h3 class="text-xl font-semibold text-red-300 mb-2">Personnages et Quêtes</h3>
-                        <ul id="charactersList" class="space-y-1 text-gray-300 list-disc list-inside">
-                            <!-- Liste des personnages/quêtes -->
-                            <li>Chargement...</li>
-                        </ul>
+                    <div class="flex-1">
+                        <label for="versionApres" class="block text-sm font-medium text-green-400 mb-1">
+                            Version APRÈS (Histoire & POI affichés) :
+                        </label>
+                        <select id="versionApres" class="w-full p-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-green-500 focus:border-green-500 transition-colors">
+                            <!-- Options remplies par JS -->
+                        </select>
+                    </div>
+
+                </div>
+
+                <!-- Conteneur principal du slider et POI -->
+                <div id="comparisonContainer" 
+                     class="comparison-slider-container relative w-full aspect-video shadow-2xl rounded-xl overflow-hidden border-4 border-gray-700 bg-gray-800 transition-all duration-300 ease-in-out">
+
+                    <!-- Images de comparaison -->
+                    <img id="imageAvant" class="comparison-image absolute inset-0 z-10" src="" alt="Carte Avant Mise à Jour">
+                    <div class="image-apres-wrapper absolute inset-0 z-20 overflow-hidden bg-gray-600">
+                        <img id="imageApres" class="comparison-image absolute inset-0" src="" alt="Carte Après Mise à Jour">
+                    </div>
+                    
+                    <!-- Conteneur des POI -->
+                    <div id="poiContainer" class="absolute inset-0 z-40 pointer-events-none">
+                        <!-- Les épingles de POI seront ajoutées ici par JS -->
+                    </div>
+
+                    <!-- La poignée (Handle) draggable/tactile -->
+                    <div id="sliderHandle" 
+                         class="slider-handle absolute top-0 bottom-0 z-50 flex items-center justify-center 
+                                text-white bg-transparent pointer-events-auto">
+                        
+                        <div class="handle-line h-full bg-white shadow-lg"></div>
+
+                        <div class="handle-circle absolute bg-white p-1 rounded-full shadow-xl 
+                                    border-4 border-gray-900/50 hover:scale-110 transition-transform duration-150 ease-out">
+                            <div class="handle-content text-gray-900">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                                    <polyline points="15 17 20 12 15 7"></polyline>
+                                    <polyline points="9 17 4 12 9 7"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Étiquettes de version dynamiques -->
+                    <div id="labelAvant" class="absolute top-3 left-3 p-1.5 bg-red-800/80 text-white text-xs font-bold rounded-lg z-60 shadow-md"></div>
+                    <div id="labelApres" class="absolute top-3 right-3 p-1.5 bg-green-800/80 text-white text-xs font-bold rounded-lg z-60 shadow-md"></div>
+                    
+                </div>
+                
+                <!-- Panneau d'Information d'Histoire -->
+                <div class="mt-8 p-6 w-full bg-gray-800 rounded-xl shadow-xl border-2 border-gray-700">
+                    <h2 class="text-2xl font-bold text-green-400 mb-4 flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Détails de l'Événement : <span id="currentVersionName" class="text-white ml-2">...</span>
+                    </h2>
+                    
+                    <!-- Zone d'affichage des POI actifs -->
+                    <div id="activePoiInfo" class="p-4 mb-4 border border-blue-600 rounded-lg bg-blue-900/50 text-white hidden">
+                        <h3 class="font-bold text-lg text-blue-300">Point d'Intérêt Actif : <span id="poiName"></span></h3>
+                        <p id="poiDescription" class="text-sm mt-1"></p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <!-- Résumé de l'Histoire -->
+                        <div>
+                            <h3 id="historyTitle" class="text-xl font-semibold text-green-300 mb-2"></h3>
+                            <p id="historyContent" class="text-gray-300 leading-relaxed min-h-[5rem]">
+                                <!-- Contenu dynamique de l'histoire -->
+                                <span class="text-center p-4 text-gray-500 italic">
+                                    Chargement de l'histoire...
+                                </span>
+                            </p>
+                        </div>
+                        
+                        <!-- Personnages Clés de la Saison -->
+                        <div>
+                            <h3 class="text-xl font-semibold text-red-300 mb-2">Personnages et Quêtes</h3>
+                            <ul id="charactersList" class="space-y-1 text-gray-300 list-disc list-inside">
+                                <!-- Liste des personnages/quêtes -->
+                                <li>Chargement...</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -324,35 +336,8 @@
         let isAuthReady = false;
         let firebaseEnabled = false;
 
-        // --- Données Centrales du Monde d'Oraxia (MISES À JOUR AVEC VOS IMAGES) ---
-
-        const mapVersions = [
-            { id: 'v0_alpha', name: "v0.0 Alpha (Carte Base)", url: "https://placehold.co/1024x576/434B5D/D1D5DB?text=v0_alpha+%28Base%29", 
-                story: { title: "Début des Terres Vagues", summary: "La toute première version de la carte post-collision. Terres inexplorées, peu de reliefs détaillés.", characters: ["Aucun"], quests: ["..."]}
-            }, 
-            { id: 'v0_beta', name: "v0.5 Beta (Pré-S1)", url: "https://placehold.co/1024x576/374151/D1D5DB?text=v0_beta+%28Pre-S1%29", 
-                story: { title: "Premières Explorations", summary: "Les premières structures et chemins apparaissent. Oraxia est prête pour l'arrivée des Cartographes.", characters: ["Premiers Explorateurs", "Cartographes"], quests: ["..."]}
-            }, 
-            { id: 'v0_beta_v5', name: "v0.5 Beta v5 (Tests)", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v0_beta_v5+%28Tests%29", 
-                story: { title: "Version de Test Intermédiaire", summary: "Tests et ajustements de la carte avant le lancement officiel de la Saison 1.", characters: ["Développeurs"], quests: ["..."]}
-            }, 
-            // VOS IMAGES COMMENCENT ICI
-            { id: 'v1_s1', name: "S1 Øraxia", url: "1000069803.png", // Image 1 (supposée être S1)
-                story: { title: "S1 Øraxia", summary: "Découverte des terres alentours et météorites ravagant le Royaume. Arrivée de nouveaux personnage.", characters: ["Cartographes un peu partout sur la map", "Habitants d'oraxia"], quests: ["Remplir la carte donnée par le cartographe en parlant au population des regions alentours", "aider les sientifiques et Moldzar a trouver une utilité a la pierre dans la météorite"]}
-            }, 
-            { id: 'v2_s2', name: "S2 Les Pierres d'Øraxia", url: "https://placehold.co/1024x576/2D3748/D1D5DB?text=v2_s2+%28S2%29", 
-                story: { title: "S2 Les Pierres d'Øraxia", summary: "Quelques temps après l'union des civilisations, une pluie de météorites contenant des pierres runiques. Moldar se lança sur l'étude des ces pierres et decouvrit un pouvoir méconnu. Moldar et ses scientifiques se rendent au Sanctuaire dans les montagnes divines et active la puissance de la pierre d'Oracle dévoilant des pirres runiques dans tout le royaume", characters: ["Météoroloque", "Scientifiques autours des météores", "Moldzar Alchimiste prédicteur du Royaume", "habitants du royaume se mefiant du pouvoir des pierres"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et a les ressembler dans le Sanctuaire"]}
-            },
-            { id: 'v3_s3', name: "S3 Aux Pierres et à la baguette", url: "1000069879.png", // Image 2 (supposée être S3)
-                story: { title: "S3 Aux Pierres et à la baguette", summary: "De nouveaux événements paranormaux arrivent : magie, régions corompues... et des secrets sur Oraxia bien cachés", characters: ["Mages et personnages de la saison 2"], quests: ["aider les sientifiques et Moldzar a trouver toutes les pierres et à les ressembler dans le Sanctuaire"]}
-            },
-            { id: 'v4_s4', name: "S4 L'Orbe Du Néan", url: "https://placehold.co/1024x576/4C51BF/D1D5DB?text=v4_s4+%28S4%29", 
-                story: { title: "S4 L'Orbe Du Néan", summary: "Moldar réussi à réunir toute les pierres et a les contenir dans une machine (Stones Container) qui lui confère une partie du pouvoir pour créer L'Orbe Du Néan", characters: ["Moldar", "Héros (Kai, Léo, Caleb, Aria, Flèche)"], quests: ["..."]}
-            },
-            { id: 'v5_s5', name: "S5 Le Dieu Moldar", url: "https://placehold.co/1024x576/6B46C1/D1D5DB?text=v5_s5+%28S5%29", 
-                story: { title: "S5 Le Dieu Moldar", summary: "Moldar qui a tout les pouvoir est maintenant un Dieu (Al Moldar est son nom de dieu) Créé l'Orbe mais faiblit", characters: ["Al Moldar", "Les Héros"], quests: ["..."]}
-            },
-        ];
+        // --- Données Centrales du Monde d'Oraxia (Chargées depuis JSON) ---
+        let mapVersions = []; 
 
         const characterFiches = [
             { name: "Kai, Léo, Caleb, Aria et Flèche", role: "Les Héros d'Oraxia", debut: "Tome 1 (Saisons 1-3)", evolution: "Jeunes aventuriers chargés de réunir les Cinq Cités divisées par le Fléau. Ils sont l'antithèse de la méthode de Moldar, cherchant l'unité par la coopération et non la force divine. Flèche est leur compagnon canin indéfectible.", color: 'bg-indigo-600' },
@@ -362,6 +347,34 @@
         
         let poiData = []; 
         
+        // --- Fonctions d'Initialisation et de Chargement ---
+        
+        async function loadMapData() {
+            try {
+                const response = await fetch('map_data.json');
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                mapVersions = await response.json();
+                console.log("Données de carte chargées :", mapVersions);
+                
+                // Masquer le loader et afficher le contenu
+                document.getElementById('loadingApp').classList.add('hidden');
+                document.getElementById('appContent').classList.remove('hidden');
+
+                // Continuer l'initialisation de l'application (Firebase et DOM)
+                initializeFirebase();
+                
+            } catch (error) {
+                console.error("Échec du chargement de map_data.json. Veuillez vérifier le chemin d'accès et le format du fichier.", error);
+                
+                document.getElementById('loadingApp').innerHTML = `
+                    <p class="text-xl text-red-500">Erreur critique : Impossible de charger les données de la carte.</p>
+                    <p class="text-sm text-gray-400 mt-2">Vérifiez que le fichier map_data.json est présent et correctement formaté.</p>
+                `;
+            }
+        }
+
         // --- Initialisation Firebase ---
         function initializeFirebase() {
             if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
@@ -392,9 +405,11 @@
                         
                         document.getElementById('firebaseStatus').textContent = `Connexion Firebase réussie. Utilisateur ID: ${userId}`;
                         document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-green-900 text-green-300';
+                        document.getElementById('firebaseStatus').classList.remove('hidden');
 
-                        // Une fois l'authentification prête, démarrer l'écoute des POI
+                        // Une fois l'authentification prête, démarrer l'écoute des POI et init l'application
                         setupPoiListener();
+                        initApplication();
                     });
                 } catch (error) {
                     console.error("Firebase initialization failed:", error);
@@ -402,6 +417,7 @@
                     document.getElementById('firebaseStatus').textContent = `Erreur critique Firebase: ${error.message}`;
                     document.getElementById('firebaseStatus').className = 'p-4 mb-4 text-center rounded-lg text-sm font-medium bg-red-900 text-red-300';
                     document.getElementById('firebaseStatus').classList.remove('hidden');
+                    initApplication(); // Lancer l'app même sans BDD
                 }
             } else {
                 // Mode limité sans Firebase
@@ -473,7 +489,9 @@
 
         window.showView = (viewId) => {
             views.forEach(view => {
-                view.classList.add('hidden');
+                if (view.id.endsWith('-view')) {
+                    view.classList.add('hidden');
+                }
             });
             document.getElementById(`${viewId}-view`).classList.remove('hidden');
 
@@ -598,8 +616,6 @@
                 const focalY = coords.clientY - containerRect.top;
 
                 // Centre l'image sur le point tapé
-                // Pour que le point tapé (focalX, focalY) reste au centre de l'écran après le zoom,
-                // il faut calculer le décalage (offsetX) nécessaire.
                 const scaledFocalX = focalX * viewState.scale;
                 const scaledFocalY = focalY * viewState.scale;
                 
@@ -767,7 +783,8 @@
             
             // Assurer que le conteneur des POI ne pan/zoom pas avec les images.
             poiContainer.style.transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
-            poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none';
+            // Les POI ne sont cliquables que si l'on a zoomé un peu (pour éviter les clics accidentels pendant le drag)
+            poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none'; 
 
             poiData.forEach(poi => {
                 const minVersionIndex = mapVersions.findIndex(v => v.id === poi.minVersion);
@@ -811,7 +828,10 @@
                 historyContent.textContent = version.story.summary;
                 
                 charactersList.innerHTML = '';
-                const allDetails = [...(version.story.characters || []).map(c => `👤 ${c}`), ...(version.story.quests || []).map(q => `📜 ${q}`)];
+                const allDetails = [
+                    ...(version.story.characters || []).map(c => `👤 ${c}`), 
+                    ...(version.story.quests || []).map(q => `📜 ${q}`)
+                ];
                 
                 if (allDetails.length > 0) {
                     allDetails.forEach(detail => {
@@ -835,6 +855,12 @@
         }
 
         function populateSelects() {
+             if (mapVersions.length === 0) return;
+             
+            selectAvant.innerHTML = '';
+            selectApres.innerHTML = '';
+            poiMinVersionInput.innerHTML = '';
+            
             mapVersions.forEach(version => {
                 const optionAvant = new Option(version.name, version.id);
                 const optionApres = new Option(version.name, version.id);
@@ -846,12 +872,12 @@
                 poiMinVersionInput.add(optionAdmin);
             });
 
-            // Sélection par défaut
-            const defaultAvantId = 'v1_s1'; // Utilisez la première image fournie
-            const defaultApresId = 'v3_s3'; // Utilisez la deuxième image fournie
+            // Sélection par défaut: Avant = S1 (v7), Après = S3 (v9)
+            const defaultAvantId = mapVersions.find(v => v.id === 'v7_s1')?.id || mapVersions[0].id;
+            const defaultApresId = mapVersions.find(v => v.id === 'v9_s3')?.id || mapVersions[mapVersions.length - 1].id;
             
-            selectAvant.value = mapVersions.find(v => v.id === defaultAvantId)?.id || mapVersions[0].id;
-            selectApres.value = mapVersions.find(v => v.id === defaultApresId)?.id || mapVersions[mapVersions.length - 1].id;
+            selectAvant.value = defaultAvantId;
+            selectApres.value = defaultApresId;
         }
 
         function updateImagesAndLabels() {
@@ -912,14 +938,18 @@
                 const eventDiv = document.createElement('div');
                 eventDiv.className = `timeline-item mb-8 flex ${isLeft ? 'justify-start sm:justify-start' : 'justify-start sm:justify-end'}`;
 
+                // Utilisation d'un placeholder si le titre de l'histoire n'est pas rempli
+                const storyTitle = version.story && version.story.title ? version.story.title : `Événement ${version.name}`;
+                const storySummary = version.story && version.story.summary ? version.story.summary : 'Résumé de l\'histoire non disponible.';
+                
                 eventDiv.innerHTML = `
                     <div class="relative w-full sm:w-1/2 p-4 rounded-xl shadow-lg transition-transform duration-300 transform hover:scale-[1.02] cursor-pointer bg-gray-800 border-l-4 ${isLeft ? 'sm:border-r-4 sm:border-l-0 border-blue-400' : 'border-green-400'}">
                         
                         <div class="hidden sm:block absolute w-4 h-4 rounded-full ${isLeft ? 'right-[-2.35rem]' : 'left-[-2.35rem]'} top-4 bg-gray-900 border-4 border-blue-400 z-10"></div>
                         
                         <p class="text-sm font-bold text-gray-500 mb-1">${version.name}</p>
-                        <h3 class="text-xl font-semibold ${isLeft ? 'text-red-400' : 'text-green-400'}">${version.story.title}</h3>
-                        <p class="text-gray-300 mt-2 text-sm">${version.story.summary}</p>
+                        <h3 class="text-xl font-semibold ${isLeft ? 'text-red-400' : 'text-green-400'}">${storyTitle}</h3>
+                        <p class="text-gray-300 mt-2 text-sm">${storySummary}</p>
                         
                         <div class="sm:hidden absolute top-0 left-[-1.5rem] w-3 h-3 rounded-full bg-blue-400 border-2 border-gray-900"></div>
 
@@ -986,7 +1016,6 @@
         poiForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!firebaseEnabled || !isAuthReady) {
-                // Utiliser une boîte de dialogue personnalisée au lieu d'alert()
                 console.error("La base de données n'est pas prête ou est désactivée.");
                 return;
             }
@@ -1057,11 +1086,9 @@
          */
         window.deletePoi = async (poiId) => {
             if (!firebaseEnabled || !isAuthReady) {
-                 // Utiliser une boîte de dialogue personnalisée au lieu d'alert()
                  console.error("La base de données n'est pas prête ou est désactivée.");
                  return;
             }
-            // Remplacer par un modal de confirmation customisé si nécessaire, mais pour l'instant, on utilise le console.log pour éviter l'alert()
             console.log(`Tentative de suppression du POI ${poiId}`);
 
             poiLoadingIndicator.classList.remove('hidden');
@@ -1132,6 +1159,7 @@
                     poiListDiv.appendChild(poiItem);
                 });
                 
+                updateImagesAndLabels(); // Met à jour les POI sur la carte
                 updateHistoryPanel(selectApres.value); 
 
             }, (error) => {
@@ -1172,13 +1200,9 @@
         }
 
         // Démarrage de l'application
-        window.addEventListener('load', () => {
-             // Démarrer l'initialisation de Firebase ou l'application en mode limité
-             initializeFirebase();
-        });
+        window.addEventListener('load', loadMapData);
         window.addEventListener('resize', initializePosition);
 
     </script>
 </body>
-</html>
-
+                        </html>
