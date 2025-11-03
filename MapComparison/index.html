@@ -2,29 +2,38 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <!-- Méta tag essentiel pour le responsive sur mobile -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Comparaison d'Évolution de Carte Dynamique</title>
     <!-- Chargement de Tailwind CSS pour un design moderne et responsive -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Définition du curseur personnalisé */
+        /* Utilisation d'une propriété CSS variable pour stocker la position du slider */
         .comparison-slider-container {
-            /* Utilisation d'une propriété CSS variable pour stocker la position du slider */
             --position: 50%;
             user-select: none;
             cursor: grab;
-            touch-action: none; /* Empêche le défilement du navigateur lors du glisser */
+            /* Empêche le défilement du navigateur lors du glisser */
+            touch-action: none; 
+        }
+
+        /* Curseur spécifique pour le panoramique */
+        .cursor-grabbing {
+            cursor: grabbing !important;
         }
         
-        /* Conteneur de l'image "Après" - C'est sa largeur qui change, utilise clip-path pour l'efficacité */
+        /* Conteneur de l'image "Après" - Sa largeur est coupée par le clip-path */
         .image-apres-wrapper {
-            clip-path: inset(0 0 0 var(--position));
+            /* Coupe la partie droite de l'image. Plus le pourcentage est petit, plus l'image "avant" est visible. */
+            clip-path: inset(0 calc(100% - var(--position)) 0 0);
         }
 
         /* La poignée (handle) se positionne à la valeur de la variable */
         .slider-handle {
             left: var(--position);
             transform: translateX(-50%); /* Centrage horizontal de la poignée */
+            /* Assure que la poignée reste au-dessus de tout et est réactive au tactile */
+            touch-action: none; 
         }
 
         /* Styles pour la poignée du slider */
@@ -44,30 +53,28 @@
             justify-content: center;
             font-size: 1.5rem;
         }
-
-        /* * Important: Les images ne doivent plus utiliser object-fit: cover, 
-         * mais doivent être stylées dynamiquement via JS pour le zoom/déplacement.
-         * Elles doivent occuper 100% de l'espace de leur conteneur au repos (scale=1).
-         */
+        
+        /* Les images pour la gestion du zoom/panoramique */
         .comparison-image {
             position: absolute;
             width: 100%;
             height: 100%;
-            /* Définition des transitions pour un mouvement de zoom plus doux */
+            /* Définition des transitions pour un mouvement de zoom/pan plus doux */
             transition: transform 0.15s ease-out;
-            transform-origin: 0 0; /* Important pour que le zoom se fasse depuis le coin haut-gauche */
+            /* Le zoom commence depuis le coin haut-gauche (0 0) */
+            transform-origin: 0 0; 
         }
 
     </style>
 </head>
 <body class="bg-gray-900 min-h-screen p-4 flex flex-col items-center font-sans">
 
-    <header class="text-center mb-8">
-        <h1 class="4xl font-extrabold text-blue-400">
+    <header class="text-center mb-8 w-full max-w-4xl">
+        <h1 class="text-4xl font-extrabold text-blue-400">
             Comparateur d'Évolution de Carte 🗺️
         </h1>
         <p class="text-xl text-gray-400 mt-2">
-            Sélectionnez les versions de carte à comparer. Utilisez la molette (ou glissez-déposez) pour zoomer et vous déplacer.
+            Visualisez les changements entre les mises à jour.
         </p>
     </header>
 
@@ -103,23 +110,21 @@
         <div id="comparisonContainer" 
              class="comparison-slider-container relative w-full aspect-video shadow-2xl rounded-xl overflow-hidden border-4 border-gray-700 bg-gray-800 transition-all duration-300 ease-in-out">
 
-            <!-- 1. Image de base (VERSION AVANT) -->
-            <!-- Ajout de la classe comparison-image pour la gestion du zoom/pan -->
+            <!-- 1. Image de base (VERSION AVANT) - Z-index 10 -->
             <img id="imageAvant" 
                  class="comparison-image absolute inset-0 z-10" 
                  src="" 
                  alt="Carte Avant Mise à Jour">
             
-            <!-- 2. Conteneur de l'image de dessus (VERSION APRÈS) -->
+            <!-- 2. Conteneur de l'image de dessus (VERSION APRÈS) - Z-index 20 -->
             <div class="image-apres-wrapper absolute inset-0 z-20 overflow-hidden bg-gray-600">
-                <!-- Ajout de la classe comparison-image pour la gestion du zoom/pan -->
                 <img id="imageApres" 
                      class="comparison-image absolute inset-0" 
                      src="" 
                      alt="Carte Après Mise à Jour">
             </div>
 
-            <!-- 3. La poignée (Handle) draggable/tactile -->
+            <!-- 3. La poignée (Handle) draggable/tactile - Z-index 30 -->
             <div id="sliderHandle" 
                  class="slider-handle absolute top-0 bottom-0 z-30 flex items-center justify-center 
                         text-white bg-transparent">
@@ -140,7 +145,7 @@
                 </div>
             </div>
 
-            <!-- 4. Étiquettes de version dynamiques -->
+            <!-- 4. Étiquettes de version dynamiques - Z-index 40 -->
             <div id="labelAvant" class="absolute top-3 left-3 p-1.5 bg-red-800/80 text-white text-xs font-bold rounded-lg z-40 shadow-md"></div>
             <div id="labelApres" class="absolute top-3 right-3 p-1.5 bg-green-800/80 text-white text-xs font-bold rounded-lg z-40 shadow-md"></div>
             
@@ -148,13 +153,16 @@
         
     </main>
     
-    <p class="mt-6 text-sm text-gray-500">
-        <span class="text-blue-400">Instructions :</span> Choisissez deux versions et utilisez le slider pour comparer l'évolution de la carte. Pour zoomer/dézoomer, utilisez la molette de la souris. Pour déplacer la carte (panoramique), maintenez le bouton de la souris enfoncé et glissez.
+    <p class="mt-6 text-sm text-gray-500 max-w-4xl text-center">
+        <span class="text-blue-400 font-bold">Instructions :</span> 
+        Choisissez deux versions et utilisez le séparateur pour comparer l'évolution. 
+        Pour **zoomer/dézoomer** (Desktop), utilisez la molette de la souris. 
+        Pour **déplacer la carte** (Panoramique / Mobile), maintenez le bouton gauche de la souris enfoncé ou utilisez un doigt pour glisser (le zoom doit être supérieur à 1.0).
     </p>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Définition des versions de carte ---
+            // --- Définition des versions de carte (CHEMINS D'ACCÈS RELATIFS RÉTABLIS) ---
             const mapVersions = [
                 { id: 'v1', name: "Alpha (v0.0)", url: "./Maps/alpha.png" }, 
                 { id: 'v2', name: "Beta (v1.0)", url: "./Maps/beta.png" },
@@ -165,7 +173,7 @@
                 { id: 'v7', name: "Beta v5 - Debut d'Ankatar (v1.5)", url: "./Maps/beta-v6.png" },
             ];
 
-            const FALLBACK_PLACEHOLDER = "https://placehold.co/1024x576/374151/D1D5DB?text=IMAGE+INDISPONIBLE%0A(Vérifiez+l'URL)";
+            const FALLBACK_PLACEHOLDER = "https://placehold.co/1024x576/374151/D1D5DB?text=ERREUR+DE+CHARGEMENT";
             const MIN_SCALE = 1.0;
             const MAX_SCALE = 5.0;
             const SCALE_STEP = 0.15;
@@ -182,23 +190,23 @@
             const style = container.style;
             
             // --- Variables de l'état du composant ---
-            let isSliderDragging = false; // Pour le curseur de comparaison
-            let isPanDragging = false;    // Pour le déplacement (panoramique) de la carte
-            let containerRect;
+            let isSliderDragging = false; 
+            let isPanDragging = false;    
+            let containerRect;            
             let lastX = 0;
-            let lastY = 0;
+            let lastY = 0;                
 
             // État de la vue (Zoom et Panoramique)
             let viewState = {
-                scale: MIN_SCALE, // Niveau de zoom (1.0 = normal)
-                offsetX: 0,       // Décalage horizontal (en pixels)
-                offsetY: 0        // Décalage vertical (en pixels)
+                scale: MIN_SCALE, 
+                offsetX: 0,       
+                offsetY: 0        
             };
 
             // --- Fonctions utilitaires ---
 
             /**
-             * Applique les transformations de zoom et de panoramique aux deux images.
+             * Applique les transformations de zoom et de panoramique aux deux images via CSS transform.
              */
             function updateImageTransform() {
                 const transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
@@ -208,46 +216,47 @@
 
             /**
              * Applique les contraintes de déplacement pour ne pas sortir du cadre.
+             * Empêche l'image zoomée de laisser un espace vide dans le conteneur.
              */
             function clampPan() {
-                if (!containerRect) return;
+                if (!containerRect) containerRect = container.getBoundingClientRect();
 
-                // Calculer les limites du déplacement basé sur le zoom
-                const maxOffsetX = (containerRect.width * viewState.scale) - containerRect.width;
-                const maxOffsetY = (containerRect.height * viewState.scale) - containerRect.height;
-                
-                // Limites positives (vers la gauche / haut)
-                const minPanX = -maxOffsetX;
-                const minPanY = -maxOffsetY;
-
-                // Limiter le déplacement. Si zoomé à 1.0, les limites sont 0.
-                if (viewState.scale <= 1.0) {
+                if (viewState.scale <= MIN_SCALE) {
+                    // Si non zoomé, on réinitialise les décalages
                     viewState.offsetX = 0;
                     viewState.offsetY = 0;
                 } else {
-                    viewState.offsetX = Math.max(minPanX, Math.min(0, viewState.offsetX));
-                    viewState.offsetY = Math.max(minPanY, Math.min(0, viewState.offsetY));
+                    const scaledWidth = containerRect.width * viewState.scale;
+                    const scaledHeight = containerRect.height * viewState.scale;
+
+                    // Limites max/min pour les coordonnées X/Y du coin supérieur gauche de l'image
+                    const maxPanX = 0; 
+                    const minPanX = containerRect.width - scaledWidth; 
+                    const maxPanY = 0;
+                    const minPanY = containerRect.height - scaledHeight;
+
+                    viewState.offsetX = Math.max(minPanX, Math.min(maxPanX, viewState.offsetX));
+                    viewState.offsetY = Math.max(minPanY, Math.min(maxPanY, viewState.offsetY));
                 }
 
                 updateImageTransform();
             }
 
             /**
-             * Gère l'événement de la molette pour zoomer/dézoomer.
+             * Gère l'événement de la molette pour zoomer/dézoomer (Desktop).
              * @param {WheelEvent} e - L'événement molette.
              */
             function handleZoom(e) {
                 // Empêcher le défilement de la page
                 e.preventDefault(); 
                 
-                // Déterminer la direction du zoom
+                // Déterminer la direction du zoom (deltaY est négatif si on scroll vers le haut = zoom)
                 const delta = e.deltaY < 0 ? SCALE_STEP : -SCALE_STEP;
 
-                // Calculer le nouveau niveau de zoom
                 let newScale = viewState.scale + delta;
+                // Clamper le zoom entre les limites min et max
                 newScale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, newScale));
 
-                // Si le zoom n'a pas changé, on sort
                 if (newScale === viewState.scale) return;
 
                 // Calculer le point focal pour le zoom
@@ -255,22 +264,20 @@
                 const mouseX = e.clientX - containerRect.left;
                 const mouseY = e.clientY - containerRect.top;
 
-                // Facteur de changement de zoom (pour garder le point sous la souris)
+                // Facteur de changement de zoom
                 const zoomFactor = newScale / viewState.scale;
 
                 // Appliquer la correction de panoramique pour centrer le zoom sur le curseur
                 viewState.offsetX = mouseX - (mouseX - viewState.offsetX) * zoomFactor;
                 viewState.offsetY = mouseY - (mouseY - viewState.offsetY) * zoomFactor;
                 
-                // Mettre à jour l'état
+                // Mettre à jour l'état et appliquer les contraintes
                 viewState.scale = newScale;
-                clampPan(); // Appliquer les contraintes après le changement de zoom
+                clampPan(); 
             }
 
-            // --- Logique du Slider de Comparaison ---
-
             /**
-             * Calcule la nouvelle position du slider et l'applique au CSS.
+             * Calcule la nouvelle position du slider de comparaison et l'applique au CSS.
              * @param {number} clientX - Position X du curseur/doigt.
              */
             function updateSliderPosition(clientX) {
@@ -281,21 +288,20 @@
                 let position = clientX - containerRect.left;
 
                 // Clamper la position entre 0 et la largeur du conteneur
-                if (position < 0) {
-                    position = 0;
-                } else if (position > containerRect.width) {
-                    position = containerRect.width;
-                }
+                position = Math.max(0, Math.min(position, containerRect.width));
                 
                 const percent = (position / containerRect.width) * 100;
+                // Met à jour la variable CSS pour l'effet de coupe
                 style.setProperty('--position', `${percent}%`);
             }
 
+            // --- Gestion des événements de glissement (Drag) ---
+
             /**
-             * Commence le glissement du slider (MouseDown/TouchStart).
+             * Commence le glissement du slider de comparaison (MouseDown/TouchStart sur la poignée).
              */
             const startSliderDrag = (e) => {
-                // Si l'événement vient du conteneur principal, c'est un panoramique, pas un glissement de slider
+                // Vérifie si l'événement provient bien de la poignée
                 if (e.currentTarget !== handle) return;
 
                 isSliderDragging = true;
@@ -304,19 +310,41 @@
                 containerRect = container.getBoundingClientRect();
                 
                 if (e.type.startsWith('touch')) {
-                    e.preventDefault();
+                    e.preventDefault(); 
                 }
+                e.stopPropagation(); // Empêche l'événement de remonter et de déclencher un Pan Drag
             };
 
             /**
-             * Gère le glissement du slider (MouseMove/TouchMove).
+             * Commence le panoramique (Pan Drag) (MouseDown/TouchStart sur le conteneur).
+             */
+            const startPanDrag = (e) => {
+                // Si le clic vient de la poignée ou si le zoom est à 1.0, on n'autorise pas le panoramique
+                if (e.target === handle || handle.contains(e.target) || isSliderDragging) return;
+                
+                if (viewState.scale === MIN_SCALE) return;
+
+                isPanDragging = true;
+                container.classList.add('cursor-grabbing'); 
+                containerRect = container.getBoundingClientRect();
+
+                // Initialiser les dernières positions (compatible Souris et Tactile)
+                lastX = e.clientX || e.touches[0].clientX;
+                lastY = e.clientY || e.touches[0].clientY;
+                
+                if (e.touches) e.preventDefault(); // Empêcher le défilement sur mobile
+            };
+            
+            /**
+             * Gère le glissement du slider OU le Panoramique (MouseMove/TouchMove).
              */
             const onDrag = (e) => {
                 if (!isSliderDragging && !isPanDragging) return;
 
+                // Récupérer les coordonnées X/Y (compatible Souris et Tactile)
                 const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
+                
                 if (isSliderDragging) {
                     updateSliderPosition(clientX);
                 }
@@ -330,12 +358,17 @@
                     viewState.offsetX += dx;
                     viewState.offsetY += dy;
 
-                    // Clamper les valeurs pour rester dans les limites
+                    // Clamper les valeurs et appliquer la transformation
                     clampPan();
 
                     // Mise à jour des dernières positions
                     lastX = clientX;
                     lastY = clientY;
+                }
+                
+                if (e.touches) {
+                    // Empêche le défilement du navigateur pendant le glissement sur écran tactile
+                    e.preventDefault(); 
                 }
             };
 
@@ -351,27 +384,6 @@
                 container.classList.remove('cursor-grabbing');
             };
 
-            // --- Logique de Panoramique (Déplacement) ---
-
-            /**
-             * Commence le panoramique (mousedown sur le conteneur principal).
-             */
-            const startPanDrag = (e) => {
-                // Si le clic vient de la poignée du slider, on ignore le panoramique
-                if (e.target === handle || handle.contains(e.target)) return;
-                
-                // Si le zoom est à 1.0, on n'autorise pas le panoramique
-                if (viewState.scale === MIN_SCALE) return;
-
-                isPanDragging = true;
-                container.classList.add('cursor-grabbing'); // Utiliser la classe Tailwind ou une custom si besoin
-                containerRect = container.getBoundingClientRect();
-
-                // Initialiser les dernières positions
-                lastX = e.clientX || e.touches[0].clientX;
-                lastY = e.clientY || e.touches[0].clientY;
-            };
-
             // --- Fonctions d'initialisation et de mise à jour ---
 
             /**
@@ -385,7 +397,7 @@
                     selectApres.add(optionApres);
                 });
 
-                // Définir les valeurs par défaut
+                // Définir les valeurs par défaut (avant-dernière et dernière version)
                 if (mapVersions.length >= 2) {
                     selectAvant.value = mapVersions[mapVersions.length - 2].id;
                     selectApres.value = mapVersions[mapVersions.length - 1].id;
@@ -422,7 +434,7 @@
                     labelElement.classList.add(colorSet.success);
 
                     imgElement.onerror = () => {
-                        console.error(`[Load Error] Échec du chargement de l'image : ${version.name} à ${version.url}`);
+                        console.error(`[Erreur de Chargement] Échec du chargement de l'image : ${version.name} à ${version.url}`);
                         imgElement.src = FALLBACK_PLACEHOLDER;
                         imgElement.alt = `Carte ${version.name} (Erreur de chargement)`;
                         labelElement.textContent = `${version.name} (Erreur)`;
@@ -456,9 +468,10 @@
                 viewState.offsetY = 0;
                 updateImageTransform();
                 
-                // Centrer le slider (50%)
-                const center = container.clientWidth / 2;
-                updateSliderPosition(container.getBoundingClientRect().left + center);
+                // Recalculer la position du conteneur et centrer le slider (50%)
+                containerRect = container.getBoundingClientRect();
+                const center = containerRect.width / 2;
+                updateSliderPosition(containerRect.left + center);
             };
 
 
@@ -474,29 +487,28 @@
 
             // Logique de Panoramique (déplacement)
             container.addEventListener('mousedown', startPanDrag);
-            // Ajout du support tactile pour le panoramique
             container.addEventListener('touchstart', startPanDrag);
 
-            // Logique de Zoom (molette)
+            // Logique de Zoom (molette/Desktop)
             container.addEventListener('wheel', handleZoom);
             
-            // Écouteurs globaux pour le déplacement et la fin du glissement
+            // Écouteurs globaux pour le déplacement et la fin du glissement (Tactile et Souris)
             document.addEventListener('mousemove', onDrag);
-            document.addEventListener('touchmove', onDrag);
+            // `{ passive: false }` est essentiel pour que e.preventDefault() fonctionne correctement sur mobile
+            document.addEventListener('touchmove', onDrag, { passive: false }); 
             document.addEventListener('mouseup', endDrag);
             document.addEventListener('touchend', endDrag);
             
             
             // Initialisation de la page
             window.addEventListener('load', () => {
-                populateSelects(); // Remplir les dropdowns avec les données
-                initializePosition(); // Centrer le slider et réinitialiser le zoom
+                populateSelects(); 
+                initializePosition(); 
             });
             window.addEventListener('resize', initializePosition);
         });
 
     </script>
-
 </body>
 </html>
 
