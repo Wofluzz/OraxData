@@ -1,0 +1,102 @@
+[
+    { 
+        "id": "v1_alpha", 
+        "name": "Alpha (v0.0)", 
+        "url": "./Maps/alpha.png",
+        "story": { 
+            "title": "Phase Alpha : Début des Terres Vagues", 
+            "summary": "La toute première version de la carte, post-collision initiale. Terres inexplorées, peu de reliefs détaillés, principalement des emplacements temporaires.", 
+            "characters": ["Aucun"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v2_beta", 
+        "name": "Beta (v1.0)", 
+        "url": "./Maps/beta.png",
+        "story": { 
+            "title": "Beta v1.0 : Premières Structures", 
+            "summary": "Les premières structures permanentes et les chemins de base sont établis. Cette version marque la préparation pour les premiers événements narratifs majeurs.", 
+            "characters": ["Premiers Explorateurs", "Cartographes"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v3_oraxoween", 
+        "name": "Beta v1 - Oraxoween (v1.1)", 
+        "url": "./Maps/beta-v2.png",
+        "story": { 
+            "title": "Beta v1.1 : L'événement d'Oraxoween", 
+            "summary": "Introduction d'un événement saisonnier ou temporaire (Oraxoween). Des zones spécifiques de la carte subissent des modifications cosmétiques et d'ambiance.", 
+            "characters": ["Habitants festifs"], 
+            "quests": ["Événement spécial Oraxoween"]
+        }
+    },
+    { 
+        "id": "v4_beta_v2", 
+        "name": "Beta v2 (v1.2)", 
+        "url": "./Maps/beta-v3.png",
+        "story": { 
+            "title": "Beta v1.2 : Raffinement des Zones", 
+            "summary": "Raffinement général de la géographie et des limites des zones. Ajustements basés sur les retours des premiers tests.", 
+            "characters": ["Développeurs"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v5_beta_v3", 
+        "name": "Beta v3 (v1.3)", 
+        "url": "./Maps/beta-v4.png",
+        "story": { 
+            "title": "Beta v1.3 : Déploiement des POI Clés", 
+            "summary": "Les Points d'Intérêt majeurs permanents (villes, donjons principaux) commencent à être placés et finalisés sur la carte.", 
+            "characters": ["Architectes"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v6_biomes", 
+        "name": "Beta v4 - Biomes Classics (v1.4)", 
+        "url": "./Maps/beta-v5.png",
+        "story": { 
+            "title": "Beta v1.4 : Finalisation des Biomes", 
+            "summary": "Les biomes reçoivent leur apparence finale et leurs limites définitives. Préparation de la carte pour le lancement de la Saison 1.", 
+            "characters": ["Spécialistes des Biomes"], 
+            "quests": ["..."]
+        }
+    },
+    { 
+        "id": "v7_s1", 
+        "name": "S1 Øraxia", 
+        "url": "1000069803.png", 
+        "story": { 
+            "title": "S1 Øraxia : Les Météorites et l'Appel", 
+            "summary": "Découverte des terres alentours et météorites ravageant le Royaume. Arrivée de nouveaux personnages clés. C'est l'aube d'une nouvelle ère pour Oraxia, marquée par l'union des cités.", 
+            "characters": ["Cartographes", "Habitants d'Oraxia", "Moldzar"], 
+            "quests": ["Remplir la carte donnée par le cartographe", "Trouver une utilité à la pierre des météorites"]
+        }
+    }, 
+    { 
+        "id": "v8_s2", 
+        "name": "S2 Les Pierres d'Øraxia", 
+        "url": "https://placehold.co/1024x576/2D3748/D1D5DB?text=v8_s2+%28S2%29", 
+        "story": { 
+            "title": "S2 : L'activation de la Pierre d'Oracle", 
+            "summary": "Après l'union, une pluie de pierres runiques frappe. Moldar et ses scientifiques se rendent au Sanctuaire pour activer la Pierre d'Oracle, dévoilant des pierres runiques dans tout le royaume.", 
+            "characters": ["Météoroloque", "Scientifiques", "Moldzar Alchimiste", "Habitants méfiants"], 
+            "quests": ["Aider Moldzar à rassembler toutes les pierres au Sanctuaire"]
+        }
+    },
+    { 
+        "id": "v9_s3", 
+        "name": "S3 Aux Pierres et à la baguette", 
+        "url": "1000069879.png",
+        "story": { 
+            "title": "S3 : La Montée de la Magie et de la Corruption", 
+            "summary": "De nouveaux événements paranormaux arrivent : magie, régions corrompues... et des secrets bien cachés sur Oraxia commencent à faire surface. La carte montre les premières zones affectées par la corruption magique.", 
+            "characters": ["Mages", "Personnages de la Saison 2"], 
+            "quests": ["Aider Moldzar à rassembler toutes les pierres au Sanctuaire"]
+        }
+    }
+]
+
