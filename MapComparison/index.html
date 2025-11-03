@@ -30,7 +30,6 @@
             height: 100%;
             transform-origin: 0 0; 
             object-fit: cover; /* Assure que l'image couvre le conteneur */
-            transition: none; /* Important pour éviter les transitions lentes lors du drag/pan */
         }
         
         /* POI Styles */
@@ -153,7 +152,7 @@
                     </div>
                     
                     <!-- Conteneur des POI -->
-                    <div id="poiContainer" class="absolute inset-0 z-40 pointer-events-none transition-transform duration-100 ease-out">
+                    <div id="poiContainer" class="absolute inset-0 z-40 pointer-events-none">
                         <!-- Les épingles de POI seront ajoutées ici par JS -->
                     </div>
 
@@ -338,11 +337,8 @@
         let firebaseEnabled = false;
 
         // --- Données Centrales du Monde d'Oraxia (Chargées depuis JSON) ---
-        // Les données JSON du prompt de l'utilisateur sont stockées ici temporairement.
-        const response = await fetch("map_data.json");
+        let mapVersions = []; 
 
-        let mapHistoryData = await response.json();
-        
         const characterFiches = [
             { name: "Kai, Léo, Caleb, Aria et Flèche", role: "Les Héros d'Oraxia", debut: "Tome 1 (Saisons 1-3)", evolution: "Jeunes aventuriers chargés de réunir les Cinq Cités divisées par le Fléau. Ils sont l'antithèse de la méthode de Moldar, cherchant l'unité par la coopération et non la force divine. Flèche est leur compagnon canin indéfectible.", color: 'bg-indigo-600' },
             { name: "Moldar / Al Moldar", role: "Alchimiste, puis Dieu", debut: "Saison 1.5", evolution: "Passe d'un chercheur à un être divin par l'acquisition du pouvoir des Pierres Runiques, puis est affaibli par le Néan. Antagoniste complexe cherchant la Stabilité par la force.", color: 'bg-yellow-600' },
@@ -354,14 +350,29 @@
         // --- Fonctions d'Initialisation et de Chargement ---
         
         async function loadMapData() {
-            // Note: Les données mapVersions sont maintenant intégrées dans le code JS pour garantir le fonctionnement.
-            
-            // Masquer le loader et afficher le contenu
-            document.getElementById('loadingApp').classList.add('hidden');
-            document.getElementById('appContent').classList.remove('hidden');
+            try {
+                const response = await fetch('map_data.json');
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                mapVersions = await response.json();
+                console.log("Données de carte chargées :", mapVersions);
+                
+                // Masquer le loader et afficher le contenu
+                document.getElementById('loadingApp').classList.add('hidden');
+                document.getElementById('appContent').classList.remove('hidden');
 
-            // Continuer l'initialisation de l'application (Firebase et DOM)
-            initializeFirebase();
+                // Continuer l'initialisation de l'application (Firebase et DOM)
+                initializeFirebase();
+                
+            } catch (error) {
+                console.error("Échec du chargement de map_data.json. Veuillez vérifier le chemin d'accès et le format du fichier.", error);
+                
+                document.getElementById('loadingApp').innerHTML = `
+                    <p class="text-xl text-red-500">Erreur critique : Impossible de charger les données de la carte.</p>
+                    <p class="text-sm text-gray-400 mt-2">Vérifiez que le fichier map_data.json est présent et correctement formaté.</p>
+                `;
+            }
         }
 
         // --- Initialisation Firebase ---
@@ -582,8 +593,6 @@
             
             viewState.scale = newScale;
             clampPan(); 
-            // Met à jour la cliquabilité des POI après le zoom
-            poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none';
         }
         
         function handleDoubleTapZoom(e) {
@@ -615,8 +624,6 @@
             }
 
             clampPan(); 
-            // Met à jour la cliquabilité des POI après le zoom
-            poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none';
         }
 
         function updateSliderPosition(clientX) {
@@ -715,8 +722,6 @@
                 }
                 
                 clampPan();
-                // Met à jour la cliquabilité des POI après le zoom
-                poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none';
                 return; 
             }
             
@@ -776,10 +781,9 @@
             const currentVersionIndex = mapVersions.findIndex(v => v.id === currentVersionId);
             poiContainer.innerHTML = '';
             
-            // FIX: Suppression de la ligne redondante qui réinitialisait la transformation
-            // poiContainer.style.transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`; 
-
-            // Met à jour la cliquabilité des POI en fonction du zoom
+            // Assurer que le conteneur des POI ne pan/zoom pas avec les images.
+            poiContainer.style.transform = `translate(${viewState.offsetX}px, ${viewState.offsetY}px) scale(${viewState.scale})`;
+            // Les POI ne sont cliquables que si l'on a zoomé un peu (pour éviter les clics accidentels pendant le drag)
             poiContainer.style.pointerEvents = viewState.scale > MIN_SCALE ? 'auto' : 'none'; 
 
             poiData.forEach(poi => {
@@ -868,9 +872,9 @@
                 poiMinVersionInput.add(optionAdmin);
             });
 
-            // Sélection par défaut: Avant = V7 (la dernière beta avant S1), Après = V10 (S3)
-            const defaultAvantId = mapVersions.find(v => v.id === 'v7_debut_ankatar')?.id || mapVersions[0].id;
-            const defaultApresId = mapVersions.find(v => v.id === 'v10_s3')?.id || mapVersions[mapVersions.length - 1].id;
+            // Sélection par défaut: Avant = S1 (v7), Après = S3 (v9)
+            const defaultAvantId = mapVersions.find(v => v.id === 'v7_s1')?.id || mapVersions[0].id;
+            const defaultApresId = mapVersions.find(v => v.id === 'v9_s3')?.id || mapVersions[mapVersions.length - 1].id;
             
             selectAvant.value = defaultAvantId;
             selectApres.value = defaultApresId;
@@ -920,9 +924,6 @@
             viewState.offsetY = 0;
             updateImageTransform();
             
-            // Met à jour la cliquabilité des POI (désactivée au zoom MIN)
-            poiContainer.style.pointerEvents = 'none';
-
             containerRect = container.getBoundingClientRect();
             const center = containerRect.width / 2;
             updateSliderPosition(containerRect.left + center);
@@ -1007,10 +1008,6 @@
             submitButton.textContent = "Ajouter le POI";
             document.getElementById('poiXInput').value = 50;
             document.getElementById('poiYInput').value = 50;
-            document.getElementById('poiColorInput').value = '#3B82F6';
-            if (mapVersions.length > 0) {
-                 document.getElementById('poiMinVersionInput').value = mapVersions[mapVersions.length - 1].id;
-            }
         }
 
         /**
@@ -1177,15 +1174,12 @@
         function initApplication() {
             // Attacher les écouteurs du comparateur/panoramique
             handle.addEventListener('mousedown', startSliderDrag);
-            // FIX: Ajout de { passive: false } pour permettre le preventDefault
-            handle.addEventListener('touchstart', startSliderDrag, { passive: false });
+            handle.addEventListener('touchstart', startSliderDrag);
 
             container.addEventListener('mousedown', startPanDrag);
-            // FIX: Ajout de { passive: false } pour empêcher le scroll de la page pendant le pan/pinch
-            container.addEventListener('touchstart', startPanDrag, { passive: false });
+            container.addEventListener('touchstart', startPanDrag);
 
-            // Onscroll doit être non passif pour preventDefault
-            container.addEventListener('wheel', handleZoom, { passive: false }); 
+            container.addEventListener('wheel', handleZoom, { passive: false });
             
             document.addEventListener('mousemove', onDrag);
             document.addEventListener('touchmove', onDrag, { passive: false }); 
@@ -1212,4 +1206,3 @@
     </script>
 </body>
                         </html>
-
