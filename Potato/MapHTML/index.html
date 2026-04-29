@@ -1,517 +1,242 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Région Grand Vide</title>
+    <title>Potatoverse Clash - Cartographie</title>
     <style>
-        /* --- VARIABLES & RESET --- */
         :root {
-            --bg-deep-space: #0b0716;
-            --panel-bg: rgba(18, 12, 33, 0.95);
-            --panel-border: #3b205e;
+            --bg-deep: #070512;
             --accent-purple: #a855f7;
-            --accent-glow: rgba(168, 85, 247, 0.6);
+            --accent-blue: #3b82f6;
+            --accent-gold: #fbbf24;
             --text-main: #f8f9fa;
-            --text-muted: #9ca3af;
-            --text-purple: #c084fc;
+            --panel-bg: rgba(15, 12, 28, 0.95);
+            --border-purple: rgba(168, 85, 247, 0.4);
+            --border-blue: rgba(59, 130, 246, 0.4);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: var(--bg-deep); color: var(--text-main); overflow: hidden; height: 100vh; }
 
-        body, html {
-            width: 100vw;
-            height: 100vh;
-            background-color: var(--bg-deep-space);
-            color: var(--text-main);
-            overflow: hidden;
-        }
-
-        /* --- LAYOUT GLOBAL --- */
-        .app-container {
+        /* --- NAVIGATION --- */
+        .region-selector {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
             display: flex;
-            width: 100%;
-            height: 100%;
-            /* Dégradé simulant la nébuleuse spatiale de fond */
-            background: radial-gradient(circle at 50% 50%, #1a103c 0%, #0b0716 80%);
+            gap: 10px;
+            background: rgba(0,0,0,0.6);
+            padding: 5px;
+            border-radius: 50px;
+            border: 1px solid var(--border-purple);
         }
-
-        /* --- ZONE GAUCHE : LA CARTE --- */
-        .map-section {
-            flex-grow: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* En-tête de la carte (Haut Gauche) */
-        .map-header {
-            position: absolute;
-            top: 40px;
-            left: 40px;
-            z-index: 10;
-        }
-        .map-header h2 { 
-            font-size: 1rem; 
-            color: var(--text-purple); 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 2px;
-        }
-        .map-header h1 { 
-            font-size: 3.5rem; 
-            font-style: italic; 
-            font-weight: 800;
-            letter-spacing: 1px; 
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(255,255,255,0.2);
-        }
-        .map-header .separator {
-            width: 100%;
-            height: 2px;
-            background: linear-gradient(90deg, var(--accent-purple), transparent);
-            margin-top: 10px;
-        }
-
-        /* Légende (Bas Gauche) */
-        .map-legend {
-            position: absolute;
-            bottom: 40px;
-            left: 40px;
-            background: rgba(10, 5, 20, 0.8);
-            border: 1px solid var(--panel-border);
-            padding: 15px 20px;
-            border-radius: 8px;
-            z-index: 10;
-            font-size: 0.8rem;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-        }
-        .legend-item:last-child { margin-bottom: 0; }
-        .legend-icon {
-            width: 24px; height: 24px;
-            border-radius: 50%;
-            border: 1px solid var(--accent-purple);
-            display: flex; justify-content: center; align-items: center;
-            font-size: 0.7rem; color: var(--accent-purple);
-        }
-        .legend-line {
-            width: 24px; height: 2px;
-            border-top: 2px dashed rgba(255,255,255,0.4);
-        }
-
-        /* Conteneur pour bouger les éléments de la carte */
-        .map-content {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Représentation visuelle des îles (Gradients) */
-        .island-shape {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            border-radius: 50%;
-            background: radial-gradient(circle, #3e206d 0%, transparent 70%);
-            z-index: 15;
-            opacity: 0.6;
-            pointer-events: none;
-        }
-
-        /* --- LES POINTS D'INTÉRÊT (POI) --- */
-        .poi-container {
-            position: absolute;
-            transform: translate(-50%, -50%);
-            z-index: 20;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .poi {
-            width: 36px;
-            height: 36px;
-            background-color: #120a24;
-            border: 2px solid var(--accent-purple);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        .nav-btn {
+            padding: 10px 25px;
+            border-radius: 25px;
+            border: none;
+            background: transparent;
+            color: white;
             cursor: pointer;
-            transition: all 0.3s ease;
-            color: var(--text-main);
             font-weight: bold;
-            font-size: 14px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
-        }
-
-        .poi:hover, .poi-container.active .poi {
-            transform: scale(1.2);
-            box-shadow: 0 0 20px var(--accent-glow), inset 0 0 10px var(--accent-glow);
-            background-color: var(--accent-purple);
-        }
-
-        /* Les infobulles (Tooltips attachés aux POI) */
-        .tooltip {
-            position: absolute;
-            bottom: 50px;
-            background: rgba(15, 8, 30, 0.95);
-            border: 1px solid var(--accent-purple);
-            padding: 8px 12px;
-            border-radius: 4px;
-            width: max-content;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.2s ease, transform 0.2s ease;
-            transform: translateY(10px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-            text-align: center;
-        }
-
-        .poi-container:hover .tooltip {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        .tooltip-title { font-weight: 700; font-size: 0.9rem; letter-spacing: 1px;}
-        .tooltip-subtitle { font-size: 0.65rem; color: var(--text-purple); text-transform: uppercase; margin-top: 2px; }
-
-        /* Positionnement */
-        #poi-erathiel { top: 35%; left: 25%; }
-        #poi-macon { top: 45%; left: 55%; }
-        #poi-inconnu-1 { top: 65%; left: 15%; }
-        #poi-inconnu-2 { top: 85%; left: 30%; }
-        #poi-inconnu-3 { top: 70%; left: 65%; }
-
-        /* --- ZONE DROITE : PANNEAU LATÉRAL --- */
-        .sidebar {
-            width: 420px;
-            min-width: 420px;
-            background-color: var(--panel-bg);
-            border-left: 1px solid var(--panel-border);
-            display: flex;
-            flex-direction: column;
-            z-index: 30;
-            box-shadow: -10px 0 30px rgba(0,0,0,0.5);
-        }
-
-        .sidebar-header {
-            padding: 30px 20px 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .sidebar-header h3 { font-size: 1.1rem; letter-spacing: 1.5px; font-weight: 400;}
-        .sidebar-header span { font-size: 0.7rem; color: var(--text-muted); letter-spacing: 2px; text-transform: uppercase;}
-
-        .location-list {
-            flex-grow: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* Personnalisation de la scrollbar */
-        .location-list::-webkit-scrollbar { width: 6px; }
-        .location-list::-webkit-scrollbar-track { background: transparent; }
-        .location-list::-webkit-scrollbar-thumb { background: var(--panel-border); border-radius: 10px; }
-        .location-list::-webkit-scrollbar-thumb:hover { background: var(--accent-purple); }
-
-        /* Cartes de la liste latérale */
-        .location-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .location-card:hover {
-            border-color: rgba(168, 85, 247, 0.4);
-            background: rgba(255, 255, 255, 0.06);
-        }
-
-        .location-card.active {
-            border-color: var(--accent-purple);
-            background: rgba(168, 85, 247, 0.15);
-            box-shadow: 0 0 20px rgba(168, 85, 247, 0.1);
-        }
-
-        .card-image-placeholder {
-            width: 100%;
-            height: 120px;
-            background: linear-gradient(45deg, #1f113a, #2a1b4d);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: rgba(255,255,255,0.2);
+            transition: 0.3s;
+            text-transform: uppercase;
             font-size: 0.8rem;
-            position: relative;
+            letter-spacing: 1px;
         }
+        .nav-btn.active { background: var(--accent-purple); box-shadow: 0 0 15px var(--accent-purple); }
+
+        .app-container { display: flex; width: 100%; height: 100%; transition: opacity 0.5s; }
+        .hidden { display: none !important; }
+
+        /* --- STYLES COMMUNS --- */
+        .map-section { flex-grow: 1; position: relative; overflow: hidden; }
+        .sidebar { width: 420px; background: var(--panel-bg); border-left: 1px solid var(--border-purple); display: flex; flex-direction: column; z-index: 50; }
+        .sidebar-header { padding: 30px 20px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .location-list { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
         
-        .card-image-placeholder::after {
-            content: '';
-            position: absolute;
-            bottom: 0; left: 0; right: 0; height: 30px;
-            background: linear-gradient(to top, rgba(0,0,0,0.5), transparent);
-        }
+        .header-ui { position: absolute; top: 40px; left: 40px; z-index: 10; }
+        .header-ui h2 { font-size: 0.9rem; color: var(--accent-purple); letter-spacing: 2px; }
+        .header-ui h1 { font-size: 3rem; font-style: italic; font-weight: 800; line-height: 1; }
 
-        .location-info {
-            padding: 15px;
-        }
-        .location-info h4 { margin-bottom: 2px; font-size: 1.1rem; letter-spacing: 0.5px;}
-        .location-info .type { font-size: 0.65rem; color: var(--text-purple); margin-bottom: 10px; display: block; text-transform: uppercase; letter-spacing: 1px;}
-        .location-info p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+        /* --- ÉLÉMENTS DE LA CARTE --- */
+        .poi-container { position: absolute; transform: translate(-50%, -50%); z-index: 20; display: flex; flex-direction: column; align-items: center; cursor: pointer; }
+        .poi-icon { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; display: flex; justify-content: center; align-items: center; font-weight: bold; transition: 0.3s; }
+        .tooltip { position: absolute; bottom: 55px; background: rgba(0,0,0,0.9); border: 1px solid var(--accent-purple); padding: 8px 15px; border-radius: 4px; opacity: 0; pointer-events: none; transition: 0.3s; white-space: nowrap; }
+        .poi-container:hover .tooltip { opacity: 1; transform: translateY(-5px); }
 
-        .footer-logo {
-            padding: 15px;
-            text-align: right;
-            border-top: 1px solid rgba(255,255,255,0.05);
-            font-size: 0.8rem;
-            font-weight: bold;
-            color: var(--text-muted);
-        }
-        .footer-logo span { color: #f97316; font-style: italic; font-size: 1.2rem;}
+        /* --- SPÉCIFIQUE CŒUR DU TIMELINE --- */
+        .timeline-theme .header-ui h2 { color: var(--accent-blue); }
+        .timeline-theme .nav-btn.active { background: var(--accent-blue); box-shadow: 0 0 15px var(--accent-blue); }
+        .energy-beam { position: absolute; width: 4px; height: 1000px; background: linear-gradient(to top, transparent, #d8b4fe, #a855f7, transparent); filter: blur(4px); z-index: 5; opacity: 0.6; animation: flicker 2s infinite; }
+        @keyframes flicker { 0%, 100% { opacity: 0.4; } 50% { opacity: 0.8; } }
 
-        /* Media Queries pour petits écrans */
-        @media (max-width: 1024px) {
-            .app-container { flex-direction: column; }
-            .sidebar { width: 100%; height: 40%; min-width: auto; border-left: none; border-top: 1px solid var(--panel-border); }
-            .map-header h1 { font-size: 2.5rem; }
-        }
+        .location-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 15px; cursor: pointer; transition: 0.2s; }
+        .location-card:hover, .location-card.active { background: rgba(168, 85, 247, 0.1); border-color: var(--accent-purple); }
+        .timeline-theme .location-card:hover, .timeline-theme .location-card.active { background: rgba(59, 130, 246, 0.1); border-color: var(--accent-blue); }
+
+        .tag { font-size: 0.6rem; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; margin-bottom: 5px; display: inline-block; }
+        .tag-blue { background: var(--accent-blue); color: white; }
+        .tag-gold { background: var(--accent-gold); color: black; }
+
+        /* Effet de lueur centrale pour le Temple */
+        .central-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(168, 85, 247, 0.2) 0%, transparent 70%); border-radius: 50%; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
-        
-        <!-- SECTION CARTE -->
+    <!-- SELECTEUR DE RÉGION -->
+    <nav class="region-selector">
+        <button class="nav-btn active" onclick="switchRegion('grand-vide')">Grand Vide</button>
+        <button class="nav-btn" onclick="switchRegion('timeline')">Cœur du Timeline</button>
+    </nav>
+
+    <!-- RÉGION 1 : GRAND VIDE -->
+    <div id="region-grand-vide" class="app-container">
         <main class="map-section">
-            <div class="map-header">
+            <div class="header-ui">
                 <h2>Région</h2>
                 <h1>GRAND VIDE</h1>
-                <div class="separator"></div>
             </div>
-
-            <!-- SVG pour dessiner les lignes pointillées de connexion -->
-            <svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 5; pointer-events: none;">
-                <!-- Connexion Erathiel -> Macon -->
-                <path d="M 25% 35% Q 40% 50% 55% 45%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
-                <!-- Connexion Macon -> Inconnu 3 -->
-                <path d="M 55% 45% Q 60% 60% 65% 70%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
-                <!-- Connexion Inconnu 1 -> Inconnu 2 -->
-                <path d="M 15% 65% Q 20% 80% 30% 85%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
-                <!-- Connexion Centre -> Erathiel/Inconnu2/Macon -->
-                <path d="M 40% 60% Q 30% 50% 25% 35%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
-                <path d="M 40% 60% Q 35% 70% 30% 85%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
-                <path d="M 40% 60% Q 45% 65% 65% 70%" fill="transparent" stroke="rgba(255,255,255,0.3)" stroke-width="2" stroke-dasharray="6,6" />
+            
+            <!-- SVG de connexion -->
+            <svg style="position: absolute; width:100%; height:100%; pointer-events:none;">
+                <path d="M 30% 35% Q 45% 50% 60% 45%" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2" stroke-dasharray="5,5" />
             </svg>
 
             <div class="map-content">
-                
-                <!-- Formes simulant la lueur des îles en arrière plan -->
-                <div class="island-shape" style="top: 35%; left: 25%; width: 400px; height: 250px;"></div>
-                <div class="island-shape" style="top: 45%; left: 55%; width: 300px; height: 200px;"></div>
-                <div class="island-shape" style="top: 65%; left: 15%; width: 200px; height: 150px;"></div>
-                <div class="island-shape" style="top: 85%; left: 30%; width: 250px; height: 180px;"></div>
-                <div class="island-shape" style="top: 70%; left: 65%; width: 280px; height: 200px;"></div>
-
-                <!-- POI 1 : Érathiel -->
-                <div class="poi-container" id="poi-erathiel" data-target="card-erathiel">
-                    <div class="poi">Ω</div>
-                    <div class="tooltip">
-                        <div class="tooltip-title">ÉRATHIEL</div>
-                        <div class="tooltip-subtitle">La Ville du Grand Omega</div>
-                    </div>
+                <div class="poi-container" style="top: 35%; left: 30%;" data-target="card-erathiel">
+                    <div class="poi-icon" style="background:#2e1b4e; border-color:var(--accent-purple);">Ω</div>
+                    <div class="tooltip">ÉRATHIEL</div>
                 </div>
-
-                <!-- POI 2 : Maçon'île -->
-                <div class="poi-container" id="poi-macon" data-target="card-macon">
-                    <div class="poi">🧱</div>
-                    <div class="tooltip">
-                        <div class="tooltip-title">MAÇON'ÎLE</div>
-                        <div class="tooltip-subtitle">La carrière de briques</div>
-                    </div>
-                </div>
-
-                <!-- Îles Inconnues -->
-                <div class="poi-container" id="poi-inconnu-1" data-target="card-inconnu-1">
-                    <div class="poi">?</div>
-                    <div class="tooltip">
-                        <div class="tooltip-title">ÎLE INCONNUE</div>
-                        <div class="tooltip-subtitle">Point d'intérêt inconnu</div>
-                    </div>
-                </div>
-                
-                <div class="poi-container" id="poi-inconnu-2" data-target="card-inconnu-2">
-                    <div class="poi">?</div>
-                    <div class="tooltip">
-                        <div class="tooltip-title">ÎLE INCONNUE</div>
-                        <div class="tooltip-subtitle">Point d'intérêt inconnu</div>
-                    </div>
-                </div>
-
-                <div class="poi-container" id="poi-inconnu-3" data-target="card-inconnu-3">
-                    <div class="poi">?</div>
-                    <div class="tooltip">
-                        <div class="tooltip-title">ÎLE INCONNUE</div>
-                        <div class="tooltip-subtitle">Point d'intérêt inconnu</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Légende -->
-            <div class="map-legend">
-                <div class="legend-item">
-                    <div class="legend-icon">Ω</div>
-                    <span>POINT D'INTÉRÊT PRINCIPAL</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon">🧱</div>
-                    <span>POINT D'INTÉRÊT SECONDAIRE</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-icon">?</div>
-                    <span>POINT D'INTÉRÊT INCONNU</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-line"></div>
-                    <span>CONNEXION AÉRIENNE</span>
+                <div class="poi-container" style="top: 45%; left: 60%;" data-target="card-macon">
+                    <div class="poi-icon" style="background:#4a2619; border-color:#f97316;">🧱</div>
+                    <div class="tooltip">MAÇON'ÎLE</div>
                 </div>
             </div>
         </main>
 
-        <!-- SECTION PANNEAU LATÉRAL -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h3>CARTE DU GRAND VIDE</h3>
-                <span>Map Overview</span>
+                <p style="font-size:0.7rem; color:var(--text-muted);">OVERVIEW</p>
             </div>
-            
             <div class="location-list">
-                
-                <!-- Carte Érathiel -->
-                <div class="location-card" id="card-erathiel" data-target="poi-erathiel">
-                    <div class="card-image-placeholder">[Image Érathiel]</div>
-                    <div class="location-info">
-                        <h4>ÉRATHIEL</h4>
-                        <span class="type">LA VILLE DU GRAND OMEGA</span>
-                        <p>Cœur technologique du Grand Vide. Abrite le Grand Omega, symbole de puissance et de contrôle.</p>
-                    </div>
+                <div class="location-card" id="card-erathiel">
+                    <span class="tag tag-blue">Principal</span>
+                    <h4>ÉRATHIEL</h4>
+                    <p>La cité technologique du Grand Vide.</p>
                 </div>
-
-                <!-- Carte Maçon'île -->
-                <div class="location-card" id="card-macon" data-target="poi-macon">
-                    <div class="card-image-placeholder" style="background: linear-gradient(45deg, #4a2119, #7a3a29);">[Image Maçon'île]</div>
-                    <div class="location-info">
-                        <h4>MAÇON'ÎLE</h4>
-                        <span class="type">LA CARRIÈRE DE BRIQUES</span>
-                        <p>Fournit les briques nécessaires à toutes les constructions du Grand Vide.</p>
-                    </div>
+                <div class="location-card" id="card-macon">
+                    <span class="tag" style="background:#f97316;">Secondaire</span>
+                    <h4>MAÇON'ÎLE</h4>
+                    <p>La plus grande carrière de briques.</p>
                 </div>
-
-                <!-- Cartes Inconnues -->
-                <div class="location-card" id="card-inconnu-1" data-target="poi-inconnu-1">
-                    <div class="card-image-placeholder" style="background: linear-gradient(45deg, #150a24, #2a164a);">[Image Île Inconnue]</div>
-                    <div class="location-info">
-                        <h4>ÎLE INCONNUE</h4>
-                        <span class="type">POINT D'INTÉRÊT INCONNU</span>
-                        <p>Aucune information disponible pour le moment.</p>
-                    </div>
-                </div>
-
-                <div class="location-card" id="card-inconnu-2" data-target="poi-inconnu-2">
-                    <div class="card-image-placeholder" style="background: linear-gradient(45deg, #150a24, #2a164a);">[Image Île Inconnue]</div>
-                    <div class="location-info">
-                        <h4>ÎLE INCONNUE</h4>
-                        <span class="type">POINT D'INTÉRÊT INCONNU</span>
-                        <p>Aucune information disponible pour le moment.</p>
-                    </div>
-                </div>
-
-                <div class="location-card" id="card-inconnu-3" data-target="poi-inconnu-3">
-                    <div class="card-image-placeholder" style="background: linear-gradient(45deg, #150a24, #2a164a);">[Image Île Inconnue]</div>
-                    <div class="location-info">
-                        <h4>ÎLE INCONNUE</h4>
-                        <span class="type">POINT D'INTÉRÊT INCONNU</span>
-                        <p>Aucune information disponible pour le moment.</p>
-                    </div>
-                </div>
-
-            </div>
-
-            <div class="footer-logo">
-                POTATOVERSE <span>CLASH</span>
             </div>
         </aside>
-
     </div>
 
-    <!-- SCRIPT D'INTERACTIVITÉ -->
+    <!-- RÉGION 2 : CŒUR DU TIMELINE -->
+    <div id="region-timeline" class="app-container timeline-theme hidden">
+        <main class="map-section" style="background: radial-gradient(circle at center, #1e0b3a 0%, #070512 100%);">
+            <div class="header-ui">
+                <h2>Région</h2>
+                <h1>CŒUR DU TIMELINE</h1>
+                <p style="font-size:0.9rem; max-width: 300px; color:var(--text-muted); margin-top:10px;">
+                    Où le temps, l'espace et la patate sacrée s'entrelacent.
+                </p>
+            </div>
+
+            <!-- Faisceau d'énergie central -->
+            <div class="energy-beam" style="left: 60%; top: -200px;"></div>
+            <div class="central-glow" style="left: 60%; top: 50%; transform:translate(-50%, -50%);"></div>
+
+            <div class="map-content">
+                <!-- La Base Verse -->
+                <div class="poi-container" style="top: 40%; left: 25%;" data-target="card-base">
+                    <div class="poi-icon" style="background:#0c4a6e; border-color:var(--accent-blue);">1</div>
+                    <div class="tooltip">LA BASE VERSE</div>
+                </div>
+
+                <!-- Le Temple -->
+                <div class="poi-container" style="top: 50%; left: 60%; scale: 1.5;" data-target="card-temple">
+                    <div class="poi-icon" style="background:#422006; border-color:var(--accent-gold); color:var(--accent-gold);">2</div>
+                    <div class="tooltip">LE TEMPLE DE LA PATATE</div>
+                </div>
+            </div>
+            
+            <!-- Statistiques en bas -->
+            <div style="position:absolute; bottom:40px; left:40px; display:flex; gap:30px;">
+                <div>
+                    <h5 style="color:var(--accent-blue);">ENVIRONNEMENT</h5>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">Tempêtes d'énergie, gravité instable.</p>
+                </div>
+                <div>
+                    <h5 style="color:var(--accent-purple);">LORE</h5>
+                    <p style="font-size:0.8rem; color:var(--text-muted);">La Patate Sacrée maintient l'équilibre.</p>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar" style="border-left-color: var(--border-blue);">
+            <div class="sidebar-header">
+                <h3 style="color:var(--accent-blue);">POINTS D'INTÉRÊT</h3>
+                <p style="font-size:0.7rem; color:var(--text-muted);">TIMELINE NODES</p>
+            </div>
+            <div class="location-list">
+                <div class="location-card" id="card-base">
+                    <span class="tag tag-blue">QG TEAM VERSE</span>
+                    <h4>1. LA BASE VERSE</h4>
+                    <p>Quartier général avancé. Centre de recherche sur l'énergie du timeline.</p>
+                </div>
+                <div class="location-card" id="card-temple">
+                    <span class="tag tag-gold">Sanctuaire Éternel</span>
+                    <h4>2. LE TEMPLE DE LA PATATE SACRÉE</h4>
+                    <p>Protège la source d'énergie illimitée. Lieu de méditation et de connexion.</p>
+                </div>
+                
+                <div style="margin-top:20px; padding:15px; background:rgba(168, 85, 247, 0.1); border-radius:8px;">
+                    <h5 style="color:var(--accent-purple); font-size:0.8rem;">ÉNERGIE TIMELINE</h5>
+                    <p style="font-size:0.75rem; color:var(--text-muted);">Flux d'énergie brut. Source de toute existence dans le Potatoverse.</p>
+                </div>
+            </div>
+        </aside>
+    </div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const poiContainers = document.querySelectorAll('.poi-container');
-            const cards = document.querySelectorAll('.location-card');
+        function switchRegion(region) {
+            const gv = document.getElementById('region-grand-vide');
+            const tl = document.getElementById('region-timeline');
+            const btns = document.querySelectorAll('.nav-btn');
 
-            // Fonction de réinitialisation des états actifs
-            function clearActiveStates() {
-                poiContainers.forEach(p => p.classList.remove('active'));
-                cards.forEach(c => c.classList.remove('active'));
+            btns.forEach(b => b.classList.remove('active'));
+
+            if(region === 'grand-vide') {
+                gv.classList.remove('hidden');
+                tl.classList.add('hidden');
+                btns[0].classList.add('active');
+            } else {
+                gv.classList.add('hidden');
+                tl.classList.remove('hidden');
+                btns[1].classList.add('active');
             }
+        }
 
-            // Clic sur un point de la carte (POI)
-            poiContainers.forEach(container => {
-                const poi = container.querySelector('.poi');
-                poi.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Évite que le clic se propage
-                    clearActiveStates();
-                    container.classList.add('active');
-                    
-                    const targetCardId = container.getAttribute('data-target');
-                    if(targetCardId) {
-                        const targetCard = document.getElementById(targetCardId);
-                        if(targetCard) {
-                            targetCard.classList.add('active');
-                            targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-                        }
-                    }
-                });
-            });
-
-            // Clic sur une carte de la liste (Sidebar)
-            cards.forEach(card => {
-                card.addEventListener('click', () => {
-                    clearActiveStates();
-                    card.classList.add('active');
-
-                    const targetPoiId = card.getAttribute('data-target');
-                    if(targetPoiId) {
-                        const targetPoi = document.getElementById(targetPoiId);
-                        if(targetPoi) {
-                            targetPoi.classList.add('active');
-                        }
-                    }
-                });
-            });
-
-            // Clic sur le fond pour tout désélectionner
-            document.querySelector('.app-container').addEventListener('click', () => {
-                clearActiveStates();
+        // Interactivité des clics
+        document.querySelectorAll('.poi-container').forEach(poi => {
+            poi.addEventListener('click', () => {
+                const targetId = poi.getAttribute('data-target');
+                document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
+                const card = document.getElementById(targetId);
+                card.classList.add('active');
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
         });
     </script>
 </body>
 </html>
+
+
