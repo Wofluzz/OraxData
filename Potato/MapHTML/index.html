@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Potatoverse Clash - Cartographie Officielle</title>
+    <title>Potatoverse Clash - Expérience Cartographique</title>
     <style>
         :root {
             --bg-deep: #05040a;
@@ -11,8 +11,9 @@
             --accent-blue: #3b82f6;
             --accent-gold: #fbbf24;
             --text-main: #f8f9fa;
-            --panel-bg: rgba(10, 8, 20, 0.98);
+            --panel-bg: rgba(7, 5, 15, 0.98);
             --panel-border: rgba(168, 85, 247, 0.3);
+            --transition-speed: 1.2s;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
@@ -22,57 +23,58 @@
             color: var(--text-main); 
             overflow: hidden; 
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            width: 100vw;
         }
 
-        /* Simulation de la vue à 67% pour que tout rentre dans l'écran */
-        .app-scaler {
-            width: 150%; /* On crée un espace plus grand */
-            height: 150%;
-            transform: scale(0.67); /* On dézoome à 67% pour que l'utilisateur voit tout */
-            transform-origin: center center;
+        /* --- SYSTÈME DE SLIDE --- */
+        .viewport-slider {
             display: flex;
-            position: absolute;
+            width: 200vw; /* 2 régions = 200% de la largeur */
+            height: 100vh;
+            transition: transform var(--transition-speed) cubic-bezier(0.77, 0, 0.175, 1);
         }
 
-        /* --- NAVIGATION --- */
+        .region-view {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-shrink: 0;
+            position: relative;
+        }
+
+        /* --- NAVIGATION FIXE --- */
         .region-nav {
             position: fixed;
-            top: 40px;
+            top: 30px;
             left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
             display: flex;
-            background: rgba(0,0,0,0.85);
-            padding: 10px;
-            border-radius: 60px;
-            border: 2px solid var(--panel-border);
-            backdrop-filter: blur(15px);
-            box-shadow: 0 15px 50px rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.8);
+            padding: 8px;
+            border-radius: 50px;
+            border: 1px solid var(--panel-border);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 0 40px rgba(0,0,0,1);
         }
         .nav-btn {
-            padding: 16px 40px;
-            border-radius: 30px;
+            padding: 14px 35px;
+            border-radius: 25px;
             border: none;
             background: transparent;
-            color: #777;
+            color: #666;
             cursor: pointer;
             font-weight: bold;
             transition: 0.4s;
             text-transform: uppercase;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
             letter-spacing: 3px;
         }
         .nav-btn.active { 
             background: var(--accent-purple); 
             color: white;
-            box-shadow: 0 0 40px var(--accent-purple); 
+            box-shadow: 0 0 30px var(--accent-purple); 
         }
-
-        .app-container { display: flex; width: 100%; height: 100%; transition: opacity 0.5s ease; }
-        .hidden { display: none !important; }
 
         /* --- SECTION CARTE --- */
         .map-section { 
@@ -81,17 +83,28 @@
             overflow: hidden; 
             background-size: cover;
             background-position: center;
-            background-repeat: no-repeat;
         }
 
-        #region-grand-vide .map-section { background-image: url('Fond1.png'); }
-        #region-timeline .map-section { background-image: url('1000065933.jpg'); }
+        #view-1 .map-section { background-image: url('Fond1.png'); }
+        #view-2 .map-section { background-image: url('Fond2.jpg'); }
 
-        .map-header { position: absolute; top: 80px; left: 80px; z-index: 10; pointer-events: none; }
-        .map-header h2 { font-size: 1.4rem; color: var(--accent-purple); letter-spacing: 8px; margin-bottom: 15px; text-transform: uppercase; }
-        .map-header h1 { font-size: 7rem; font-style: italic; font-weight: 900; line-height: 0.8; text-shadow: 0 15px 40px rgba(0,0,0,0.9); }
+        .map-header { 
+            position: absolute; 
+            top: 60px; 
+            left: 60px; 
+            z-index: 10; 
+            pointer-events: none;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: 1s ease-out;
+            transition-delay: 0.5s;
+        }
+        .active-view .map-header { opacity: 1; transform: translateX(0); }
 
-        /* --- POINTS D'INTÉRÊT (POI) --- TAILLE DOUBLÉE --- */
+        .map-header h2 { font-size: 1.2rem; color: var(--accent-purple); letter-spacing: 10px; margin-bottom: 10px; text-transform: uppercase; }
+        .map-header h1 { font-size: 6rem; font-style: italic; font-weight: 900; line-height: 0.8; text-shadow: 0 10px 40px rgba(0,0,0,0.9); }
+
+        /* --- POI (Taille Doublée) --- */
         .poi-container {
             position: absolute;
             transform: translate(-50%, -50%);
@@ -100,104 +113,120 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 1s;
         }
 
         .poi-image {
-            width: 320px; /* Taille augmentée */
+            width: 280px; 
             height: auto;
-            filter: drop-shadow(0 0 30px rgba(0,0,0,0.9));
+            filter: drop-shadow(0 0 25px rgba(0,0,0,0.9));
             transition: 0.4s;
         }
 
-        .poi-container:hover .poi-image, .poi-container.active .poi-image {
-            transform: scale(1.15) translateY(-20px);
-            filter: drop-shadow(0 0 60px var(--accent-purple));
+        .poi-container:hover .poi-image {
+            transform: scale(1.1) translateY(-15px);
+            filter: drop-shadow(0 0 50px var(--accent-purple));
         }
 
         .poi-marker {
-            width: 60px; height: 60px;
+            width: 50px; height: 50px;
             background: rgba(15, 10, 35, 0.95);
-            border: 4px solid white;
+            border: 3px solid white;
             border-radius: 50%;
-            margin-top: -30px;
+            margin-top: -25px;
             display: flex; justify-content: center; align-items: center;
-            font-weight: bold; font-size: 28px;
+            font-weight: bold; font-size: 22px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.8);
-            z-index: 5;
         }
 
         .tooltip {
             position: absolute;
-            bottom: 125%;
+            bottom: 115%;
             background: rgba(5, 5, 20, 0.98);
-            border: 3px solid var(--accent-purple);
-            padding: 20px 35px;
+            border: 2px solid var(--accent-purple);
+            padding: 15px 30px;
             border-radius: 12px;
             opacity: 0;
-            transform: translateY(20px);
+            transform: translateY(15px);
             transition: 0.3s;
             pointer-events: none;
             white-space: nowrap;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.9);
-            font-size: 1.5rem;
-            z-index: 100;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.9);
+            font-size: 1.2rem;
         }
-        .poi-container:hover .tooltip { opacity: 1; transform: translateY(-20px); }
+        .poi-container:hover .tooltip { opacity: 1; transform: translateY(-15px); }
 
         /* --- SIDEBAR --- */
         .sidebar { 
-            width: 600px; 
+            width: 500px; 
             background: var(--panel-bg); 
-            border-left: 4px solid var(--panel-border); 
+            border-left: 2px solid var(--panel-border); 
             display: flex; 
             flex-direction: column; 
             z-index: 50; 
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(20px);
+            transform: translateX(100%);
+            transition: transform 1s cubic-bezier(0.77, 0, 0.175, 1);
+            transition-delay: 0.3s;
         }
-        .sidebar-header { padding: 100px 50px 40px; border-bottom: 2px solid rgba(255,255,255,0.05); }
-        .sidebar-header h3 { font-size: 2rem; letter-spacing: 2px; }
-        .location-list { flex-grow: 1; overflow-y: auto; padding: 40px; display: flex; flex-direction: column; gap: 35px; }
+        .active-view .sidebar { transform: translateX(0); }
+
+        .sidebar-header { padding: 80px 40px 30px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .location-list { flex-grow: 1; overflow-y: auto; padding: 30px; display: flex; flex-direction: column; gap: 25px; }
         
         .location-card {
             background: rgba(255, 255, 255, 0.03);
-            border: 2px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
             overflow: hidden;
             cursor: pointer;
-            transition: 0.4s;
+            transition: 0.3s;
         }
         .location-card:hover, .location-card.active {
-            background: rgba(168, 85, 247, 0.15);
+            background: rgba(168, 85, 247, 0.12);
             border-color: var(--accent-purple);
-            transform: scale(1.03);
         }
 
-        .card-img { width: 100%; height: 300px; object-fit: cover; background: #000; }
-        .card-content { padding: 35px; }
-        .card-content .tag { font-size: 1rem; color: var(--accent-purple); text-transform: uppercase; font-weight: 800; letter-spacing: 4px; margin-bottom: 15px; display: block; }
-        .card-content h4 { font-size: 2.2rem; margin-bottom: 15px; letter-spacing: 1px; color: white; }
-        .card-content p { font-size: 1.3rem; color: #ccc; line-height: 1.7; }
+        .card-img { width: 100%; height: 220px; object-fit: cover; background: #000; }
+        .card-content { padding: 25px; }
+        .card-content .tag { font-size: 0.7rem; color: var(--accent-purple); text-transform: uppercase; font-weight: 800; letter-spacing: 3px; margin-bottom: 10px; display: block; }
+        .card-content h4 { font-size: 1.6rem; margin-bottom: 10px; color: white; }
+        .card-content p { font-size: 1rem; color: #bbb; line-height: 1.6; }
 
         /* --- ANIMATIONS --- */
-        @keyframes floating { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-30px); } }
-        .float { animation: floating 6s ease-in-out infinite; }
+        @keyframes floating { 0%, 100% { transform: translate(-50%, -50%) translateY(0); } 50% { transform: translate(-50%, -50%) translateY(-20px); } }
+        .float { animation: floating 5s ease-in-out infinite; }
         
-        #region-timeline .map-header h2 { color: var(--accent-blue); }
-        #region-timeline .location-card:hover, #region-timeline .location-card.active { border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.2); }
-        #region-timeline .tag { color: var(--accent-blue); }
+        /* Region 2 spécifique */
+        #view-2 .map-header h2 { color: var(--accent-blue); }
+        #view-2 .location-card:hover, #view-2 .location-card.active { border-color: var(--accent-blue); background: rgba(59, 130, 246, 0.15); }
+        #view-2 .tag { color: var(--accent-blue); }
+        #view-2 .tooltip { border-color: var(--accent-blue); }
+
+        /* Overlay Scannline */
+        .scanline {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 2000;
+        }
     </style>
 </head>
 <body>
 
-    <div class="app-scaler">
-        <nav class="region-nav">
-            <button class="nav-btn active" onclick="switchRegion('grand-vide')">Grand Vide</button>
-            <button class="nav-btn" onclick="switchRegion('timeline')">Cœur du Timeline</button>
-        </nav>
+    <div class="scanline"></div>
 
+    <nav class="region-nav">
+        <button class="nav-btn active" id="btn-1" onclick="slideTo(0)">Grand Vide</button>
+        <button class="nav-btn" id="btn-2" onclick="slideTo(1)">Cœur du Timeline</button>
+    </nav>
+
+    <div class="viewport-slider" id="slider">
+        
         <!-- RÉGION 1 : GRAND VIDE -->
-        <div id="region-grand-vide" class="app-container">
+        <div id="view-1" class="region-view active-view">
             <main class="map-section">
                 <div class="map-header">
                     <h2>Cartographie</h2>
@@ -205,30 +234,35 @@
                 </div>
 
                 <div class="map-content">
-                    <!-- Érathiel -->
-                    <div class="poi-container float" style="top: 35%; left: 32%; animation-delay: 0s;" data-target="card-erathiel">
-                        <div class="tooltip"><span style="color:var(--accent-purple); font-size:0.9rem; font-weight:bold;">CAPITALE</span><br><b>ÉRATHIEL</b></div>
+                    <!-- POI Principaux -->
+                    <div class="poi-container float" style="top: 35%; left: 30%; animation-delay: 0s;" data-target="card-erathiel">
+                        <div class="tooltip"><b>ÉRATHIEL</b></div>
                         <img src="Erathiel.png" class="poi-image" alt="Erathiel">
                         <div class="poi-marker">Ω</div>
                     </div>
 
-                    <!-- Maçon'île -->
                     <div class="poi-container float" style="top: 45%; left: 65%; animation-delay: 1.5s;" data-target="card-macon">
-                        <div class="tooltip"><span style="color:var(--accent-purple); font-size:0.9rem; font-weight:bold;">RESSOURCES</span><br><b>MAÇON'ÎLE</b></div>
-                        <img src="Maconile.png" class="poi-image" alt="Maçon'île">
+                        <div class="tooltip"><b>MAÇON'ÎLE</b></div>
+                        <img src="Maconile.png" class="poi-image" alt="Macon">
                         <div class="poi-marker">🧱</div>
                     </div>
 
-                    <!-- Inconnues -->
+                    <!-- Zones Inconnues Région 1 -->
                     <div class="poi-container float" style="top: 75%; left: 20%; animation-delay: 0.8s;">
-                        <div class="tooltip"><b>ÎLOT MYSTÈRE</b></div>
-                        <img src="1000077074.png" class="poi-image" style="width: 220px;" alt="Mystère">
+                        <div class="tooltip">ZONE INCONNUE A</div>
+                        <img src="Inconnue1.png" class="poi-image" style="width: 180px;">
                         <div class="poi-marker">?</div>
                     </div>
 
                     <div class="poi-container float" style="top: 85%; left: 45%; animation-delay: 2.2s;">
-                        <div class="tooltip"><b>NÉBULEUSE BETA</b></div>
-                        <img src="1000077073.png" class="poi-image" style="width: 220px;" alt="Nébuleuse">
+                        <div class="tooltip">ZONE INCONNUE B</div>
+                        <img src="Inconnue2.png" class="poi-image" style="width: 180px;">
+                        <div class="poi-marker">?</div>
+                    </div>
+
+                    <div class="poi-container float" style="top: 78%; left: 80%; animation-delay: 1.2s;">
+                        <div class="tooltip">ZONE INCONNUE C</div>
+                        <img src="Inconnue3.png" class="poi-image" style="width: 180px;">
                         <div class="poi-marker">?</div>
                     </div>
                 </div>
@@ -237,23 +271,23 @@
             <aside class="sidebar">
                 <div class="sidebar-header">
                     <h3>VUE D'ENSEMBLE</h3>
-                    <p style="font-size:1.1rem; letter-spacing:6px; color:#666; margin-top:12px;">RÉGION I-A</p>
+                    <p style="font-size:0.7rem; letter-spacing:4px; color:#555; margin-top:10px;">SECTEUR OMEGA</p>
                 </div>
                 <div class="location-list">
                     <div class="location-card" id="card-erathiel">
                         <img src="Erathiel.png" class="card-img">
                         <div class="card-content">
-                            <span class="tag">Citadelle Principale</span>
+                            <span class="tag">Capitale Globale</span>
                             <h4>ÉRATHIEL</h4>
-                            <p>Le joyau technologique flottant dans le Grand Vide. C'est ici que l'énergie est canalisée.</p>
+                            <p>Le centre de commande technologique suspendu dans le néant.</p>
                         </div>
                     </div>
                     <div class="location-card" id="card-macon">
                         <img src="Maconile.png" class="card-img">
                         <div class="card-content">
-                            <span class="tag">Site de Production</span>
+                            <span class="tag">Site Industriel</span>
                             <h4>MAÇON'ÎLE</h4>
-                            <p>L'archipel industriel où sont forgées les briques fondamentales du Potatoverse.</p>
+                            <p>Extraction massive de matériaux stellaires pour le multiverse.</p>
                         </div>
                     </div>
                 </div>
@@ -261,7 +295,7 @@
         </div>
 
         <!-- RÉGION 2 : CŒUR DU TIMELINE -->
-        <div id="region-timeline" class="app-container hidden">
+        <div id="view-2" class="region-view">
             <main class="map-section">
                 <div class="map-header">
                     <h2 style="color:var(--accent-blue);">Anomalie</h2>
@@ -269,10 +303,24 @@
                 </div>
 
                 <div class="map-content">
-                    <div class="poi-container float" style="top: 50%; left: 50%;" data-target="card-temple">
-                        <div class="tooltip"><span style="color:var(--accent-blue); font-size:1rem; font-weight:bold;">ORIGINE</span><br><b>LE TEMPLE SACRÉ</b></div>
-                        <img src="1000077069.png" class="poi-image" style="width: 600px; filter: drop-shadow(0 0 70px rgba(59, 130, 246, 0.7));" alt="Le Temple">
-                        <div class="poi-marker" style="border-color:var(--accent-gold); color:var(--accent-gold); width: 80px; height:80px; font-size:40px;">★</div>
+                    <!-- POI Principal -->
+                    <div class="poi-container float" style="top: 50%; left: 55%;" data-target="card-temple">
+                        <div class="tooltip"><b>LE TEMPLE SACRÉ</b></div>
+                        <img src="1000077069.png" class="poi-image" style="width: 500px; filter: drop-shadow(0 0 60px rgba(59, 130, 246, 0.7));">
+                        <div class="poi-marker" style="border-color:var(--accent-gold); color:var(--accent-gold); width: 60px; height:60px; font-size:30px;">★</div>
+                    </div>
+
+                    <!-- Zones Inconnues Région 2 -->
+                    <div class="poi-container float" style="top: 25%; left: 75%; animation-delay: 0.5s;">
+                        <div class="tooltip">ANOMALIE DELTA</div>
+                        <img src="Inconnue1.png" class="poi-image" style="width: 200px;">
+                        <div class="poi-marker">?</div>
+                    </div>
+
+                    <div class="poi-container float" style="top: 80%; left: 25%; animation-delay: 2.5s;">
+                        <div class="tooltip">ANOMALIE EPSILON</div>
+                        <img src="Inconnue2.png" class="poi-image" style="width: 200px;">
+                        <div class="poi-marker">?</div>
                     </div>
                 </div>
             </main>
@@ -280,57 +328,68 @@
             <aside class="sidebar" style="border-left-color: rgba(59, 130, 246, 0.4);">
                 <div class="sidebar-header">
                     <h3 style="color:var(--accent-blue);">NODES TEMPORELS</h3>
-                    <p style="font-size:1.1rem; letter-spacing:6px; color:#666; margin-top:12px;">POINT ALPHA</p>
+                    <p style="font-size:0.7rem; letter-spacing:4px; color:#555; margin-top:10px;">FLUX PRIMORDIAL</p>
                 </div>
                 <div class="location-list">
                     <div class="location-card active" id="card-temple">
                         <img src="1000077069.png" class="card-img">
                         <div class="card-content">
-                            <span class="tag" style="color:var(--accent-blue);">Source Énergétique</span>
+                            <span class="tag" style="color:var(--accent-blue);">Relique Temporelle</span>
                             <h4>LE TEMPLE SACRÉ</h4>
-                            <p>Le point de convergence ultime. On raconte que la Patate Primordiale y repose toujours.</p>
+                            <p>C'est ici que l'histoire du Potatoverse a commencé. Une source d'énergie infinie.</p>
                         </div>
                     </div>
                 </div>
             </aside>
         </div>
+
     </div>
 
     <script>
-        function switchRegion(region) {
+        function slideTo(index) {
+            const slider = document.getElementById('slider');
             const btns = document.querySelectorAll('.nav-btn');
-            const gv = document.getElementById('region-grand-vide');
-            const tl = document.getElementById('region-timeline');
-
-            btns.forEach(b => b.classList.remove('active'));
+            const views = document.querySelectorAll('.region-view');
             
-            if(region === 'grand-vide') {
-                gv.classList.remove('hidden');
-                tl.classList.add('hidden');
-                btns[0].classList.add('active');
-                document.documentElement.style.setProperty('--accent-purple', '#a855f7');
-                document.documentElement.style.setProperty('--panel-border', 'rgba(168, 85, 247, 0.3)');
-            } else {
-                gv.classList.add('hidden');
-                tl.classList.remove('hidden');
-                btns[1].classList.add('active');
-                document.documentElement.style.setProperty('--accent-purple', '#3b82f6');
-                document.documentElement.style.setProperty('--panel-border', 'rgba(59, 130, 246, 0.3)');
-            }
+            // Effet de translation
+            slider.style.transform = `translateX(-${index * 100}vw)`;
+            
+            // Mise à jour des boutons
+            btns.forEach(b => b.classList.remove('active'));
+            document.getElementById(`btn-${index + 1}`).classList.add('active');
+            
+            // Mise à jour des classes actives pour les animations d'entrée
+            views.forEach((v, i) => {
+                if(i === index) v.classList.add('active-view');
+                else v.classList.remove('active-view');
+            });
+
+            // Changement dynamique de la couleur d'accentuation globale
+            const color = index === 0 ? '#a855f7' : '#3b82f6';
+            document.documentElement.style.setProperty('--accent-purple', color);
+            document.documentElement.style.setProperty('--panel-border', index === 0 ? 'rgba(168, 85, 247, 0.3)' : 'rgba(59, 130, 246, 0.3)');
         }
 
+        // Interactivité des points d'intérêt
         document.querySelectorAll('.poi-container').forEach(poi => {
             poi.addEventListener('click', () => {
                 const targetId = poi.getAttribute('data-target');
                 if(!targetId) return;
 
-                document.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
                 const card = document.getElementById(targetId);
                 if(card) {
+                    // Retirer l'active des autres cartes dans la même liste
+                    card.parentElement.querySelectorAll('.location-card').forEach(c => c.classList.remove('active'));
                     card.classList.add('active');
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
             });
+        });
+
+        // Gestion du clavier (Flèches) pour le slide
+        window.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight') slideTo(1);
+            if(e.key === 'ArrowLeft') slideTo(0);
         });
     </script>
 </body>
