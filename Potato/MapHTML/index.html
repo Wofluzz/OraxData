@@ -11,7 +11,7 @@
             --text-main: #f8f9fa;
             --panel-bg: rgba(6, 4, 12, 0.98);
             --panel-border: rgba(168, 85, 247, 0.3);
-            --slide-speed: 1s;
+            --slide-speed: 0.8s;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', system-ui, sans-serif; }
@@ -44,39 +44,59 @@
             backdrop-filter: blur(5px);
         }
         .audio-control:hover { transform: scale(1.1); border-color: var(--accent-primary); }
-        .audio-control svg { fill: white; width: 20px; }
+        .audio-control svg { fill: white; width: 20px; transition: fill 0.3s; }
+        .audio-control.muted svg { fill: #ef4444; }
 
         /* --- NAVIGATION DYNAMIQUE --- */
-        .region-nav {
+        .region-nav-container {
             position: fixed;
             top: 25px;
-            left: calc(50% - 240px);
+            left: 50%;
             transform: translateX(-50%);
             z-index: 1000;
+        }
+
+        .region-nav {
             display: flex;
-            background: rgba(0,0,0,0.85);
+            background: rgba(0,0,0,0.6);
             padding: 5px;
             border-radius: 50px;
             border: 1px solid var(--panel-border);
-            backdrop-filter: blur(15px);
+            backdrop-filter: blur(20px);
+            position: relative;
         }
+
+        .nav-indicator {
+            position: absolute;
+            height: calc(100% - 10px);
+            top: 5px;
+            left: 5px;
+            background: var(--accent-primary);
+            border-radius: 25px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 0;
+            box-shadow: 0 0 20px var(--accent-primary);
+        }
+
         .nav-btn {
-            padding: 10px 22px;
+            padding: 12px 28px;
             border-radius: 25px;
             border: none;
             background: transparent;
-            color: #666;
+            color: rgba(255,255,255,0.4);
             cursor: pointer;
             font-weight: bold;
-            transition: 0.4s;
+            transition: color 0.4s;
             text-transform: uppercase;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             letter-spacing: 2px;
+            position: relative;
+            z-index: 1;
+            white-space: nowrap;
         }
+
         .nav-btn.active { 
-            background: var(--accent-primary); 
             color: white;
-            box-shadow: 0 0 20px var(--accent-primary); 
         }
 
         /* --- STRUCTURE --- */
@@ -105,12 +125,12 @@
 
         .region-overlay {
             position: absolute;
-            top: 70px;
+            top: 90px;
             left: 50px;
             z-index: 5;
             pointer-events: none;
         }
-        .region-overlay h2 { font-size: 0.9rem; letter-spacing: 5px; color: var(--accent-primary); text-transform: uppercase; }
+        .region-overlay h2 { font-size: 0.9rem; letter-spacing: 5px; color: var(--accent-primary); text-transform: uppercase; transition: color 0.5s; }
         .region-overlay h1 { font-size: 4.5rem; font-weight: 900; font-style: italic; text-transform: uppercase; line-height: 1; }
 
         /* --- POINTS D'INTÉRÊT --- */
@@ -139,6 +159,7 @@
             font-size: 0.8rem;
             font-weight: bold;
             white-space: nowrap;
+            transition: border-color 0.5s;
         }
 
         /* --- SIDEBAR --- */
@@ -151,11 +172,12 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            padding: 100px 30px 40px;
+            padding: 110px 30px 40px;
+            transition: border-left-color 0.5s;
         }
         .sidebar-title { margin-bottom: 30px; }
         .sidebar-title h3 { font-size: 1.8rem; letter-spacing: 2px; }
-        .sidebar-title .divider { height: 4px; width: 50px; background: var(--accent-primary); margin-top: 10px; }
+        .sidebar-title .divider { height: 4px; width: 50px; background: var(--accent-primary); margin-top: 10px; transition: background 0.5s; }
 
         .card {
             background: rgba(255,255,255,0.03);
@@ -188,15 +210,17 @@
     <div class="scanlines"></div>
 
     <!-- Audio Element -->
-    <audio id="bgMusic" loop>
-        <source src="verseclashmenu.mp3" type="audio/mpeg">
-    </audio>
+    <audio id="bgMusic" loop></audio>
 
-    <div class="audio-control" onclick="toggleAudio(event)">
+    <div class="audio-control" id="audioBtn" onclick="toggleAudio(event)">
         <svg id="icon-music" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
     </div>
 
-    <nav class="region-nav" id="mainNav"></nav>
+    <div class="region-nav-container">
+        <nav class="region-nav" id="mainNav">
+            <div class="nav-indicator" id="navIndicator"></div>
+        </nav>
+    </div>
 
     <div class="app-shell">
         <div class="map-viewport">
@@ -216,14 +240,15 @@
                     id: "grand-vide",
                     name: "Grand Vide",
                     subtitle: "Secteur Omega",
-                    background: "Fond1.png",
+                    background: "1000077068.png",
                     accentColor: "#a855f7",
+                    music: "verseclashmenu.mp3",
                     zones: [
-                        { name: "ÉRATHIEL", img: "Erathiel.png", top: "35%", left: "30%", desc: "Capitale technologique du Grand Vide.", type: "Capitale" },
-                        { name: "MAÇON'ÎLE", img: "Maconile.png", top: "45%", left: "65%", desc: "Site d'extraction massif de ressources.", type: "Industrie" },
-                        { name: "ÎLE ALPHA", img: "Inconnue1.png", top: "75%", left: "20%", desc: "Secteur inexploré.", type: "Inconnu" },
-                        { name: "ÎLE BETA", img: "Inconnue2.png", top: "82%", left: "45%", desc: "Secteur inexploré.", type: "Inconnu" },
-                        { name: "ÎLE GAMMA", img: "Inconnue3.png", top: "78%", left: "80%", desc: "Secteur inexploré.", type: "Inconnu" }
+                        { name: "ÉRATHIEL", img: "1000077070.png", top: "35%", left: "30%", desc: "Capitale technologique du Grand Vide.", type: "Capitale" },
+                        { name: "MAÇON'ÎLE", img: "1000077071.png", top: "45%", left: "65%", desc: "Site d'extraction massif de ressources.", type: "Industrie" },
+                        { name: "ÎLE ALPHA", img: "1000077074.png", top: "75%", left: "20%", desc: "Secteur inexploré.", type: "Inconnu" },
+                        { name: "ÎLE BETA", img: "1000077072.png", top: "82%", left: "45%", desc: "Secteur inexploré.", type: "Inconnu" },
+                        { name: "ÎLE GAMMA", img: "1000077073.png", top: "78%", left: "80%", desc: "Secteur inexploré.", type: "Inconnu" }
                     ]
                 },
                 {
@@ -232,11 +257,12 @@
                     subtitle: "Sanctuaire Tropical",
                     background: "1000077124.png",
                     accentColor: "#eab308",
+                    music: "verseclashsacred.mp3",
                     zones: [
-                        { name: "BASE VERSE", img: "BaseVerse.png", top: "35%", left: "32%", desc: "Le QG opérationnel de la Team Verse.", type: "Base" },
-                        { name: "TEMPLE PATATE", img: "TempleSacre.png", top: "42%", left: "70%", desc: "Lieu mystique protégeant la Graine.", type: "Relique", filter: "hue-rotate(45deg)" },
-                        { name: "POSTE OMEGA", img: "Inconnue4.png", top: "75%", left: "25%", desc: "Observation des flux Daïmon.", type: "Poste" },
-                        { name: "GROTTE ÉCHOS", img: "Inconnue4.png", top: "80%", left: "75%", desc: "Résonance énergétique détectée.", type: "Anomalie" }
+                        { name: "BASE VERSE", img: "1000077069.png", top: "35%", left: "32%", desc: "Le QG opérationnel de la Team Verse.", type: "Base" },
+                        { name: "TEMPLE PATATE", img: "1000077069.png", top: "42%", left: "70%", desc: "Lieu mystique protégeant la Graine.", type: "Relique", filter: "hue-rotate(45deg)" },
+                        { name: "POSTE OMEGA", img: "1000077074.png", top: "75%", left: "25%", desc: "Observation des flux Daïmon.", type: "Poste" },
+                        { name: "GROTTE ÉCHOS", img: "1000077072.png", top: "80%", left: "75%", desc: "Résonance énergétique détectée.", type: "Anomalie" }
                     ]
                 },
                 {
@@ -245,9 +271,10 @@
                     subtitle: "La pollution a pris le dessus",
                     background: "1000065933.jpg",
                     accentColor: "#ea0008",
+                    music: "verseclashdechu.mp3",
                     zones: [
-                        { name: "ZONE SINISTRE", img: "Inconnue1.png", top: "50%", left: "50%", desc: "Une terre dévastée par l'industrie Omega.", type: "Ruines", filter: "grayscale(1) contrast(1.5)" },
-                        { name: "DÉCHARGE ECHO", img: "Inconnue4.png", top: "80%", left: "75%", desc: "Résonance toxique détectée.", type: "Anomalie", filter: "sepia(1) hue-rotate(90deg)" }
+                        { name: "ZONE SINISTRE", img: "1000077074.png", top: "50%", left: "50%", desc: "Une terre dévastée par l'industrie Omega.", type: "Ruines", filter: "grayscale(1) contrast(1.5)" },
+                        { name: "DÉCHARGE ECHO", img: "1000077072.png", top: "80%", left: "75%", desc: "Résonance toxique détectée.", type: "Anomalie", filter: "sepia(1) hue-rotate(90deg)" }
                     ]
                 }
             ]
@@ -255,26 +282,42 @@
 
         const mapSlider = document.getElementById('mapSlider');
         const mainNav = document.getElementById('mainNav');
+        const navIndicator = document.getElementById('navIndicator');
         const sidebarHeader = document.getElementById('sidebarHeader');
         const sidebarContent = document.getElementById('sidebarContent');
         const bgMusic = document.getElementById('bgMusic');
+        const audioBtn = document.getElementById('audioBtn');
+
         let audioStarted = false;
+        let isMuted = false;
+        let currentMusicPath = "";
 
         function startAudioOnce() {
             if (!audioStarted) {
-                bgMusic.play().catch(() => {});
+                const initialRegion = potatoverseData.regions[0];
+                playMusicForRegion(initialRegion.music);
                 audioStarted = true;
+            }
+        }
+
+        function playMusicForRegion(musicPath) {
+            if (currentMusicPath === musicPath) return;
+            currentMusicPath = musicPath;
+            bgMusic.src = musicPath;
+            if (!isMuted) {
+                bgMusic.play().catch(() => {});
             }
         }
 
         function toggleAudio(e) {
             e.stopPropagation();
-            if (bgMusic.paused) {
-                bgMusic.play();
-                document.getElementById('icon-music').style.fill = "white";
-            } else {
+            isMuted = !isMuted;
+            if (isMuted) {
                 bgMusic.pause();
-                document.getElementById('icon-music').style.fill = "#555";
+                audioBtn.classList.add('muted');
+            } else {
+                bgMusic.play();
+                audioBtn.classList.remove('muted');
             }
         }
 
@@ -296,7 +339,7 @@
                 canvas.style.width = `${100 / regionCount}%`;
                 canvas.innerHTML = `
                     <div class="region-overlay">
-                        <h2 style="color:${region.accentColor}">${region.subtitle}</h2>
+                        <h2 id="subtitle-${index}">${region.subtitle}</h2>
                         <h1>${region.name}</h1>
                     </div>
                 `;
@@ -316,23 +359,40 @@
                 mapSlider.appendChild(canvas);
             });
 
+            // Positionner l'indicateur initialement
+            setTimeout(() => moveIndicator(0), 100);
             updateSidebar(0);
+        }
+
+        function moveIndicator(index) {
+            const activeBtn = document.getElementById(`nav-${index}`);
+            if (activeBtn) {
+                navIndicator.style.width = `${activeBtn.offsetWidth}px`;
+                navIndicator.style.left = `${activeBtn.offsetLeft}px`;
+            }
         }
 
         function switchRegion(index) {
             const regionCount = potatoverseData.regions.length;
             const region = potatoverseData.regions[index];
+            
+            playMusicForRegion(region.music);
+            moveIndicator(index);
+
             mapSlider.style.transform = `translateX(-${(index * 100) / regionCount}%)`;
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById(`nav-${index}`).classList.add('active');
+            
+            // Mise à jour de la couleur d'accent globale
             document.documentElement.style.setProperty('--accent-primary', region.accentColor);
+            
             updateSidebar(index);
         }
 
         function updateSidebar(index) {
             const region = potatoverseData.regions[index];
             sidebarHeader.innerHTML = `
-                <h3 style="color:${region.accentColor}">${region.name}</h3>
+                <h3 style="color:${region.accentColor}; transition: color 0.5s;">${region.name}</h3>
                 <div class="divider" style="background:${region.accentColor}"></div>
             `;
             sidebarContent.innerHTML = '';
@@ -342,7 +402,7 @@
                 card.innerHTML = `
                     <img src="${zone.img}" class="card-img" style="${zone.filter || ''}">
                     <div class="card-body">
-                        <span style="color:${region.accentColor}; font-size:0.7rem; font-weight:800;">${zone.type.toUpperCase()}</span>
+                        <span style="color:${region.accentColor}; font-size:0.7rem; font-weight:800; transition: color 0.5s;">${zone.type.toUpperCase()}</span>
                         <h4>${zone.name}</h4>
                         <p>${zone.desc}</p>
                     </div>
@@ -350,6 +410,11 @@
                 sidebarContent.appendChild(card);
             });
         }
+
+        window.addEventListener('resize', () => {
+            const activeIndex = Array.from(document.querySelectorAll('.nav-btn')).findIndex(b => b.classList.contains('active'));
+            moveIndicator(activeIndex);
+        });
 
         initApp();
     </script>
