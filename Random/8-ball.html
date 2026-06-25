@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Magic 8-Ball Loufoque</title>
+    <style>
+        body {
+            background: radial-gradient(circle, #1a102f 0%, #05030a 100%);
+            color: #fff;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+
+        h1 {
+            text-shadow: 0 0 10px rgba(168, 85, 247, 0.6);
+            margin-bottom: 40px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+
+        /* La Boule Magique (Sphère avec reflets) */
+        .ball-container {
+            position: relative;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            /* Dégradé radial pour simuler la lumière sur une sphère 3D */
+            background: radial-gradient(circle at 75px 75px, #333 0%, #050505 60%, #000 100%);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7), inset -10px -10px 20px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        /* L'animation de secousse */
+        .ball-container.shaking {
+            animation: shake 1.2s ease-in-out;
+        }
+
+        /* Le hublot / la fenêtre de la boule */
+        .window {
+            width: 130px;
+            height: 130px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #08071a 0%, #020208 100%);
+            border: 4px solid #111;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Le triangle bleu magique */
+        .triangle {
+            width: 0;
+            height: 0;
+            border-left: 55px solid transparent;
+            border-right: 55px solid transparent;
+            border-bottom: 95px solid #0f172a; /* Bleu très sombre de base */
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-bottom-color 0.4s ease;
+        }
+
+        /* Effet lumineux sur le triangle quand la réponse est là */
+        .ball-container.revealed .triangle {
+            border-bottom-color: #1d4ed8; /* Bleu magique */
+            filter: drop-shadow(0 0 8px #3b82f6);
+        }
+
+        /* Conteneur du texte dans le triangle */
+        .answer-text {
+            position: absolute;
+            top: 35px;
+            width: 75px;
+            color: #67e8f9;
+            font-size: 0.65rem;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.3;
+            text-shadow: 0 0 4px rgba(6, 182, 212, 0.8);
+            opacity: 0;
+            transform: scale(0.7) translateY(10px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        /* Apparition fluide (comme si elle flottait vers la surface) */
+        .answer-text.visible {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+
+        /* Bouton */
+        .btn {
+            margin-top: 40px;
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #a855f7 0%, #7e22ce 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(168, 85, 247, 0.4);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(168, 85, 247, 0.6);
+        }
+
+        .btn:active {
+            transform: translateY(1px);
+        }
+
+        /* Keyframes de l'animation de secousse réaliste */
+        @keyframes shake {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            10% { transform: translate(-8px, 5px) rotate(-5deg); }
+            20% { transform: translate(10px, -8px) rotate(8deg); }
+            30% { transform: translate(-12px, 2px) rotate(-10deg); }
+            40% { transform: translate(8px, 8px) rotate(5deg); }
+            50% { transform: translate(-10px, -5px) rotate(-7deg); }
+            60% { transform: translate(12px, 4px) rotate(9deg); }
+            70% { transform: translate(-6px, 8px) rotate(-4deg); }
+            80% { transform: translate(5px, -6px) rotate(3deg); }
+            90% { transform: translate(-2px, 2px) rotate(-1deg); }
+            100% { transform: translate(0, 0) rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Pose ta question et secoue la boule magique</h1>
+
+    <div class="ball-container" id="ball" onclick="shakeBall()">
+        <div class="window">
+            <div class="triangle">
+                <div class="answer-text" id="answer"></div>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="shakeBall()">Secouer la Boule</button>
+
+    <script>
+        // Liste des phrases complètement loufoques
+        const answers = [
+            "Demande à ton chat, il sait.",
+            "Le contraire de oui, mais en bleu.",
+            "Si j'étais toi, je mangerais un tacos.",
+            "Mon avocat m'interdit de répondre.",
+            "Erreur 404 : Futur non trouvé.",
+            "Oui, mais seulement le mardi.",
+            "La réponse est cachée derrière toi.",
+            "Les feux de l'amour disent non.",
+            "Refais le test en dansant.",
+            "Le pigeon sur ton balcon dit oui.",
+            "Seulement si tu me donnes un gâteau.",
+            "Le destin est flou, va faire une sieste.",
+          "Burp",
+          "J'ai chier"
+          ];
+
+        let isShaking = false;
+
+        function shakeBall() {
+            if (isShaking) return; // Empêche de spammer pendant l'animation
+
+            isShaking = true;
+            const ball = document.getElementById('ball');
+            const answerText = document.getElementById('answer');
+
+            // Réinitialisation de l'affichage précédent
+            ball.classList.remove('revealed');
+            answerText.classList.remove('visible');
+
+            // Déclenchement de l'animation CSS
+            ball.classList.add('shaking');
+
+            // On attend la fin de l'animation (1.2 seconde) pour afficher le texte
+            setTimeout(() => {
+                ball.classList.remove('shaking');
+                
+                // Sélection aléatoire d'une réponse
+                const randomIndex = Math.floor(Math.random() * answers.length);
+                answerText.innerText = answers[randomIndex];
+
+                // Activation des styles d'affichage fluide
+                ball.classList.add('revealed');
+                answerText.classList.add('visible');
+
+                isShaking = false;
+            }, 1200); 
+        }
+    </script>
+</body>
+</html>
