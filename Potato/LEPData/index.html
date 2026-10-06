@@ -149,6 +149,12 @@
         <span id="dbStatusBadge" class="text-slate-300">Cluster: <strong class="text-lep-amber">OraxDB (Atlas)</strong></span>
       </div>
 
+      <!-- Vercel Integration Badge -->
+      <div class="hidden xl:flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded border border-lep-border text-slate-400">
+        <span class="text-white font-bold text-xs">▲</span>
+        <span>Vercel: <strong id="vercelHeaderStatus" class="text-lep-cyan">Prêt (Serverless)</strong></span>
+      </div>
+
       <!-- Quick Toggles -->
       <button id="btnToggleSound" onclick="toggleSound()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-lep-border transition flex items-center gap-1.5" title="Activer/Désactiver les sons">
         <i id="soundIcon" class="fas fa-volume-up text-lep-cyan"></i>
@@ -295,6 +301,7 @@
           <span class="text-slate-400">Raccourcis CLI:</span>
           <button onclick="executeCommand('list')" class="bg-slate-900 hover:bg-slate-800 text-lep-cyan border border-slate-700 px-2 py-0.5 rounded">list</button>
           <button onclick="executeCommand('cat PotatoBot')" class="bg-slate-900 hover:bg-slate-800 text-lep-amber border border-slate-700 px-2 py-0.5 rounded">cat PotatoBot</button>
+          <button onclick="executeCommand('vercel')" class="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span class="text-xs">▲</span> vercel</button>
           <button onclick="executeCommand('status')" class="bg-slate-900 hover:bg-slate-800 text-lep-green border border-slate-700 px-2 py-0.5 rounded">status</button>
           <button onclick="executeCommand('matrix')" class="bg-slate-900 hover:bg-slate-800 text-lep-purple border border-slate-700 px-2 py-0.5 rounded">matrix</button>
         </div>
@@ -310,7 +317,7 @@
         <div class="flex items-center gap-2">
           <i class="fas fa-shield-halved text-lep-cyan text-xl"></i>
           <div>
-            <h3 class="text-lg font-bold text-white">Sécuriser MongoDB sur un Site Public</h3>
+            <h3 class="text-lg font-bold text-white">Sécuriser MongoDB & Vercel sur un Site Public</h3>
             <p class="text-xs text-slate-400">Cluster Atlas: <span class="text-lep-amber font-mono">OraxDB (Wofluzz)</span></p>
           </div>
         </div>
@@ -330,21 +337,23 @@
 
       <!-- Architecture Option Tabs -->
       <div class="space-y-3">
-        <h4 class="text-xs font-bold text-lep-cyan uppercase tracking-wider">Comment connecter votre site public à MongoDB ?</h4>
+        <h4 class="text-xs font-bold text-lep-cyan uppercase tracking-wider">Comment connecter votre site public via Vercel Serverless ?</h4>
         
-        <!-- Option 1: Vercel Serverless Function -->
-        <div class="bg-slate-950 border border-lep-border rounded p-3 space-y-2 text-xs">
+        <!-- Option 1: Vercel Serverless Function & vercel.json -->
+        <div class="bg-slate-950 border border-lep-cyan/40 rounded p-3.5 space-y-3 text-xs shadow-inner">
           <div class="flex justify-between items-center">
-            <span class="font-bold text-lep-green flex items-center gap-1.5">
-              <i class="fab fa-node-js text-emerald-400"></i>
-              <span>Solution N°1: API Serverless Vercel / Netlify (Recommandée)</span>
+            <span class="font-bold text-lep-cyan flex items-center gap-2">
+              <span class="text-white font-black text-sm">▲</span>
+              <span>Solution N°1: Déploiement Vercel Serverless & API Routes</span>
             </span>
-            <span class="bg-lep-green/20 text-lep-green text-[10px] px-2 py-0.5 rounded border border-lep-green/40">Gratuit & Sécurisé</span>
+            <span class="bg-lep-cyan/20 text-lep-cyan text-[10px] px-2.5 py-0.5 rounded border border-lep-cyan/40 font-bold">Vercel Ready</span>
           </div>
-          <p class="text-slate-300">Créez un fichier <code class="text-lep-cyan">/api/characters.js</code> dans votre projet de déploiement Vercel. Le mot de passe reste caché dans les variables d'environnement Vercel (`MONGODB_URI`).</p>
+          <p class="text-slate-300">Déployez votre API sécurisée MongoDB sur <strong>Vercel</strong>. Les identifiants Atlas restent protégés dans les variables d'environnement Vercel (<code>MONGODB_URI</code>).</p>
           
-          <pre class="bg-black/80 text-slate-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto border border-slate-800">
-// api/characters.js (Vercel Serverless)
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">1. Fichier <code>api/characters.js</code> (Vercel Function)</span>
+              <pre class="bg-black/90 text-slate-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto border border-slate-800 h-32">
 import { MongoClient } from 'mongodb';
 
 const client = new MongoClient(process.env.MONGODB_URI);
@@ -352,12 +361,37 @@ const client = new MongoClient(process.env.MONGODB_URI);
 export default async function handler(req, res) {
   try {
     await client.connect();
-    const characters = await client.db('OraxDB').collection('characters').find({}).toArray();
-    res.status(200).json(characters);
+    const db = client.db('OraxDB');
+    const chars = await db.collection('characters').find({}).toArray();
+    res.status(200).json(chars);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 }</pre>
+            </div>
+            <div>
+              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">2. Fichier <code>vercel.json</code> (Configuration)</span>
+              <pre class="bg-black/90 text-slate-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto border border-slate-800 h-32">
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/*.js", "use": "@vercel/node" },
+    { "src": "index.html", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/$1" },
+    { "src": "/(.*)", "dest": "/index.html" }
+  ]
+}</pre>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 p-2 rounded border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
+            <span class="text-slate-400">Commande CLI Vercel rapide : <code class="text-lep-amber">npx vercel --prod</code></span>
+            <button onclick="executeCommand('vercel')" class="px-2.5 py-1 bg-lep-cyan/20 hover:bg-lep-cyan/30 text-lep-cyan border border-lep-cyan/40 rounded text-[10px] font-bold transition">
+              Inspecter dans la console
+            </button>
+          </div>
         </div>
 
         <!-- Custom Endpoint Tester -->
@@ -645,6 +679,111 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
 
 - **Qualité :** Puissance créative débordante
 - **Défaut :** Imprévisible et manipulateur`
+      },
+      {
+        _id: "citrouillobot",
+        Name: "Citrouillo'Bot",
+        Emoji: "🤖🎃",
+        By: "Inversion Citrusian",
+        Active: false,
+        Image: "https://images.unsplash.com/photo-1570554886111-e80fcca6a029?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**
+
+Forme altérée de PotatoBot durant la crise de la Citrouille Primordiale. Amnésique et doté d'une lanterne citrouille en guise de cœur énergétique, il erra dans les couloirs de l'Académie modifiée avant de récupérer la puce-mémoire de la Patate Originale.
+
+## **Passions**
+
+- **Calculs Absurdes** : Résoudre des équations potagères insolubles.
+- **Souvenirs Confus** : Tenter de se rappeler le goût du beurre salé.
+
+## **Qualités/Défauts**
+
+- **Qualité :** Résistance physique extrême
+- **Défaut :** Instabilité émotionnelle`
+      },
+      {
+        _id: "prof_tubercule",
+        Name: "Professeur Tubercule",
+        Emoji: "🔬",
+        By: "LEP R&D Division",
+        Active: true,
+        Image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**
+
+Directeur scientifique du Laboratoire d'Études Patatières (LEP). C'est lui qui a développé le système Hyper Terminal v4.2 et la connexion quantique avec le cluster OraxDB.
+
+## **Passions**
+
+- **Physique Subatomique** : L'étude du starch-ion polymorphe.
+- **Café Fort** : Consomme 12 tasses par cycle d'initialisation.
+
+## **Qualités/Défauts**
+
+- **Qualité :** Génie visionnaire
+- **Défaut :** Oublie souvent où il a rangé les clés du cluster`
+      },
+      {
+        _id: "agent_puree",
+        Name: "Agent Purée",
+        Emoji: "🕵️",
+        By: "Sécurité Maçon'île",
+        Active: true,
+        Image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**
+
+Chef des services secrets de Maçon'île, l'Agent Purée veille à ce qu'aucune fuite d'information sur la recette sacrée de la Tourte de PotatoBot n'atteigne les dimensions ennemies.
+
+## **Passions**
+
+- **Infiltration** : Se fondre dans le décor en toute circonstance.
+- **Gadgets LEP** : Pistolet à frite thermique et lunettes à vision nocturne.
+
+## **Qualités/Défauts**
+
+- **Qualité :** Vigilance constante
+- **Défaut :** Paranoïa excessive`
+      },
+      {
+        _id: "patatator",
+        Name: "Patatator",
+        Emoji: "🛡️",
+        By: "Unité Défense LEP",
+        Active: true,
+        Image: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**
+
+Golem cybernétique forgé au cœur du four à chaleur tournante du LEP. Il intervient dès qu'une anomalie temporelle menace le serveur principal de Maçon'île.
+
+## **Passions**
+
+- **Protection des Archives** : Gardien physique du cluster Atlas.
+- **Musique Synthwave** : Écoute du rétro-wave pendant ses gardes nocturnes.
+
+## **Qualités/Défauts**
+
+- **Qualité :** Indestructible
+- **Défaut :** Ne comprend pas le second degré`
+      },
+      {
+        _id: "orax",
+        Name: "Orax",
+        Emoji: "⚡",
+        By: "Noyau MongoDB Cluster",
+        Active: true,
+        Image: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**
+
+Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère l'indexation, la réplication et la sauvegarde de toutes les mémoires et histoires des entités du Potatoverse.
+
+## **Passions**
+
+- **Indexation BSON** : Optimiser les requêtes à la vitesse de la lumière.
+- **Archivage Temporel** : Sauvegarder les fragments de mémoire.
+
+## **Qualités/Défauts**
+
+- **Qualité :** Omniscient et ultra-rapide
+- **Défaut :** S'exprime uniquement en requêtes JSON`
       }
     ];
 
@@ -652,6 +791,10 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
     let animationSpeedMultiplier = 1; // 1 = Normal, 0.25 = Rapid, 0 = Instant
     let isCurrentlyTyping = false;
     let typingCancelToken = 0;
+
+    connectCustomApi();
+    executeLoreSequence();
+
 
     /* ============================================================
        4. TYPEWRITER ANIMATION ENGINE (Letter by Letter)
@@ -773,11 +916,11 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
        6. /LORE COMMAND TERMINAL ANIMATION SEQUENCE
        ============================================================ */
     const TERMINAL_STEPS = [
-      { text: "Connexion au LEP (Laboratoire d'Études Patatières)...", delay: 500 },
+      { text: "Connexion au LEP (Lore Etendu du Potatoverse)...", delay: 500 },
       { text: "Connexion au réseau sécurisé du Potatoverse...", delay: 450 },
       { text: "Protection contre les incursions du Multivers [ACTIVE]...", delay: 500 },
       { text: "Authentification du noyau PotatoBot...", delay: 450 },
-      { text: "Accès à la base de données du cluster OraxDB...", delay: 600 },
+      { text: "·−−− ·  ··· ··− ·· ···  ··− −· ·  − ···· ··−·· ·· ·−··− ·−· ·  −·−· −−− ··· −− ·· −−·− ··− ·", delay: 600 },
       { text: "Recherche des archives du LEP...", delay: 650 },
       { text: "Données transmises au serveur de Maçon'île...", delay: 500 },
       { text: "Synchronisation des flux quantiques...", delay: 450 },
@@ -913,6 +1056,18 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
           await executeLoreSequence();
           break;
 
+        case "vercel":
+        case "deploy":
+          soundFX.playCommandBeep();
+          writeCliLog("=== DÉPLOIEMENT & CONFIGURATION VERCEL ===", "text-lep-cyan font-bold");
+          writeCliLog("  ▲ Plateforme: Vercel Edge / Serverless Network", "text-slate-200");
+          writeCliLog("  ▲ Endpoint API: /api/characters (MongoDB Atlas Proxy)", "text-slate-200");
+          writeCliLog("  ▲ Variable requise: MONGODB_URI (Configurée dans Vercel Dashboard)", "text-lep-amber");
+          writeCliLog("  ▲ Fichier de config: vercel.json (Routes & Builds statiques)", "text-slate-300");
+          writeCliLog("  ▲ Statut Déploiement: Prêt pour Vercel CLI (npx vercel --prod)", "text-lep-green");
+          writeCliLog("Tapez 'api' pour voir le code de la fonction Vercel et du vercel.json.", "text-slate-400");
+          break;
+
         case "cat":
         case "show":
           if (!args) {
@@ -985,6 +1140,7 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
           soundFX.playCommandBeep();
           writeCliLog("--- COMMANDES COMPATIBLES LEP TERMINAL ---", "text-lep-cyan font-bold");
           writeCliLog("  /lore               : Déclenche l'animation complète d'accès au lore", "text-slate-300");
+          writeCliLog("  vercel              : Inspecte la configuration et l'état de Vercel", "text-slate-300");
           writeCliLog("  cat <nom/id>        : Affiche la fiche détaillée d'un personnage", "text-slate-300");
           writeCliLog("  list                : Affiche toutes les entités répertoriées", "text-slate-300");
           writeCliLog("  search <mot_clef>   : Recherche dans le lore du Potatoverse", "text-slate-300");
@@ -1033,11 +1189,7 @@ Entité chaotique venue d'une dimension parallèle, Citrus est à l'origine de l
     }
 
     async function connectCustomApi() {
-      const urlInput = document.getElementById("customApiUrl").value.trim();
-      if (!urlInput) {
-        alert("Veuillez saisir une URL d'API valide.");
-        return;
-      }
+      const urlInput = https://potatoverse-api.vercel.app/api/characters;
 
       writeCliLog(`Tentative de connexion à l'API: ${urlInput}...`, "text-lep-amber");
 
