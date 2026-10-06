@@ -97,7 +97,71 @@
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-0 relative">
 
         <!-- Left Controls / Add Form Panel -->
-        
+        <section class="lg:col-span-3 tva-box rounded p-3 flex flex-col overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-amber-500/40 pb-2 mb-3">
+                <h2 id="form-title" class="text-sm font-bold text-amber-300 uppercase flex items-center gap-1.5">
+                    <span>➕ ADD NEW REALITY</span>
+                </h2>
+                <span class="text-[10px] bg-amber-950 text-amber-400 px-1.5 py-0.5 border border-amber-500/40 rounded">LEP-CRUD</span>
+            </div>
+
+            <!-- Dynamic Branch Form -->
+            <form id="branch-form" class="space-y-3 text-xs">
+                <input type="hidden" id="form-edit-index" value="-1">
+
+                <div>
+                    <label class="block text-amber-500 mb-1 font-bold">REALITY ID (e.g. REALITY-616)</label>
+                    <input type="text" id="input-id" required placeholder="POTATO-404" 
+                        class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400 font-mono">
+                </div>
+
+                <div>
+                    <label class="block text-amber-500 mb-1 font-bold">BRANCH NAME</label>
+                    <input type="text" id="input-name" required placeholder="Earth-Frite Supreme" 
+                        class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400">
+                </div>
+
+                <div>
+                    <label class="block text-amber-500 mb-1 font-bold">MULTIVERSAL DESCRIPTION</label>
+                    <textarea id="input-desc" rows="3" required placeholder="Describe this timeline anomaly..." 
+                        class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-amber-500 mb-1 font-bold">IMAGE URL (OPTIONAL)</label>
+                    <input type="url" id="input-image" placeholder="Leave blank for auto placeholder" 
+                        class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400 font-mono text-[11px]">
+                    <p class="text-[10px] text-amber-600 mt-1">If empty, a customized Reality-ID SVG placeholder is generated automatically.</p>
+                </div>
+
+                <div class="flex gap-2 pt-2">
+                    <button type="submit" id="btn-save-branch" class="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-bold py-2 px-3 rounded transition shadow-[0_0_10px_rgba(255,176,0,0.3)]">
+                        ⚡ SAVE REALITY
+                    </button>
+                    <button type="button" id="btn-cancel-edit" class="hidden bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold py-2 px-3 rounded transition">
+                        CANCEL
+                    </button>
+                </div>
+            </form>
+
+            <!-- Quick Stats & Search -->
+            <div class="mt-auto pt-4 border-t border-amber-500/30">
+                <div class="text-[11px] text-amber-600 font-bold mb-2">QUICK SEARCH / FILTER</div>
+                <input type="text" id="search-input" placeholder="Filter by ID or name..." 
+                    class="w-full bg-black/90 border border-amber-500/40 rounded p-1.5 text-amber-300 text-xs focus:outline-none focus:border-amber-400 mb-3">
+
+                <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <div class="bg-black/50 border border-amber-500/30 p-2 rounded text-center">
+                        <span class="block text-amber-600">TOTAL BRANCHES</span>
+                        <span id="stat-total" class="text-base font-bold text-amber-300">0</span>
+                    </div>
+                    <div class="bg-black/50 border border-amber-500/30 p-2 rounded text-center">
+                        <span class="block text-amber-600">NEXUS EVENTS</span>
+                        <span id="stat-nexus" class="text-base font-bold text-red-400">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- Center View: Interactive Canvas Tree MAP OR Card List Grid -->
         <section class="lg:col-span-9 flex flex-col min-h-0 relative">
