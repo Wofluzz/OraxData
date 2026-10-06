@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="fr" class="h-full bg-slate-950 text-amber-400 select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LEP - Potatoverse Multiverse Explorer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --amber-bright: #ffb000;
+            --amber-glow: rgba(255, 176, 0, 0.4);
+            --cyan-ether: #00f0ff;
+            --green-ether: #39ff14;
+            --bg-dark: #05050a;
+        }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--bg-dark);
+            color: var(--amber-bright);
+        }
+
+        .font-vt323 { font-family: 'VT323', monospace; }
+
+        .amber-glow-text {
+            text-shadow: 0 0 8px rgba(255, 176, 0, 0.8), 0 0 18px rgba(255, 176, 0, 0.4);
+        }
+
+        .tva-box {
+            background: rgba(12, 8, 3, 0.85);
+            border: 1px solid rgba(255, 176, 0, 0.4);
+            box-shadow: 0 0 15px rgba(255, 176, 0, 0.15), inset 0 0 10px rgba(255, 176, 0, 0.1);
+        }
+
+        /* Scanlines Overlay */
+        .scanline-overlay {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.4) 50%
+            );
+            background-size: 100% 4px;
+            pointer-events: none;
+        }
+
+        @keyframes subtle-pulse {
+            0%, 100% { opacity: 0.98; }
+            50% { opacity: 1; }
+        }
+        .crt-pulse { animation: subtle-pulse 0.2s infinite; }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0c0803; }
+        ::-webkit-scrollbar-thumb { background: #996600; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #ffb000; }
+    </style>
+</head>
+<body class="h-full flex flex-col overflow-hidden crt-pulse p-2 md:p-3 relative">
+
+    <!-- Retro CRT Overlay -->
+    <div class="fixed inset-0 scanline-overlay z-50 pointer-events-none"></div>
+
+    <!-- Top TVA Bar -->
+    <header class="flex flex-wrap items-center justify-between border-b-2 border-amber-500/80 pb-2 mb-2 px-2 bg-black/60 rounded backdrop-blur">
+        <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-full border-2 border-amber-400 flex items-center justify-center font-bold font-vt323 text-2xl bg-amber-950 text-amber-300 shadow-[0_0_10px_rgba(255,176,0,0.5)]">
+                LEP
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-bold tracking-widest amber-glow-text uppercase flex items-center gap-2">
+                    POTATOVERSE MULTIVERSE MONITOR
+                </h1>
+                <p class="text-[11px] text-amber-600 tracking-wider">
+                    REALITY MAPPER // SEC-31415 // SACRED STARCH DATABASE
+                </p>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-3 text-xs mt-2 sm:mt-0">
+            <!-- View Mode Switcher -->
+            <div class="flex rounded border border-amber-500/50 bg-black/80 overflow-hidden">
+                <button id="view-map-btn" class="px-3 py-1.5 bg-amber-500 text-black font-bold transition flex items-center gap-1">
+                    🌐 MAP OVERVIEW
+                </button>
+                <button id="view-grid-btn" class="px-3 py-1.5 hover:bg-amber-500/20 text-amber-300 transition flex items-center gap-1">
+                    🗂️ BRANCH DATABASE
+                </button>
+            </div>
+
+            <button id="audio-toggle-btn" class="px-2.5 py-1.5 border border-amber-500/60 hover:bg-amber-500/20 text-amber-300 text-xs transition">
+                🔊 AUDIO: ON
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-0 relative">
+
+        <!-- Left Controls / Add Form Panel -->
+        
+
+        <!-- Center View: Interactive Canvas Tree MAP OR Card List Grid -->
+        <section class="lg:col-span-9 flex flex-col min-h-0 relative">
+            
+            <!-- MAP VIEW CONTAINER -->
+            <div id="map-view-container" class="w-full h-full tva-box rounded relative flex flex-col overflow-hidden">
+                <div class="absolute top-3 left-3 z-10 pointer-events-none bg-black/70 p-2 rounded border border-amber-500/40">
+                    <p class="text-[10px] text-amber-500 tracking-widest uppercase">CANVAS RADIAL REALITY MAPPER</p>
+                    <p class="text-sm font-bold text-amber-300 font-vt323 tracking-wider amber-glow-text">
+                        SACRED POTATO CORE & TIMELINE BRANCHES
+                    </p>
+                </div>
+
+                <div class="absolute top-3 right-3 z-10 text-right bg-black/70 p-2 rounded border border-amber-500/40 text-[11px]">
+                    <span class="text-amber-500 block">CLICK BRANCH NODE:</span>
+                    <span class="text-amber-300">INSPECT / EDIT REALITY</span>
+                </div>
+
+                <!-- Canvas -->
+                <canvas id="multiverse-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+
+                <div class="bg-black/80 border-t border-amber-500/40 p-2 text-xs flex justify-between items-center text-amber-500/80">
+                    <span>💡 Dynamic Radial Ether Flow matching Multiverse Reference</span>
+                    <button id="btn-reset-demo" class="px-2 py-1 bg-amber-950/80 border border-amber-500/50 hover:bg-amber-500 hover:text-black text-amber-300 text-[11px] rounded transition">
+                        🔄 RESET DEMO DATA
+                    </button>
+                </div>
+            </div>
+
+            <!-- GRID / CARD VIEW CONTAINER (Hidden by default) -->
+            <div id="grid-view-container" class="hidden w-full h-full tva-box rounded p-3 overflow-y-auto flex-col">
+                <div class="flex justify-between items-center border-b border-amber-500/40 pb-2 mb-3">
+                    <h2 class="text-sm font-bold text-amber-300">INDEXED REALITIES DATABASE</h2>
+                    <span class="text-xs text-amber-600">Select any reality card to edit or prune</span>
+                </div>
+
+                <!-- Reality Cards Grid -->
+                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
+                    <!-- Dynamic Cards Rendered Here -->
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Branch Detail Modal -->
+    <div id="branch-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="tva-box rounded-lg max-w-lg w-full p-5 relative border-2 border-amber-500/80 shadow-[0_0_30px_rgba(255,176,0,0.3)] text-xs">
+            <button id="modal-close-btn" class="absolute top-3 right-3 text-amber-500 hover:text-amber-300 text-lg font-bold">✕</button>
+
+            <div class="flex items-center space-x-2 border-b border-amber-500/40 pb-2 mb-3">
+                <span id="modal-reality-id" class="px-2 py-0.5 bg-amber-500 text-black font-bold font-mono text-sm rounded">POTATO-616</span>
+                <h3 id="modal-reality-name" class="text-lg font-bold text-amber-300 font-vt323 tracking-wide">Sacred Potato Prime</h3>
+            </div>
+
+            <div class="mb-3 rounded overflow-hidden border border-amber-500/40 bg-black flex justify-center items-center max-h-48">
+                <img id="modal-reality-img" src="" alt="Reality Image" class="w-full h-48 object-cover">
+            </div>
+
+            <p id="modal-reality-desc" class="text-amber-200 text-sm leading-relaxed mb-4 bg-black/50 p-2.5 rounded border border-amber-500/20">
+                Description goes here...
+            </p>
+
+            <div class="flex justify-between items-center pt-2 border-t border-amber-500/30">
+                <button id="modal-edit-btn" class="px-4 py-2 bg-amber-500 text-black font-bold rounded hover:bg-amber-400 transition">
+                    ✏️ EDIT REALITY
+                </button>
+                <button id="modal-prune-btn" class="px-4 py-2 bg-red-950 border border-red-500 text-red-400 font-bold rounded hover:bg-red-600 hover:text-white transition">
+                    ✂️ PRUNE BRANCH
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* --- Web Audio API Sound Generator --- */
+        let audioEnabled = true;
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            if (!audioEnabled) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                const now = audioCtx.currentTime;
+
+                if (type === 'select') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(600, now);
+                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+                    gain.gain.setValueAtTime(0.05, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.08);
+                    osc.start(now);
+                    osc.stop(now + 0.08);
+                } else if (type === 'save') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(400, now);
+                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
+                    gain.gain.setValueAtTime(0.08, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.15);
+                    osc.start(now);
+                    osc.stop(now + 0.15);
+                } else if (type === 'prune') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.25);
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                }
+            } catch (e) {}
+        }
+
+        const audioToggleBtn = document.getElementById('audio-toggle-btn');
+        if (audioToggleBtn) {
+            audioToggleBtn.addEventListener('click', (e) => {
+                audioEnabled = !audioEnabled;
+                e.target.innerText = audioEnabled ? '🔊 AUDIO: ON' : '🔇 AUDIO: OFF';
+            });
+        }
+
+        /* --- Default Seed Dataset --- */
+        const DEFAULT_BRANCHES = [
+            {
+                id: "REALITY-000",
+                name: "Réalité Originelle",
+                desc: "La Réalité 0, berceau du Verse avant la naissance du Potatoverse. C'est ici que vécurent les premiers Pytan, Citrus et Grand Omega.",
+                image: ""
+            },
+            {
+                id: "REALITY-616",
+                name: "Réalité 616",
+                desc: "Notre réalité, étrangère au Potatoverse. Une réalité ordinaire dont les habitants ignorent encore l'existence des innombrables mondes qui l'entourent.",
+                image: ""
+            },
+            {
+                id: "REALITY-427",
+                name: "Réalité Potatoverse Clash",
+                desc: "Une réalité où la Graine du Verse ne fut jamais volée, mais disséminée en plusieurs fragments à travers le monde.",
+                image: ""
+            },
+            {
+                id: "REALITY-836",
+                name: "Académie des Patates Déchues",
+                desc: "Une réalité marquée par l'Académie des Patates Déchues, où Loup Alpha et les siens suivent une voie radicalement différente.",
+                image: ""
+            },
+            {
+                id: "REALITY-042",
+                name: "Le Royaume des Frites",
+                desc: "Une réalité dans laquelle l'évolution des tubercules a suivi une trajectoire inattendue. Les pommes de terre y sont conscientes.",
+                image: ""
+            },
+            {
+                id: "REALITY-213",
+                name: "L'Empire des Patates Douces",
+                desc: "Une réalité dominée par les patates douces. Leur civilisation a développé une technologie avancée fondée sur l'énergie du Verse.",
+                image: ""
+            },
+            {
+                id: "REALITY-404",
+                name: "L'Anomalie de la Purée",
+                desc: "Une réalité victime d'une catastrophe du Verse. L'espace, le temps et la matière y ont été profondément altérés.",
+                image: ""
+            },
+            {
+                id: "REALITY-777",
+                name: "Le Continuum Croustillant",
+                desc: "Une branche temporelle instable où les lois physiques dépendent du niveau de croustillant de la matière.",
+                image: ""
+            }
+        ];
+
+        // Load branches from localStorage or seed defaults
+        let branches = JSON.parse(localStorage.getItem('potatoverse_branches')) || [...DEFAULT_BRANCHES];
+
+        function saveState() {
+            localStorage.setItem('potatoverse_branches', JSON.stringify(branches));
+            updateStats();
+            renderCards();
+        }
+
+        /* --- SVG Placeholder Image Generator --- */
+        function generateSVGPlaceholder(id, name) {
+            const svg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
+                <defs>
+                    <radialGradient id="grad" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#ffcc00" stop-opacity="0.9"/>
+                        <stop offset="50%" stop-color="#ff8800" stop-opacity="0.6"/>
+                        <stop offset="100%" stop-color="#050510" stop-opacity="1"/>
+                    </radialGradient>
+                </defs>
+                <rect width="100%" height="100%" fill="#05050a"/>
+                <circle cx="200" cy="120" r="100" fill="url(#grad)"/>
+                <ellipse cx="200" cy="120" rx="55" ry="40" fill="#2a1a00" stroke="#ffb000" stroke-width="3" transform="rotate(-10 200 120)"/>
+                <circle cx="185" cy="110" r="3" fill="#ffb000"/>
+                <circle cx="215" cy="115" r="2.5" fill="#ffb000"/>
+                <circle cx="200" cy="130" r="3.5" fill="#ffb000"/>
+                <ellipse cx="200" cy="120" rx="130" ry="50" fill="none" stroke="#00f0ff" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.7"/>
+                <rect x="20" y="180" width="360" height="42" rx="4" fill="rgba(0,0,0,0.8)" stroke="#ffb000" stroke-width="1"/>
+                <text x="35" y="200" font-family="monospace" font-size="12" font-weight="bold" fill="#ffb000">${id}</text>
+                <text x="35" y="214" font-family="monospace" font-size="10" fill="#00f0ff">${name.substring(0, 32)}</text>
+            </svg>`;
+            return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
+        }
+
+        /* --- Canvas Radial Multiverse Renderer --- */
+        const canvas = document.getElementById('multiverse-canvas');
+        const ctx = canvas ? canvas.getContext('2d') : null;
+        let activeModalIndex = -1;
+        let hoverIndex = -1;
+
+        function resizeCanvas() {
+            if (!canvas) return;
+            const rect = canvas.parentElement.getBoundingClientRect();
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const etherParticles = Array.from({ length: 40 }, () => ({
+            x: Math.random(),
+            y: Math.random(),
+            radius: Math.random() * 2 + 1,
+            color: Math.random() > 0.5 ? 'rgba(0,240,255,0.4)' : 'rgba(57,255,20,0.4)',
+            speedX: (Math.random() - 0.5) * 0.001,
+            speedY: (Math.random() - 0.5) * 0.001
+        }));
+
+        const obsidianRocks = Array.from({ length: 5 }, (_, i) => ({
+            angle: (i / 5) * Math.PI * 2,
+            distance: 90 + Math.random() * 40,
+            size: 15 + Math.random() * 12,
+            speed: 0.003 + Math.random() * 0.002
+        }));
+
+        function drawCanvas() {
+            if (!ctx || !canvas) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const cx = canvas.width / 2;
+            const cy = canvas.height / 2;
+            const time = Date.now() * 0.002;
+
+            const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(canvas.width, canvas.height) * 0.6);
+            bgGrad.addColorStop(0, 'rgba(255, 180, 0, 0.25)');
+            bgGrad.addColorStop(0.3, 'rgba(57, 255, 20, 0.08)');
+            bgGrad.addColorStop(0.6, 'rgba(0, 240, 255, 0.06)');
+            bgGrad.addColorStop(1, 'rgba(5, 5, 10, 0.95)');
+            ctx.fillStyle = bgGrad;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            etherParticles.forEach(p => {
+                p.x = (p.x + p.speedX + 1) % 1;
+                p.y = (p.y + p.speedY + 1) % 1;
+                ctx.beginPath();
+                ctx.arc(p.x * canvas.width, p.y * canvas.height, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.fill();
+            });
+
+            ctx.save();
+            ctx.translate(cx, cy);
+            const coreGlow = ctx.createRadialGradient(0, 0, 5, 0, 0, 65);
+            coreGlow.addColorStop(0, 'rgba(255, 255, 200, 1)');
+            coreGlow.addColorStop(0.4, 'rgba(255, 176, 0, 0.8)');
+            coreGlow.addColorStop(0.8, 'rgba(255, 100, 0, 0.3)');
+            coreGlow.addColorStop(1, 'rgba(255, 176, 0, 0)');
+            ctx.fillStyle = coreGlow;
+            ctx.beginPath();
+            ctx.arc(0, 0, 70, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.ellipse(0, 0, 36, 26, Math.PI / 8, 0, Math.PI * 2);
+            ctx.fillStyle = '#fff4cc';
+            ctx.strokeStyle = '#ffb000';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ffb000';
+            ctx.shadowBlur = 20;
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, -26);
+            ctx.quadraticCurveTo(-8, -38, -4, -45);
+            ctx.quadraticCurveTo(2, -38, 0, -26);
+            ctx.fillStyle = '#39ff14';
+            ctx.fill();
+            ctx.restore();
+
+            obsidianRocks.forEach(rock => {
+                rock.angle += rock.speed;
+                const rx = cx + Math.cos(rock.angle) * rock.distance;
+                const ry = cy + Math.sin(rock.angle) * rock.distance;
+
+                ctx.save();
+                ctx.translate(rx, ry);
+                ctx.rotate(rock.angle);
+                ctx.fillStyle = '#0a101d';
+                ctx.strokeStyle = '#00f0ff';
+                ctx.lineWidth = 1.5;
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.moveTo(-rock.size/2, -rock.size/2);
+                ctx.lineTo(rock.size/2, -rock.size/3);
+                ctx.lineTo(rock.size/3, rock.size/2);
+                ctx.lineTo(-rock.size/3, rock.size/2);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                ctx.restore();
+            });
+
+            const count = branches.length;
+            const radius = Math.min(canvas.width, canvas.height) * 0.35;
+
+            branches.forEach((b, i) => {
+                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+                const targetX = cx + Math.cos(angle) * radius;
+                const targetY = cy + Math.sin(angle) * radius;
+
+                const waveOffset = Math.sin(time + i) * 20;
+                const cp1x = cx + Math.cos(angle + 0.3) * (radius * 0.4) + waveOffset;
+                const cp1y = cy + Math.sin(angle + 0.3) * (radius * 0.4);
+                const cp2x = cx + Math.cos(angle - 0.3) * (radius * 0.7) - waveOffset;
+                const cp2y = cy + Math.sin(angle - 0.3) * (radius * 0.7);
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, targetX, targetY);
+
+                const isHovered = (hoverIndex === i);
+                ctx.strokeStyle = isHovered ? '#00f0ff' : '#ffb000';
+                ctx.lineWidth = isHovered ? 4 : 2;
+                ctx.shadowColor = isHovered ? '#00f0ff' : '#ffb000';
+                ctx.shadowBlur = isHovered ? 15 : 8;
+                ctx.stroke();
+
+                const t = (time * 0.5 + i * 0.2) % 1;
+                const px = Math.pow(1-t, 3)*cx + 3*Math.pow(1-t, 2)*t*cp1x + 3*(1-t)*Math.pow(t, 2)*cp2x + Math.pow(t, 3)*targetX;
+                const py = Math.pow(1-t, 3)*cy + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*targetY;
+
+                ctx.beginPath();
+                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#ffffff';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(targetX, targetY, isHovered ? 12 : 9, 0, Math.PI * 2);
+                ctx.fillStyle = isHovered ? '#00f0ff' : '#100a00';
+                ctx.strokeStyle = isHovered ? '#ffffff' : '#ffb000';
+                ctx.lineWidth = 2.5;
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.font = '11px "Share Tech Mono"';
+                ctx.fillStyle = isHovered ? '#00f0ff' : '#ffb000';
+                ctx.shadowBlur = isHovered ? 8 : 0;
+                ctx.textAlign = targetX > cx ? 'left' : 'right';
+                const textX = targetX > cx ? targetX + 16 : targetX - 16;
+                ctx.fillText(b.id, textX, targetY + 4);
+
+                ctx.restore();
+
+                b._nodeX = targetX;
+                b._nodeY = targetY;
+            });
+
+            requestAnimationFrame(drawCanvas);
+        }
+
+        if (canvas) {
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mx = e.clientX - rect.left;
+                const my = e.clientY - rect.top;
+
+                hoverIndex = -1;
+                branches.forEach((b, i) => {
+                    if (b._nodeX && b._nodeY) {
+                        const dist = Math.hypot(b._nodeX - mx, b._nodeY - my);
+                        if (dist < 18) hoverIndex = i;
+                    }
+                });
+                canvas.style.cursor = hoverIndex !== -1 ? 'pointer' : 'crosshair';
+            });
+
+            canvas.addEventListener('click', () => {
+                if (hoverIndex !== -1) openModal(hoverIndex);
+            });
+        }
+
+        /* --- UI Card Grid Renderer --- */
+        const cardsGrid = document.getElementById('cards-grid');
+
+        function renderCards() {
+            if (!cardsGrid) return;
+            const searchInput = document.getElementById('search-input');
+            const filter = searchInput ? searchInput.value.toLowerCase() : '';
+            cardsGrid.innerHTML = '';
+
+            branches.forEach((b, index) => {
+                if (filter && !b.id.toLowerCase().includes(filter) && !b.name.toLowerCase().includes(filter)) {
+                    return;
+                }
+
+                const imgSrc = b.image || generateSVGPlaceholder(b.id, b.name);
+
+                const card = document.createElement('div');
+                card.className = "tva-box rounded p-3 flex flex-col space-y-2 hover:border-amber-400 transition cursor-pointer group";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-amber-500/30 pb-1.5">
+                        <span class="font-mono font-bold text-amber-300 text-xs px-2 py-0.5 bg-black/60 rounded border border-amber-500/40">${b.id}</span>
+                        <div class="flex gap-1">
+                            <button onclick="event.stopPropagation(); editBranch(${index})" class="text-amber-500 hover:text-amber-300 px-1 text-xs">✏️</button>
+                            <button onclick="event.stopPropagation(); pruneBranch(${index})" class="text-red-400 hover:text-red-300 px-1 text-xs">✂️</button>
+                        </div>
+                    </div>
+                    <div class="h-28 rounded overflow-hidden bg-black border border-amber-500/20 relative">
+                        <img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt="${b.name}">
+                    </div>
+                    <h3 class="font-vt323 text-base font-bold text-amber-300 tracking-wide">${b.name}</h3>
+                    <p class="text-[11px] text-amber-500/80 line-clamp-2">${b.desc}</p>
+                `;
+                card.addEventListener('click', () => openModal(index));
+                cardsGrid.appendChild(card);
+            });
+        }
+
+        /* --- Modal Operations --- */
+        const modal = document.getElementById('branch-modal');
+
+        function openModal(index) {
+            activeModalIndex = index;
+            const b = branches[index];
+            const modId = document.getElementById('modal-reality-id');
+            const modName = document.getElementById('modal-reality-name');
+            const modDesc = document.getElementById('modal-reality-desc');
+            const modImg = document.getElementById('modal-reality-img');
+
+            if (modId) modId.innerText = b.id;
+            if (modName) modName.innerText = b.name;
+            if (modDesc) modDesc.innerText = b.desc;
+            if (modImg) modImg.src = b.image || generateSVGPlaceholder(b.id, b.name);
+            if (modal) modal.classList.remove('hidden');
+            playSound('select');
+        }
+
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => {
+                if (modal) modal.classList.add('hidden');
+            });
+        }
+
+        const modalEditBtn = document.getElementById('modal-edit-btn');
+        if (modalEditBtn) {
+            modalEditBtn.addEventListener('click', () => {
+                if (modal) modal.classList.add('hidden');
+                editBranch(activeModalIndex);
+            });
+        }
+
+        const modalPruneBtn = document.getElementById('modal-prune-btn');
+        if (modalPruneBtn) {
+            modalPruneBtn.addEventListener('click', () => {
+                if (modal) modal.classList.add('hidden');
+                pruneBranch(activeModalIndex);
+            });
+        }
+
+        /* --- Form CRUD Operations --- */
+        const branchForm = document.getElementById('branch-form');
+        const formEditIndex = document.getElementById('form-edit-index');
+        const formTitle = document.getElementById('form-title');
+        const btnCancelEdit = document.getElementById('btn-cancel-edit');
+
+        if (branchForm) {
+            branchForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+
+                const idInput = document.getElementById('input-id');
+                const nameInput = document.getElementById('input-name');
+                const descInput = document.getElementById('input-desc');
+                const imageInput = document.getElementById('input-image');
+
+                const id = idInput ? idInput.value.trim() : 'POTATO-NEW';
+                const name = nameInput ? nameInput.value.trim() : 'Unnamed Reality';
+                const desc = descInput ? descInput.value.trim() : '';
+                const image = imageInput ? imageInput.value.trim() : '';
+
+                const idx = formEditIndex ? parseInt(formEditIndex.value) : -1;
+
+                if (idx >= 0) {
+                    branches[idx] = { id, name, desc, image };
+                    playSound('save');
+                } else {
+                    branches.push({ id, name, desc, image });
+                    playSound('save');
+                }
+
+                saveState();
+                resetForm();
+            });
+        }
+
+        window.editBranch = function(index) {
+            const b = branches[index];
+            if (formEditIndex) formEditIndex.value = index;
+            
+            const idInput = document.getElementById('input-id');
+            const nameInput = document.getElementById('input-name');
+            const descInput = document.getElementById('input-desc');
+            const imageInput = document.getElementById('input-image');
+
+            if (idInput) idInput.value = b.id;
+            if (nameInput) nameInput.value = b.name;
+            if (descInput) descInput.value = b.desc;
+            if (imageInput) imageInput.value = b.image;
+
+            if (formTitle) formTitle.innerText = "✏️ EDIT REALITY";
+            if (btnCancelEdit) btnCancelEdit.classList.remove('hidden');
+            playSound('select');
+        };
+
+        window.pruneBranch = function(index) {
+            branches.splice(index, 1);
+            playSound('prune');
+            saveState();
+        };
+
+        if (btnCancelEdit) {
+            btnCancelEdit.addEventListener('click', resetForm);
+        }
+
+        function resetForm() {
+            if (formEditIndex) formEditIndex.value = "-1";
+            if (branchForm) branchForm.reset();
+            if (formTitle) formTitle.innerText = "➕ ADD NEW REALITY";
+            if (btnCancelEdit) btnCancelEdit.classList.add('hidden');
+        }
+
+        /* --- View Switcher & Search Input --- */
+        const mapViewContainer = document.getElementById('map-view-container');
+        const gridViewContainer = document.getElementById('grid-view-container');
+        const viewMapBtn = document.getElementById('view-map-btn');
+        const viewGridBtn = document.getElementById('view-grid-btn');
+
+        if (viewMapBtn && viewGridBtn) {
+            viewMapBtn.addEventListener('click', () => {
+                if (mapViewContainer) {
+                    mapViewContainer.classList.remove('hidden');
+                    mapViewContainer.classList.add('flex');
+                }
+                if (gridViewContainer) {
+                    gridViewContainer.classList.add('hidden');
+                    gridViewContainer.classList.remove('flex');
+                }
+                viewMapBtn.className = "px-3 py-1.5 bg-amber-500 text-black font-bold transition flex items-center gap-1";
+                viewGridBtn.className = "px-3 py-1.5 hover:bg-amber-500/20 text-amber-300 transition flex items-center gap-1";
+                playSound('select');
+            });
+
+            viewGridBtn.addEventListener('click', () => {
+                if (gridViewContainer) {
+                    gridViewContainer.classList.remove('hidden');
+                    gridViewContainer.classList.add('flex');
+                }
+                if (mapViewContainer) {
+                    mapViewContainer.classList.add('hidden');
+                    mapViewContainer.classList.remove('flex');
+                }
+                viewGridBtn.className = "px-3 py-1.5 bg-amber-500 text-black font-bold transition flex items-center gap-1";
+                viewMapBtn.className = "px-3 py-1.5 hover:bg-amber-500/20 text-amber-300 transition flex items-center gap-1";
+                renderCards();
+                playSound('select');
+            });
+        }
+
+        const searchInput = document.getElementById('search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', renderCards);
+        }
+
+        const resetDemoBtn = document.getElementById('btn-reset-demo');
+        if (resetDemoBtn) {
+            resetDemoBtn.addEventListener('click', () => {
+                branches = [...DEFAULT_BRANCHES];
+                saveState();
+                playSound('save');
+            });
+        }
+
+        function updateStats() {
+            const statTotal = document.getElementById('stat-total');
+            const statNexus = document.getElementById('stat-nexus');
+            if (statTotal) statTotal.innerText = branches.length;
+            if (statNexus) statNexus.innerText = branches.filter(b => b.id.includes('ANOMALY') || b.id.includes('404') || b.id.includes('CLASH')).length;
+        }
+
+        // Init
+        window.onload = () => {
+            updateStats();
+            renderCards();
+            drawCanvas();
+        };
+    </script>
+</body>
+</html>
