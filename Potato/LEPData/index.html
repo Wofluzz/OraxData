@@ -1,82 +1,108 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Potatoverse Terminal - Lore</title>
+  <title>Potatoverse Hyper Terminal - Lore & LEP OS</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            lep: {
+              bg: '#0a0c10',
+              card: '#12161f',
+              embed: '#1e2330',
+              border: '#2a3245',
+              green: '#00ff66',
+              cyan: '#00f0ff',
+              amber: '#fee75c',
+              red: '#ed4245',
+              purple: '#9b51e0'
+            }
+          },
+          fontFamily: {
+            mono: ['"Fira Code"', 'Consolas', 'monospace'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    :root {
-      --bg-color: #0d0e12;
-      --card-bg: #18191c;
-      --embed-bg: #2b2d31;
-      --text-color: #dbdee1;
-      --accent-yellow: #fee75c;
-      --accent-green: #57f287;
-      --accent-red: #ed4245;
-      --terminal-bg: #0b0c10;
-      --terminal-text: #00ff66;
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0a0c10;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #2a3245;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #00f0ff;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'gg sans', 'Consolas', 'Courier New', monospace;
+    /* CRT Scanline & Screen Effects */
+    .crt-overlay {
+      background: linear-gradient(
+        rgba(18, 16, 16, 0) 50%, 
+        rgba(0, 0, 0, 0.35) 50%
+      ), linear-gradient(
+        90deg,
+        rgba(255, 0, 0, 0.03),
+        rgba(0, 255, 0, 0.01),
+        rgba(0, 0, 255, 0.03)
+      );
+      background-size: 100% 3px, 6px 100%;
+      pointer-events: none;
     }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      padding: 20px;
+    .crt-flicker {
+      animation: flicker 0.15s infinite;
     }
 
-    .container {
-      width: 100%;
-      max-width: 760px;
+    @keyframes flicker {
+      0% { opacity: 0.98; }
+      50% { opacity: 1; }
+      100% { opacity: 0.97; }
     }
 
-    /* --- STYLES TERMINAL ANIMÉ --- */
-    .terminal-card {
-      background: var(--terminal-bg);
-      border: 1px solid #1f232a;
-      border-radius: 8px;
-      padding: 20px;
-      box-shadow: 0 0 20px rgba(0, 255, 102, 0.15);
-      position: relative;
+    /* Glowing Text Effects */
+    .glow-green {
+      text-shadow: 0 0 8px rgba(0, 255, 102, 0.6);
+    }
+    .glow-cyan {
+      text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+    }
+    .glow-amber {
+      text-shadow: 0 0 8px rgba(254, 231, 92, 0.6);
     }
 
-    .terminal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      color: var(--accent-yellow);
-      font-weight: bold;
-      font-size: 1.1rem;
-      border-bottom: 1px solid #222;
-      padding-bottom: 10px;
-      margin-bottom: 15px;
-    }
-
-    .terminal-body {
-      color: var(--terminal-text);
-      font-size: 0.95rem;
-      line-height: 1.6;
-      min-height: 220px;
-      white-space: pre-wrap;
-    }
-
-    .cursor {
+    /* Blinking Cursor */
+    .typing-cursor::after {
+      content: '█';
       display: inline-block;
-      width: 8px;
-      height: 15px;
-      background-color: var(--terminal-text);
-      animation: blink 0.8s infinite;
-      vertical-align: middle;
-      margin-left: 4px;
+      margin-left: 3px;
+      color: #00ff66;
+      animation: blink 0.7s infinite;
     }
 
     @keyframes blink {
@@ -84,398 +110,873 @@
       50% { opacity: 0; }
     }
 
-    .terminal-footer {
-      margin-top: 15px;
-      font-size: 0.8rem;
-      color: #666;
-      border-top: 1px solid #222;
-      padding-top: 10px;
+    /* Matrix Rain Canvas */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      opacity: 0.12;
+      pointer-events: none;
     }
-
-    .skip-btn {
-      background: transparent;
-      border: 1px solid var(--accent-yellow);
-      color: var(--accent-yellow);
-      padding: 4px 10px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.8rem;
-      transition: all 0.2s;
-    }
-
-    .skip-btn:hover {
-      background: var(--accent-yellow);
-      color: #000;
-    }
-
-    /* --- STYLES EMBED DISCORD --- */
-    .discord-embed {
-      background-color: var(--embed-bg);
-      border-left: 4px solid var(--accent-yellow);
-      border-radius: 6px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-      display: none;
-    }
-
-    .embed-title {
-      font-size: 1.3rem;
-      font-weight: bold;
-      color: #ffffff;
-      margin-bottom: 15px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .character-select {
-      width: 100%;
-      padding: 12px;
-      background-color: #1e1f22;
-      color: #ffffff;
-      border: 1px solid #3f4147;
-      border-radius: 6px;
-      font-size: 1rem;
-      margin-bottom: 20px;
-      cursor: pointer;
-      outline: none;
-    }
-
-    .character-select:focus {
-      border-color: #5865f2;
-    }
-
-    .embed-content {
-      line-height: 1.6;
-      font-size: 0.95rem;
-      min-height: 120px;
-    }
-
-    .embed-content h2 {
-      font-size: 1.15rem;
-      color: #ffffff;
-      margin-top: 18px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid #3f4147;
-      padding-bottom: 4px;
-    }
-
-    .embed-content ul {
-      margin-left: 20px;
-      margin-bottom: 12px;
-    }
-
-    .embed-content li {
-      margin-bottom: 4px;
-    }
-
-    .embed-image {
-      width: 100%;
-      max-height: 320px;
-      object-fit: cover;
-      border-radius: 6px;
-      margin-top: 15px;
-    }
-
-    .embed-footer {
-      margin-top: 20px;
-      font-size: 0.85rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #b5bac1;
-    }
-
-    .status-badge {
-      display: inline-block;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-    }
-
-    .status-active { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-    .status-inactive { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
-
-    .hidden { display: none !important; }
   </style>
 </head>
-<body>
+<body class="bg-lep-bg text-slate-200 font-mono antialiased min-h-screen flex flex-col justify-between selection:bg-lep-cyan selection:text-black relative overflow-x-hidden">
 
-  <div class="container">
-    <!-- TERMINAL ANIMÉ -->
-    <div id="terminal" class="terminal-card">
-      <div class="terminal-header">
-        <span>🥔 Potatoverse Terminal</span>
-        <button id="skipBtn" class="skip-btn" onclick="skipAnimation()">Passer ⏭</button>
-      </div>
-      <div class="terminal-body" id="terminalConsole"></div>
-      <div class="terminal-footer" id="terminalFooter">Potatoverse Network</div>
+  <canvas id="matrixCanvas"></canvas>
+  <div id="crtOverlay" class="crt-overlay fixed inset-0 z-50 transition-opacity duration-300 pointer-events-none"></div>
+
+  <header class="relative z-10 bg-lep-card/90 backdrop-blur border-b border-lep-border px-4 py-3 flex flex-wrap items-center justify-between gap-3 shadow-lg">
+    <div class="flex items-center gap-3">
+      <div class="w-3 h-3 rounded-full bg-lep-green animate-pulse shadow-[0_0_10px_#00ff66]"></div>
+      <h1 class="text-base sm:text-lg font-bold text-white tracking-wider flex items-center gap-2">
+        <span class="text-lep-amber">🥔 POTATOVERSE</span>
+        <span class="text-xs bg-lep-cyan/20 text-lep-cyan border border-lep-cyan/40 px-2 py-0.5 rounded font-mono">HYPER TERMINAL v4.2</span>
+      </h1>
     </div>
 
-    <!-- INTERFACE / EMBED DISCORD -->
-    <div id="app" class="discord-embed">
-      <div class="embed-title" id="embedTitle">
-        Liste des personnages du Lore Étendu du Potatoverse !
+    <!-- Status Badges & Controls -->
+    <div class="flex items-center gap-2 sm:gap-4 text-xs">
+      <div class="hidden sm:flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded border border-lep-border text-slate-400">
+        <i class="fas fa-network-wired text-lep-cyan"></i>
+        <span>Réseau LEP : <strong class="text-lep-green">OPÉRATIONNEL</strong></span>
       </div>
 
-      <!-- SÉLECTEUR DE PERSONNAGES -->
-      <select id="characterSelect" class="character-select" onchange="onCharacterSelect(this.value)">
-        <option value="" disabled selected>Chargement des données...</option>
-      </select>
-
-      <!-- CONTENU DU LORE (ANIMATION LETTRE PAR LETTRE) -->
-      <div id="embedBody" class="embed-content">
-        Utilisez le menu déroulant ci-dessus pour choisir un personnage et voir son histoire.
+      <div class="flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded border border-lep-border">
+        <i class="fas fa-database text-lep-amber"></i>
+        <span id="dbStatusBadge" class="text-slate-300">Cluster : <strong class="text-lep-amber">Connexion MongoDB...</strong></span>
       </div>
 
-      <!-- IMAGE DU PERSONNAGE -->
-      <img id="embedImage" class="embed-image hidden" src="" alt="Image du personnage">
+      <!-- Quick Toggles -->
+      <button id="btnToggleSound" onclick="toggleSound()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-lep-border transition flex items-center gap-1.5" title="Activer/Désactiver les sons">
+        <i id="soundIcon" class="fas fa-volume-up text-lep-cyan"></i>
+        <span class="hidden md:inline">Sons</span>
+      </button>
 
-      <!-- FOOTER / STATUT -->
-      <div class="embed-footer" id="embedFooter">
-        <span id="statusDot" class="status-badge hidden"></span>
-        <span id="footerText">Potatoverse Network</span>
+      <button id="btnToggleCrt" onclick="toggleCrt()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-lep-border transition flex items-center gap-1.5" title="Activer/Désactiver effet CRT">
+        <i class="fas fa-tv text-lep-amber"></i>
+        <span class="hidden md:inline">CRT</span>
+      </button>
+
+      <button onclick="openSecurityModal()" class="px-3 py-1 bg-lep-cyan/20 hover:bg-lep-cyan/30 text-lep-cyan border border-lep-cyan/50 rounded font-semibold transition flex items-center gap-1.5">
+        <i class="fas fa-shield-alt"></i>
+        <span>API / MongoDB</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="relative z-10 flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-3 sm:p-5 max-w-[1700px] w-full mx-auto">
+    
+    <!-- LEFT PANEL: TERMINAL CONSOLE ENGINE -->
+    <section class="lg:col-span-7 flex flex-col bg-lep-card border border-lep-border rounded-lg shadow-2xl overflow-hidden h-[600px] lg:h-[calc(100vh-140px)]">
+      
+      <!-- Console Header -->
+      <div class="bg-slate-900/90 border-b border-lep-border px-4 py-2.5 flex justify-between items-center text-xs">
+        <div class="flex items-center gap-2 text-slate-400">
+          <i class="fas fa-terminal text-lep-green"></i>
+          <span class="font-bold text-slate-200">CONSOLE INTERACTIVE (/LORE)</span>
+        </div>
+        
+        <div class="flex items-center gap-3">
+          <!-- Speed Control -->
+          <div class="flex items-center gap-1 bg-slate-950 px-2 py-0.5 rounded border border-slate-800 text-[11px]">
+            <span class="text-slate-400">Vitesse :</span>
+            <button onclick="setSpeed(1)" id="spdNormal" class="px-1.5 text-lep-green font-bold">1x</button>
+            <button onclick="setSpeed(0.25)" id="spdFast" class="px-1.5 text-slate-500 hover:text-slate-300">4x</button>
+            <button onclick="setSpeed(0)" id="spdInstant" class="px-1.5 text-slate-500 hover:text-slate-300">MAX</button>
+          </div>
+
+          <button onclick="clearConsole()" class="text-slate-400 hover:text-lep-red transition" title="Effacer la console">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Console Body Log Window -->
+      <div id="consoleBody" class="flex-grow p-4 overflow-y-auto space-y-3 font-mono text-xs sm:text-sm leading-relaxed text-slate-300">
+        <!-- Initial Welcome Banner -->
+        <div class="text-slate-500 border-b border-slate-800/80 pb-3">
+          <p class="text-lep-green font-bold text-sm">POTATOVERSE LEP MULTIVERSE SYSTEM v4.2</p>
+          <p>Tapez <code class="text-lep-cyan font-bold">/lore</code> pour lancer l'initialisation ou <code class="text-lep-amber font-bold">list</code> pour voir la liste des entités.</p>
+          <p>Tapez <code class="text-slate-300">help</code> pour voir toutes les commandes CLI disponibles.</p>
+        </div>
+
+        <!-- Dynamic Output Content Area -->
+        <div id="terminalLog" class="space-y-2"></div>
+      </div>
+
+      <div class="bg-slate-950 border-t border-lep-border p-3 flex items-center gap-2">
+        <span class="text-lep-green font-bold flex items-center gap-1">
+          <i class="fas fa-chevron-right text-xs"></i>
+          <span>lep@potatoverse:~$</span>
+        </span>
+        <input 
+          type="text" 
+          id="cliInput" 
+          autocomplete="off" 
+          spellcheck="false"
+          placeholder="Entrez une commande (ex: /lore, list, cat PotatoBot, status)..." 
+          class="flex-grow bg-transparent text-white font-mono text-sm focus:outline-none placeholder-slate-600"
+          onkeydown="handleCliKeyDown(event)"
+        />
+        <button onclick="submitCliInput()" class="px-3 py-1.5 bg-lep-green/20 hover:bg-lep-green/30 text-lep-green border border-lep-green/40 rounded text-xs font-bold transition flex items-center gap-1">
+          <span>EXÉCUTER</span>
+          <i class="fas fa-level-down-alt rotate-90 text-[10px]"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- RIGHT PANEL: DISCORD EMBED VIEWER & QUICK SELECTOR -->
+    <section class="lg:col-span-5 flex flex-col gap-4 h-[600px] lg:h-[calc(100vh-140px)]">
+      
+      <!-- Character Quick Select Dropdown Bar -->
+      <div class="bg-lep-card border border-lep-border rounded-lg p-3 shadow-lg flex flex-col gap-2">
+        <label class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+          <span class="flex items-center gap-1.5 text-lep-amber">
+            <i class="fas fa-users"></i>
+            <span>SÉLECTION DU PERSONNAGE</span>
+          </span>
+          <span id="charCountBadge" class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded border border-slate-700">Chargement...</span>
+        </label>
+        
+        <select 
+          id="characterSelect" 
+          onchange="selectCharacterFromDropdown(this.value)"
+          class="w-full bg-slate-950 text-white border border-lep-border rounded p-2.5 text-sm font-mono focus:outline-none focus:border-lep-cyan transition"
+        >
+          <option value="" disabled selected>-- Chargement de la base MongoDB... --</option>
+        </select>
+      </div>
+
+      <!-- DISCORD EMBED CARD CONTAINER -->
+      <div class="flex-grow bg-lep-card border border-lep-border rounded-lg p-4 shadow-2xl overflow-y-auto flex flex-col justify-between relative">
+        
+        <!-- Discord Embed Inner Box -->
+        <div id="discordEmbed" class="bg-lep-embed border-l-4 border-lep-amber rounded p-4 sm:p-5 transition-all duration-300 space-y-4 shadow-xl relative overflow-hidden">
+          
+          <!-- Discord Embed Header -->
+          <div class="flex items-start justify-between gap-2 border-b border-slate-700/60 pb-3">
+            <div>
+              <h2 id="embedTitle" class="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                <span>🥔 Potatoverse Lore</span>
+              </h2>
+              <p id="embedAuthor" class="text-xs text-slate-400 mt-0.5">Par : <span class="text-lep-cyan font-semibold">LEP Archive System</span></p>
+            </div>
+            <span id="embedStatusBadge" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-lep-green/20 text-lep-green border border-lep-green/40 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-lep-green animate-pulse"></span>
+              <span>ACTIF</span>
+            </span>
+          </div>
+
+          <!-- Discord Embed Description Body -->
+          <div id="embedDescription" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans space-y-3 min-h-[140px]">
+            <p class="text-slate-400 italic">Sélectionnez un personnage ci-dessus ou via la console pour charger sa fiche détaillée du Lore Étendu...</p>
+          </div>
+
+          <!-- Character Image Display -->
+          <div id="embedImageContainer" class="hidden overflow-hidden rounded border border-slate-700/80 max-h-[220px]">
+            <img id="embedImage" src="" alt="Personnage" class="w-full h-full object-cover hover:scale-105 transition duration-500" onerror="this.src='https://placehold.co/600x300/1e2330/fee75c?text=Image+Lore+Indisponible'" />
+          </div>
+
+          <!-- Embed Footer -->
+          <div class="border-t border-slate-700/60 pt-3 flex justify-between items-center text-[11px] text-slate-400 font-mono">
+            <span id="embedFooterText" class="flex items-center gap-1.5">
+              <i class="fas fa-shield-cat text-lep-amber"></i>
+              <span>Connexion au LEP établie.</span>
+            </span>
+            <span class="text-slate-500">ID : <code id="embedCharId" class="text-lep-cyan">#000</code></span>
+          </div>
+        </div>
+
+        <!-- Quick Command Helper Cards -->
+        <div class="mt-4 pt-3 border-t border-lep-border/60 flex flex-wrap gap-2 text-[11px]">
+          <span class="text-slate-400">Raccourcis CLI :</span>
+          <button onclick="executeCommand('list')" class="bg-slate-900 hover:bg-slate-800 text-lep-cyan border border-slate-700 px-2 py-0.5 rounded">list</button>
+          <button onclick="executeCommand('cat PotatoBot')" class="bg-slate-900 hover:bg-slate-800 text-lep-amber border border-slate-700 px-2 py-0.5 rounded">cat PotatoBot</button>
+          <button onclick="executeCommand('status')" class="bg-slate-900 hover:bg-slate-800 text-lep-green border border-slate-700 px-2 py-0.5 rounded">status</button>
+          <button onclick="executeCommand('matrix')" class="bg-slate-900 hover:bg-slate-800 text-lep-purple border border-slate-700 px-2 py-0.5 rounded">matrix</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- MODAL: SECURE MONGODB INTEGRATION -->
+  <div id="securityModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-lep-card border border-lep-cyan/50 rounded-xl max-w-2xl w-full p-5 sm:p-6 shadow-[0_0_30px_rgba(0,240,255,0.2)] space-y-4 max-h-[90vh] overflow-y-auto">
+      
+      <div class="flex justify-between items-start border-b border-lep-border pb-3">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-shield-halved text-lep-cyan text-xl"></i>
+          <div>
+            <h3 class="text-lg font-bold text-white">Sécuriser MongoDB sur un Site Public</h3>
+            <p class="text-xs text-slate-400">Cluster Atlas : <span class="text-lep-amber font-mono">OraxDB</span></p>
+          </div>
+        </div>
+        <button onclick="closeSecurityModal()" class="text-slate-400 hover:text-white p-1">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Security Guidance -->
+      <div class="bg-amber-950/40 border border-amber-500/30 rounded p-3 text-xs text-amber-200 leading-relaxed space-y-1">
+        <p class="font-bold flex items-center gap-1.5 text-amber-400">
+          <i class="fas fa-exclamation-triangle"></i>
+          <span>Règle d'or de sécurité web :</span>
+        </p>
+        <p>Ne mettez jamais votre chaîne <code class="bg-black/50 px-1 py-0.5 rounded text-lep-amber">mongodb+srv://...</code> directement dans le code JavaScript du navigateur.</p>
+      </div>
+
+      <!-- Custom Endpoint Tester -->
+      <div class="bg-slate-950 border border-lep-border rounded p-3 space-y-2 text-xs">
+        <label class="font-bold text-slate-200 block">Tester une URL API différente :</label>
+        <div class="flex gap-2">
+          <input 
+            type="text" 
+            id="customApiUrl" 
+            placeholder="https://potatoverse-api.vercel.app/api/characters" 
+            class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono focus:outline-none focus:border-lep-cyan"
+          />
+          <button onclick="connectCustomApi()" class="px-3 py-2 bg-lep-cyan text-black font-bold rounded hover:bg-cyan-400 transition">
+            Connecter
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Data Sync (Backup JSON) -->
+      <div class="bg-slate-950 border border-lep-border rounded p-3 space-y-2 text-xs">
+        <div class="flex justify-between items-center">
+          <span class="font-bold text-slate-300">Exporter / Importer le Lore JSON en direct</span>
+          <button onclick="exportCurrentJson()" class="text-lep-amber hover:underline text-[11px]">Copier JSON actuel</button>
+        </div>
+        <textarea id="jsonImportArea" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-lep-green font-mono text-[11px]" placeholder="Collez ici un tableau JSON de personnages..."></textarea>
+        <button onclick="importJsonData()" class="px-3 py-1.5 bg-slate-800 text-slate-200 border border-slate-700 hover:border-lep-green rounded font-semibold transition">
+          Mettre à jour les personnages
+        </button>
+      </div>
+
+      <div class="pt-2 flex justify-between items-center border-t border-lep-border">
+        <span class="text-[11px] text-slate-400">Statut : <strong id="currentApiStatusText" class="text-lep-green font-bold">Initialisation...</strong></span>
+        <button onclick="closeSecurityModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-semibold text-xs border border-slate-600">
+          Fermer
+        </button>
       </div>
     </div>
   </div>
 
-  <script>
-    // ------------------------------------------------------------
-    // CONFIGURATION : REMPLACE CETTE URL PAR TON LIEN VERCEL
-    // ------------------------------------------------------------
-    const VERCEL_API_URL = "https://potatoverse-api.vercel.app/api/characters";
+  <footer class="relative z-10 bg-lep-card/90 border-t border-lep-border px-4 py-2 text-center text-xs text-slate-500 font-mono flex flex-wrap justify-between items-center gap-2">
+    <span>&copy; Potatoverse Network &bull; Laboratoire d'Études Patatières (LEP)</span>
+    <span class="text-slate-400">Déchiffrement Quantum Active &bull; <span class="text-lep-green">Statut : Sécurisé</span></span>
+  </footer>
 
-    // Effet sonore synthétisé (pas de fichier audio externe requis)
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playBeep(freq = 600, duration = 0.02) {
-      try {
-        if (audioCtx.state === 'suspended') audioCtx.resume();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.frequency.value = freq;
-        gain.gain.value = 0.03;
-        osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + duration);
-      } catch (e) {}
+  <script>
+    /* ============================================================
+       1. WEB AUDIO SYNTHESIZER
+       ============================================================ */
+    class WebAudioFX {
+      constructor() {
+        this.ctx = null;
+        this.enabled = true;
+      }
+
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      }
+
+      playKeyClick() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200 + Math.random() * 400, this.ctx.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(300, this.ctx.currentTime + 0.015);
+
+          gain.gain.setValueAtTime(0.02, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.015);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.015);
+        } catch (e) {}
+      }
+
+      playCommandBeep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(587.33, this.ctx.currentTime);
+          osc.frequency.setValueAtTime(880, this.ctx.currentTime + 0.05);
+
+          gain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.12);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.12);
+        } catch (e) {}
+      }
+
+      playErrorBeep() {
+        if (!this.enabled) return;
+        this.init();
+        if (!this.ctx) return;
+
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(180, this.ctx.currentTime);
+          osc.frequency.setValueAtTime(120, this.ctx.currentTime + 0.08);
+
+          gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.18);
+        } catch (e) {}
+      }
     }
 
-    // ------------------------------------------------------------
-    // ANIMATION DU TERMINAL INITIAL
-    // ------------------------------------------------------------
-    const terminalSteps = [
-      { text: "Connexion au LEP...", delay: 500 },
-      { text: "Connexion au réseau du Potatoverse...", delay: 450 },
-      { text: "Protection contre les incursions du Multivers...", delay: 500 },
-      { text: "Authentification de PotatoBot...", delay: 450 },
-      { text: "Accès à la base de données OraxDB...", delay: 600 },
-      { text: "Interrogation de l'API Vercel...", delay: 700 },
-      { text: "Déchiffrement des archives du LEP...", delay: 500 },
-      { text: "Vérification de l'intégrité des données...", delay: 400 },
-      { text: "Accès autorisé.", delay: 350 },
-      { text: "Chargement du Lore Étendu du Potatoverse...", delay: 600 }
+    const soundFX = new WebAudioFX();
+
+    function toggleSound() {
+      soundFX.enabled = !soundFX.enabled;
+      const soundIcon = document.getElementById("soundIcon");
+      if (soundFX.enabled) {
+        soundIcon.className = "fas fa-volume-up text-lep-cyan";
+        writeCliLog("Système audio activé.", "text-lep-cyan");
+      } else {
+        soundIcon.className = "fas fa-volume-mute text-slate-500";
+        writeCliLog("Système audio désactivé.", "text-slate-400");
+      }
+    }
+
+    /* ============================================================
+       2. CRT & MATRIX EFFECTS
+       ============================================================ */
+    function toggleCrt() {
+      const crt = document.getElementById("crtOverlay");
+      if (crt.style.display === "none") {
+        crt.style.display = "block";
+        writeCliLog("Effet visuel CRT activé.", "text-lep-amber");
+      } else {
+        crt.style.display = "none";
+        writeCliLog("Effet visuel CRT désactivé.", "text-slate-400");
+      }
+    }
+
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+    let matrixInterval = null;
+
+    function initMatrix() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン';
+      const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789🥔';
+      const alphabet = katakana + latin;
+
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+      const rainDrops = [];
+
+      for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
+      }
+
+      function draw() {
+        ctx.fillStyle = 'rgba(10, 12, 16, 0.05)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.fillStyle = '#00ff66';
+        ctx.font = fontSize + 'px monospace';
+
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+          ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+          if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+            rainDrops[i] = 0;
+          }
+          rainDrops[i]++;
+        }
+      }
+
+      if (matrixInterval) clearInterval(matrixInterval);
+      matrixInterval = setInterval(draw, 30);
+    }
+
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    /* ============================================================
+       3. CHARACTER DATA & API SYNC (MongoDB Atlas)
+       ============================================================ */
+    const DEFAULT_CHARACTERS = [
+      {
+        _id: "me",
+        Name: "PotatoBot",
+        Emoji: "🥔",
+        By: "Moi-même",
+        Active: true,
+        Image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800&auto=format&fit=crop&q=80",
+        Description: `## **Histoire**\n\nPotatoBot est le pilier de l'Académie.`
+      }
     ];
 
-    let isSkipped = false;
-    let timeoutId = null;
-    let displayedLines = [];
-    let charactersData = [];
+    let characters = [...DEFAULT_CHARACTERS];
+    let animationSpeedMultiplier = 1;
+    let typingCancelToken = 0;
 
-    const consoleEl = document.getElementById("terminalConsole");
-    const footerEl = document.getElementById("terminalFooter");
-
-    function renderTerminalLines(isFinal = false) {
-      let text = displayedLines.map(line => `> ${line}`).join("\n");
-      if (!isFinal) text += "\n\n▌";
-      consoleEl.textContent = text;
+    // Normalisation des champs provenant de MongoDB (Minuscules ou Majuscules)
+    function normalizeCharacter(c) {
+      return {
+        _id: c._id || c.id || String(Math.random().toString(36).substr(2, 6)),
+        Name: c.Name || c.name || "Entité Inconnue",
+        Emoji: c.Emoji || c.emoji || "🥔",
+        By: c.By || c.by || c.author || "LEP",
+        Active: c.Active !== undefined ? c.Active : (c.active !== undefined ? c.active : true),
+        Image: c.Image || c.image || "",
+        Description: c.Description || c.description || "Aucune biographie répertoriée."
+      };
     }
 
-    async function runTerminal() {
-      displayedLines.push("Initialisation du terminal...");
-      renderTerminalLines();
-
-      for (let i = 0; i < terminalSteps.length; i++) {
-        if (isSkipped) break;
-        await new Promise(resolve => {
-          timeoutId = setTimeout(resolve, terminalSteps[i].delay);
-        });
-        if (!isSkipped) {
-          displayedLines.push(terminalSteps[i].text);
-          renderTerminalLines();
-          playBeep(800, 0.015);
-        }
-      }
-      finishTerminal();
-    }
-
-    function skipAnimation() {
-      isSkipped = true;
-      if (timeoutId) clearTimeout(timeoutId);
-      displayedLines = ["Initialisation du terminal...", ...terminalSteps.map(s => s.text)];
-      finishTerminal();
-    }
-
-    function finishTerminal() {
-      renderTerminalLines(true);
-      footerEl.textContent = "Connexion au LEP établie.";
-      document.getElementById("skipBtn").classList.add("hidden");
-
-      setTimeout(() => {
-        document.getElementById("terminal").style.display = "none";
-        initApp();
-      }, 600);
-    }
-
-    // ------------------------------------------------------------
-    // CHARGEMENT DE L'API VERCEL / MONGODB
-    // ------------------------------------------------------------
-    async function loadCharactersFromAPI() {
-      try {
-        const response = await fetch(VERCEL_API_URL);
-        if (!response.ok) throw new Error("Erreur HTTP");
-        const data = await response.json();
-        
-        // Adaptation du schéma MongoDB (Name -> name, Emoji -> emoji, etc.)
-        return data.map(item => ({
-          id: item._id || item.id,
-          name: item.Name || item.name || "Inconnu",
-          emoji: item.Emoji || item.emoji || "🥔",
-          active: item.Active !== undefined ? item.Active : true,
-          image: item.Image || item.image || "",
-          description: item.Description || item.description || "Aucune description."
-        }));
-      } catch (err) {
-        console.warn("API indisponible, chargement des données de secours...", err);
-        // Données de secours si l'API Vercel n'est pas encore déployée
-        return [
-          {
-            id: "me",
-            name: "PotatoBot",
-            emoji: "🥔",
-            active: true,
-            image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=60",
-            description: `## **Histoire**\n\nPotatoBot est une entité polyvalente et déterminée, pilier de l’Académie des Patates. Après avoir voyagé dans le futur pour aider son soi futur, il a ensuite exploré le passé pour corriger les anomalies qu'il avait lui-même provoquées.\n\n## **Passions**\n\n- **Cuisine** : Il adore expérimenter des recettes.\n- **Innovation** : Voyager dans le temps.`
-          }
-        ];
-      }
-    }
-
-    async function initApp() {
-      const appEl = document.getElementById("app");
-      const selectEl = document.getElementById("characterSelect");
-
-      charactersData = await loadCharactersFromAPI();
-
-      selectEl.innerHTML = '<option value="" disabled selected>Choisissez un personnage...</option>';
-      charactersData.forEach(char => {
-        const option = document.createElement("option");
-        option.value = char.id;
-        option.textContent = `${char.emoji} ${char.name}`;
-        selectEl.appendChild(option);
-      });
-
-      appEl.style.display = "block";
-    }
-
-    // ------------------------------------------------------------
-    // ANIMATION DE TEXTE LETTRE PAR LETTRE (TYPEWRITER)
-    // ------------------------------------------------------------
-    let typingInterval = null;
-
-    function typeWriterEffect(htmlContent, targetElement, speed = 12) {
-      if (typingInterval) clearInterval(typingInterval);
+    // Chargement automatique depuis la DB via l'API Vercel
+    async function loadCharactersFromDb() {
+      const dbBadge = document.getElementById("dbStatusBadge");
+      const statusText = document.getElementById("currentApiStatusText");
       
-      targetElement.innerHTML = "";
-      let index = 0;
-      let tempContainer = document.createElement("div");
-      tempContainer.innerHTML = htmlContent;
-      let fullText = tempContainer.innerHTML;
-
-      // Découpage en évitant de couper les balises HTML <...>
-      let tokens = [];
-      let i = 0;
-      while (i < fullText.length) {
-        if (fullText[i] === '<') {
-          let tagEnd = fullText.indexOf('>', i);
-          if (tagEnd !== -1) {
-            tokens.push(fullText.substring(i, tagEnd + 1));
-            i = tagEnd + 1;
-            continue;
-          }
-        }
-        tokens.push(fullText[i]);
-        i++;
-      }
-
-      typingInterval = setInterval(() => {
-        if (index < tokens.length) {
-          targetElement.innerHTML += tokens[index];
-          if (tokens[index].length === 1 && tokens[index] !== ' ') {
-            playBeep(1200 + Math.random() * 200, 0.008);
-          }
-          index++;
-        } else {
-          clearInterval(typingInterval);
-          typingInterval = null;
-        }
-      }, speed);
-    }
-
-    // ------------------------------------------------------------
-    // SÉLECTION DU PERSONNAGE
-    // ------------------------------------------------------------
-    function onCharacterSelect(characterId) {
-      const char = charactersData.find(c => c.id === characterId);
-      if (!char) return;
-
-      document.getElementById("embedTitle").innerHTML = `${char.emoji} ${char.name}`;
-
-      const parsedHTML = parseMarkdown(char.description);
-      const bodyEl = document.getElementById("embedBody");
+      // Essaie l'API relative (si sur Vercel) ou l'URL complète
+      const endpoints = ["/api/characters", "https://potatoverse-api.vercel.app/api/characters"];
       
-      // Lancement de l'animation lettre par lettre
-      typeWriterEffect(parsedHTML, bodyEl, 8);
+      for (const url of endpoints) {
+        try {
+          const res = await fetch(url);
+          if (!res.ok) continue;
 
-      // Gestion de l'image
-      const imgEl = document.getElementById("embedImage");
-      if (char.image) {
-        imgEl.src = char.image;
-        imgEl.classList.remove("hidden");
-      } else {
-        imgEl.classList.add("hidden");
+          const data = await res.json();
+          if (Array.isArray(data) && data.length > 0) {
+            characters = data.map(normalizeCharacter);
+            renderCharacterDropdownOptions();
+
+            dbBadge.innerHTML = 'Cluster : <strong class="text-lep-green">MongoDB Atlas (En ligne)</strong>';
+            statusText.textContent = `MongoDB connecté (${characters.length} entités chargées)`;
+            statusText.className = "text-lep-green font-bold";
+            writeCliLog(`[BDD] ${characters.length} personnage(s) chargé(s) depuis MongoDB Atlas.`, "text-lep-green font-bold");
+            return;
+          }
+        } catch (e) {
+          // Continue vers le fallback suivant
+        }
       }
 
-      // Statut et Footer
-      const statusDot = document.getElementById("statusDot");
-      const footerText = document.getElementById("footerText");
+      // Si l'API renvoie [] ou échoue
+      dbBadge.innerHTML = 'Cluster : <strong class="text-lep-amber">Mode Secours (Local)</strong>';
+      statusText.textContent = "Aucune donnée distante trouvée (Utilisation du mode secours)";
+      statusText.className = "text-lep-amber font-bold";
+      writeCliLog("[BDD] Impossible de récupérer les données distantes. Chargement du mode secours.", "text-lep-amber");
+      renderCharacterDropdownOptions();
+    }
 
-      statusDot.classList.remove("hidden", "status-active", "status-inactive");
-      if (char.active) {
-        statusDot.classList.add("status-active");
-        footerText.textContent = "Actif dans le Potatoverse";
-      } else {
-        statusDot.classList.add("status-inactive");
-        footerText.textContent = "Inactif";
+    /* ============================================================
+       4. TYPEWRITER ANIMATION ENGINE
+       ============================================================ */
+    function setSpeed(spd) {
+      animationSpeedMultiplier = spd;
+      document.getElementById("spdNormal").className = spd === 1 ? "px-1.5 text-lep-green font-bold" : "px-1.5 text-slate-500 hover:text-slate-300";
+      document.getElementById("spdFast").className = spd === 0.25 ? "px-1.5 text-lep-green font-bold" : "px-1.5 text-slate-500 hover:text-slate-300";
+      document.getElementById("spdInstant").className = spd === 0 ? "px-1.5 text-lep-green font-bold" : "px-1.5 text-slate-500 hover:text-slate-300";
+      soundFX.playCommandBeep();
+    }
+
+    function delay(ms) {
+      if (animationSpeedMultiplier === 0) return Promise.resolve();
+      return new Promise(resolve => setTimeout(resolve, ms * animationSpeedMultiplier));
+    }
+
+    async function typeTextToConsole(text, cssClass = "text-slate-300", soundEvery = 2) {
+      const logDiv = document.getElementById("terminalLog");
+      const lineEl = document.createElement("div");
+      lineEl.className = cssClass + " typing-cursor";
+      logDiv.appendChild(lineEl);
+
+      const currentToken = ++typingCancelToken;
+
+      for (let i = 0; i < text.length; i++) {
+        if (currentToken !== typingCancelToken) break;
+        lineEl.textContent += text.charAt(i);
+        if (i % soundEvery === 0 && text.charAt(i) !== ' ') soundFX.playKeyClick();
+        scrollToBottomConsole();
+        await delay(18 + Math.random() * 12);
+      }
+
+      lineEl.classList.remove("typing-cursor");
+      scrollToBottomConsole();
+    }
+
+    async function typeFormattedMarkdownToEmbed(markdownText) {
+      const container = document.getElementById("embedDescription");
+      container.innerHTML = "";
+
+      const htmlContent = parseMarkdownToHtml(markdownText);
+      
+      if (animationSpeedMultiplier === 0) {
+        container.innerHTML = htmlContent;
+        return;
+      }
+
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = htmlContent;
+
+      const currentToken = ++typingCancelToken;
+
+      for (const node of Array.from(tempDiv.childNodes)) {
+        if (currentToken !== typingCancelToken) break;
+
+        if (node.nodeType === Node.TEXT_NODE) {
+          const text = node.textContent;
+          const textSpan = document.createElement("span");
+          container.appendChild(textSpan);
+
+          for (let i = 0; i < text.length; i++) {
+            if (currentToken !== typingCancelToken) break;
+            textSpan.textContent += text.charAt(i);
+            if (i % 3 === 0) soundFX.playKeyClick();
+            await delay(12);
+          }
+        } else if (node.nodeType === Node.ELEMENT_NODE) {
+          const clone = node.cloneNode(false);
+          container.appendChild(clone);
+
+          const innerText = node.innerText || node.textContent;
+          for (let i = 0; i < innerText.length; i++) {
+            if (currentToken !== typingCancelToken) break;
+            clone.textContent += innerText.charAt(i);
+            if (i % 3 === 0) soundFX.playKeyClick();
+            await delay(10);
+          }
+        }
       }
     }
 
-    // ------------------------------------------------------------
-    // PARSER MARKDOWN SIMPLE
-    // ------------------------------------------------------------
-    function parseMarkdown(text) {
-      if (!text) return "Aucune description disponible.";
+    /* ============================================================
+       5. DISCORD MARKDOWN PARSER
+       ============================================================ */
+    function parseMarkdownToHtml(text) {
+      if (!text) return "<p class='text-slate-500 italic'>Aucune description disponible.</p>";
 
       return text
-        .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/^- (.*$)/gim, '<li>$1</li>')
-        .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-        .replace(/\n\n/g, '<br><br>')
+        .replace(/^## (.*$)/gim, '<h3 class="text-sm font-bold text-lep-amber mt-3 mb-1 border-b border-slate-700/60 pb-1">$1</h3>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white font-semibold">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em class="text-slate-300 italic">$1</em>')
+        .replace(/^- (.*$)/gim, '<li class="ml-4 list-disc text-slate-300">$1</li>')
+        .replace(/\n\n/g, '<div class="h-2"></div>')
         .replace(/\n/g, '<br>');
     }
 
-    window.onload = runTerminal;
+    /* ============================================================
+       6. LORE SEQUENCE & CHARACTER DISPLAY
+       ============================================================ */
+    const TERMINAL_STEPS = [
+      { text: "Connexion au LEP (Laboratoire d'Études Patatières)...", delay: 400 },
+      { text: "Accès à la base de données du cluster OraxDB...", delay: 500 },
+      { text: "Déchiffrement des archives scellées...", delay: 400 },
+      { text: "ACCÈS AUTORISÉ. BIENVENUE DANS LE LORE ÉTENDU.", delay: 500 }
+    ];
+
+    async function executeLoreSequence() {
+      soundFX.playCommandBeep();
+      writeCliLog(">>> INITIALISATION DE LA COMMANDE /LORE", "text-lep-amber font-bold");
+
+      for (const step of TERMINAL_STEPS) {
+        await typeTextToConsole(`> ${step.text}`, "text-lep-green");
+        await delay(step.delay);
+      }
+
+      writeCliLog("--- ACCÈS AU LORE ÉTENDU ÉTABLI ---", "text-lep-cyan font-bold");
+      if (characters.length > 0) {
+        displayCharacterInEmbed(characters[0]._id);
+      }
+    }
+
+    function renderCharacterDropdownOptions() {
+      const select = document.getElementById("characterSelect");
+      const badge = document.getElementById("charCountBadge");
+      
+      select.innerHTML = '<option value="" disabled selected>-- Choisissez une entité du Lore --</option>';
+
+      characters.forEach(char => {
+        const opt = document.createElement("option");
+        opt.value = char._id;
+        opt.textContent = `${char.Emoji} ${char.Name} (${char.Active ? 'Actif' : 'Inactif'})`;
+        select.appendChild(opt);
+      });
+
+      badge.textContent = `${characters.length} Chargés`;
+    }
+
+    function selectCharacterFromDropdown(charId) {
+      displayCharacterInEmbed(charId);
+      executeCommand(`cat ${charId}`);
+    }
+
+    async function displayCharacterInEmbed(charId) {
+      const char = characters.find(c => 
+        String(c._id) === String(charId) || 
+        c.Name.toLowerCase() === String(charId).toLowerCase()
+      );
+      
+      if (!char) {
+        soundFX.playErrorBeep();
+        writeCliLog(`ERREUR: Personnage '${charId}' introuvable dans la base OraxDB.`, "text-lep-red font-bold");
+        return;
+      }
+
+      document.getElementById("embedTitle").innerHTML = `${char.Emoji} ${char.Name}`;
+      document.getElementById("embedAuthor").innerHTML = `Auteur : <span class="text-lep-cyan font-semibold">${char.By}</span>`;
+      document.getElementById("embedCharId").textContent = `#${char._id}`;
+
+      const statusBadge = document.getElementById("embedStatusBadge");
+      if (char.Active) {
+        statusBadge.className = "px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-lep-green/20 text-lep-green border border-lep-green/40 flex items-center gap-1";
+        statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-lep-green animate-pulse"></span><span>ACTIF</span>';
+      } else {
+        statusBadge.className = "px-2.5 py-0.5 text-[10px] font-bold rounded-full bg-lep-red/20 text-lep-red border border-lep-red/40 flex items-center gap-1";
+        statusBadge.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-lep-red"></span><span>INACTIF</span>';
+      }
+
+      const imgContainer = document.getElementById("embedImageContainer");
+      const imgEl = document.getElementById("embedImage");
+      if (char.Image) {
+        imgEl.src = char.Image;
+        imgContainer.classList.remove("hidden");
+      } else {
+        imgContainer.classList.add("hidden");
+      }
+
+      await typeFormattedMarkdownToEmbed(char.Description);
+    }
+
+    /* ============================================================
+       7. CLI COMMAND INTERPRETER
+       ============================================================ */
+    const commandHistory = [];
+    let historyIndex = -1;
+
+    function handleCliKeyDown(e) {
+      if (e.key === "Enter") {
+        submitCliInput();
+      } else if (e.key === "ArrowUp") {
+        if (commandHistory.length > 0 && historyIndex < commandHistory.length - 1) {
+          historyIndex++;
+          document.getElementById("cliInput").value = commandHistory[commandHistory.length - 1 - historyIndex];
+        }
+      } else if (e.key === "ArrowDown") {
+        if (historyIndex > 0) {
+          historyIndex--;
+          document.getElementById("cliInput").value = commandHistory[commandHistory.length - 1 - historyIndex];
+        } else if (historyIndex === 0) {
+          historyIndex = -1;
+          document.getElementById("cliInput").value = "";
+        }
+      }
+    }
+
+    function submitCliInput() {
+      const input = document.getElementById("cliInput");
+      const cmd = input.value.trim();
+      if (!cmd) return;
+
+      commandHistory.push(cmd);
+      historyIndex = -1;
+      input.value = "";
+
+      executeCommand(cmd);
+    }
+
+    async function executeCommand(cmdStr) {
+      writeCliLog(`lep@potatoverse:~$ ${cmdStr}`, "text-lep-cyan font-bold");
+      
+      const parts = cmdStr.split(" ");
+      const mainCmd = parts[0].toLowerCase();
+      const args = parts.slice(1).join(" ");
+
+      switch (mainCmd) {
+        case "/lore":
+        case "lore":
+          await executeLoreSequence();
+          break;
+
+        case "cat":
+        case "show":
+          if (!args) {
+            writeCliLog("Usage: cat <nom_du_personnage>", "text-lep-amber");
+          } else {
+            displayCharacterInEmbed(args);
+          }
+          break;
+
+        case "list":
+        case "ls":
+          soundFX.playCommandBeep();
+          writeCliLog("--- LISTE DES ENTITÉS MONGODB ---", "text-lep-amber font-bold");
+          characters.forEach(c => {
+            writeCliLog(`  [${c.Active ? 'ACTIF' : 'INACTIF'}] ${c.Emoji} ${c.Name} (ID: ${c._id})`, "text-slate-200");
+          });
+          break;
+
+        case "status":
+        case "diag":
+          soundFX.playCommandBeep();
+          writeCliLog("=== DIAGNOSTIC SYSTÈME LEP NETWORK ===", "text-lep-green font-bold");
+          writeCliLog(`BASE DE DONNÉES : MongoDB Atlas (Cluster OraxDB)`, "text-lep-amber");
+          writeCliLog(`ENTITÉS EN MÉMOIRE : ${characters.length}`, "text-slate-300");
+          break;
+
+        case "matrix":
+          initMatrix();
+          writeCliLog("Animation Matrix réinitialisée.", "text-lep-green");
+          break;
+
+        case "clear":
+        case "cls":
+          clearConsole();
+          break;
+
+        case "api":
+        case "db":
+          openSecurityModal();
+          break;
+
+        case "help":
+          soundFX.playCommandBeep();
+          writeCliLog("--- COMMANDES CLI DISPONIBLES ---", "text-lep-cyan font-bold");
+          writeCliLog("  /lore             : Lance la séquence d'accès au lore", "text-slate-300");
+          writeCliLog("  cat <nom/id>      : Affiche les détails d'un personnage", "text-slate-300");
+          writeCliLog("  list              : Liste toutes les entités chargées", "text-slate-300");
+          writeCliLog("  status            : Diagnostic de la connexion DB", "text-slate-300");
+          writeCliLog("  clear             : Efface l'historique", "text-slate-300");
+          break;
+
+        default:
+          soundFX.playErrorBeep();
+          writeCliLog(`Commande inconnue : '${cmdStr}'. Tapez 'help' pour obtenir de l'aide.`, "text-lep-red");
+          break;
+      }
+    }
+
+    function writeCliLog(text, cssClass = "text-slate-300") {
+      const logDiv = document.getElementById("terminalLog");
+      const line = document.createElement("div");
+      line.className = cssClass;
+      line.textContent = text;
+      logDiv.appendChild(line);
+      scrollToBottomConsole();
+    }
+
+    function clearConsole() {
+      document.getElementById("terminalLog").innerHTML = "";
+    }
+
+    function scrollToBottomConsole() {
+      const body = document.getElementById("consoleBody");
+      body.scrollTop = body.scrollHeight;
+    }
+
+    /* ============================================================
+       8. PUBLIC SECURITY MODAL & MANUAL APIS
+       ============================================================ */
+    function openSecurityModal() {
+      soundFX.playCommandBeep();
+      document.getElementById("securityModal").classList.remove("hidden");
+    }
+
+    function closeSecurityModal() {
+      document.getElementById("securityModal").classList.add("hidden");
+    }
+
+    async function connectCustomApi() {
+      const urlInput = document.getElementById("customApiUrl").value.trim();
+      if (!urlInput) return alert("Veuillez saisir une URL valide.");
+
+      writeCliLog(`Tentative de connexion à l'API : ${urlInput}...`, "text-lep-amber");
+
+      try {
+        const res = await fetch(urlInput);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        if (Array.isArray(data) && data.length > 0) {
+          characters = data.map(normalizeCharacter);
+          renderCharacterDropdownOptions();
+          document.getElementById("dbStatusBadge").innerHTML = 'Cluster : <strong class="text-lep-green">API Connectée</strong>';
+          writeCliLog(`[BDD] Synchronisé avec succès avec l'API (${characters.length} entités).`, "text-lep-green font-bold");
+          closeSecurityModal();
+        } else {
+          throw new Error("Tableau vide ou format invalide");
+        }
+      } catch (err) {
+        soundFX.playErrorBeep();
+        alert(`Échec : ${err.message}`);
+        writeCliLog(`Erreur de connexion API : ${err.message}`, "text-lep-red");
+      }
+    }
+
+    function exportCurrentJson() {
+      navigator.clipboard.writeText(JSON.stringify(characters, null, 2)).then(() => {
+        alert("JSON copié dans le presse-papier !");
+      });
+    }
+
+    function importJsonData() {
+      const val = document.getElementById("jsonImportArea").value.trim();
+      try {
+        const parsed = JSON.parse(val);
+        if (Array.isArray(parsed)) {
+          characters = parsed.map(normalizeCharacter);
+          renderCharacterDropdownOptions();
+          alert(`${characters.length} personnage(s) importé(s) !`);
+          closeSecurityModal();
+        }
+      } catch (e) {
+        alert("JSON invalide : " + e.message);
+      }
+    }
+
+    /* ============================================================
+       9. INITIALISATION AU CHARGEMENT DE LA PAGE
+       ============================================================ */
+    window.addEventListener("load", async () => {
+      initMatrix();
+      await loadCharactersFromDb();
+      document.getElementById("cliInput").focus();
+    });
   </script>
 </body>
 </html>
