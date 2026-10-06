@@ -6,14 +6,14 @@
   <title>Potatoverse Terminal - Lore</title>
   <style>
     :root {
-      --bg-color: #1e1f22;
-      --card-bg: #2b2d31;
+      --bg-color: #0d0e12;
+      --card-bg: #18191c;
       --embed-bg: #2b2d31;
       --text-color: #dbdee1;
       --accent-yellow: #fee75c;
       --accent-green: #57f287;
       --accent-red: #ed4245;
-      --terminal-bg: #111214;
+      --terminal-bg: #0b0c10;
       --terminal-text: #00ff66;
     }
 
@@ -21,7 +21,7 @@
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'gg sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+      font-family: 'gg sans', 'Consolas', 'Courier New', monospace;
     }
 
     body {
@@ -36,17 +36,17 @@
 
     .container {
       width: 100%;
-      max-width: 720px;
+      max-width: 760px;
     }
 
-    /* --- STYLES TERMINAL --- */
+    /* --- STYLES TERMINAL ANIMÉ --- */
     .terminal-card {
       background: var(--terminal-bg);
-      border: 1px solid #333;
+      border: 1px solid #1f232a;
       border-radius: 8px;
       padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-      font-family: 'Consolas', 'Courier New', Courier, monospace;
+      box-shadow: 0 0 20px rgba(0, 255, 102, 0.15);
+      position: relative;
     }
 
     .terminal-header {
@@ -87,7 +87,7 @@
     .terminal-footer {
       margin-top: 15px;
       font-size: 0.8rem;
-      color: #777;
+      color: #666;
       border-top: 1px solid #222;
       padding-top: 10px;
     }
@@ -112,30 +112,30 @@
     .discord-embed {
       background-color: var(--embed-bg);
       border-left: 4px solid var(--accent-yellow);
-      border-radius: 4px;
-      padding: 16px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border-radius: 6px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       display: none;
     }
 
     .embed-title {
-      font-size: 1.25rem;
+      font-size: 1.3rem;
       font-weight: bold;
       color: #ffffff;
-      margin-bottom: 12px;
+      margin-bottom: 15px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 10px;
     }
 
     .character-select {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       background-color: #1e1f22;
       color: #ffffff;
       border: 1px solid #3f4147;
-      border-radius: 4px;
-      font-size: 0.95rem;
+      border-radius: 6px;
+      font-size: 1rem;
       margin-bottom: 20px;
       cursor: pointer;
       outline: none;
@@ -146,14 +146,15 @@
     }
 
     .embed-content {
-      line-height: 1.5;
+      line-height: 1.6;
       font-size: 0.95rem;
+      min-height: 120px;
     }
 
     .embed-content h2 {
-      font-size: 1.1rem;
+      font-size: 1.15rem;
       color: #ffffff;
-      margin-top: 16px;
+      margin-top: 18px;
       margin-bottom: 8px;
       border-bottom: 1px solid #3f4147;
       padding-bottom: 4px;
@@ -170,29 +171,30 @@
 
     .embed-image {
       width: 100%;
-      max-height: 300px;
+      max-height: 320px;
       object-fit: cover;
-      border-radius: 4px;
+      border-radius: 6px;
       margin-top: 15px;
     }
 
     .embed-footer {
-      margin-top: 16px;
-      font-size: 0.8rem;
+      margin-top: 20px;
+      font-size: 0.85rem;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+      color: #b5bac1;
     }
 
     .status-badge {
       display: inline-block;
-      width: 8px;
-      height: 8px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
     }
 
-    .status-active { background-color: var(--accent-green); }
-    .status-inactive { background-color: var(--accent-red); }
+    .status-active { background-color: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+    .status-inactive { background-color: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
 
     .hidden { display: none !important; }
   </style>
@@ -210,7 +212,7 @@
       <div class="terminal-footer" id="terminalFooter">Potatoverse Network</div>
     </div>
 
-    <!-- MAIN INTERFACE / EMBED DISCORD -->
+    <!-- INTERFACE / EMBED DISCORD -->
     <div id="app" class="discord-embed">
       <div class="embed-title" id="embedTitle">
         Liste des personnages du Lore Étendu du Potatoverse !
@@ -218,10 +220,10 @@
 
       <!-- SÉLECTEUR DE PERSONNAGES -->
       <select id="characterSelect" class="character-select" onchange="onCharacterSelect(this.value)">
-        <option value="" disabled selected>Choisissez un personnage...</option>
+        <option value="" disabled selected>Chargement des données...</option>
       </select>
 
-      <!-- CONTENU DU LORE -->
+      <!-- CONTENU DU LORE (ANIMATION LETTRE PAR LETTRE) -->
       <div id="embedBody" class="embed-content">
         Utilisez le menu déroulant ci-dessus pour choisir un personnage et voir son histoire.
       </div>
@@ -239,99 +241,49 @@
 
   <script>
     // ------------------------------------------------------------
-    // CONFIGURATION DE L'ANIMATION TERMINAL
+    // CONFIGURATION : REMPLACE CETTE URL PAR TON LIEN VERCEL
+    // ------------------------------------------------------------
+    const VERCEL_API_URL = "https://potatoverse-api.vercel.app/api/characters";
+
+    // Effet sonore synthétisé (pas de fichier audio externe requis)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 600, duration = 0.02) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.value = freq;
+        gain.gain.value = 0.03;
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // ------------------------------------------------------------
+    // ANIMATION DU TERMINAL INITIAL
     // ------------------------------------------------------------
     const terminalSteps = [
-      { text: "Connexion au LEP...", delay: 600 },
-      { text: "Connexion au réseau du Potatoverse...", delay: 550 },
-      { text: "Protection contre les incursions du Multivers...", delay: 600 },
-      { text: "Authentification de PotatoBot...", delay: 600 },
-      { text: "Accès à la base de données du LEP...", delay: 750 },
-      { text: "Recherche des archives du LEP...", delay: 800 },
-      { text: "Données envoyées au serveur de Maçon'île...", delay: 750 },
-      { text: "Synchronisation des données...", delay: 600 },
-      { text: "Déchiffrement des archives...", delay: 650 },
-      { text: "Vérification de l'intégrité des données...", delay: 550 },
-      { text: "Accès autorisé.", delay: 450 },
-      { text: "Chargement du Lore Étendu du Potatoverse...", delay: 800 }
+      { text: "Connexion au LEP...", delay: 500 },
+      { text: "Connexion au réseau du Potatoverse...", delay: 450 },
+      { text: "Protection contre les incursions du Multivers...", delay: 500 },
+      { text: "Authentification de PotatoBot...", delay: 450 },
+      { text: "Accès à la base de données OraxDB...", delay: 600 },
+      { text: "Interrogation de l'API Vercel...", delay: 700 },
+      { text: "Déchiffrement des archives du LEP...", delay: 500 },
+      { text: "Vérification de l'intégrité des données...", delay: 400 },
+      { text: "Accès autorisé.", delay: 350 },
+      { text: "Chargement du Lore Étendu du Potatoverse...", delay: 600 }
     ];
 
-    let currentStep = 0;
     let isSkipped = false;
     let timeoutId = null;
+    let displayedLines = [];
+    let charactersData = [];
 
-    // ------------------------------------------------------------
-    // BASE DE DONNÉES DES PERSONNAGES (MOCK DATA)
-    // ------------------------------------------------------------
-    const charactersData = [
-      {
-        id: "me",
-        name: "PotatoBot",
-        emoji: "🥔",
-        active: true,
-        image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=60",
-        description: `## **Histoire**
-
-PotatoBot est une entité polyvalente et déterminée, pilier de l’Académie des Patates. Après avoir voyagé dans le futur pour aider son soi futur, il a ensuite exploré le passé pour corriger les anomalies qu'il avait lui-même provoquées. Ces aventures temporelles l’ont rendu indispensable à l’équilibre de l’Académie. De retour, il a collaboré avec Francis pour reprendre les rênes de l’institution.
-
-Toutefois, lorsque Citrus altéra le Multivers et transforma l’Académie des Patates en Académie des Citrouilles, PotatoBot fut lui-même changé en Citrouillo'Bot, devenant un étrange automate aux objectifs flous. Après une lutte pour retrouver son identité, PotatoBot est réapparu et s’est réinventé en lançant une émission culinaire, **"Le Potato’Chaud"**, où il explore sa nouvelle passion pour la cuisine.
-
-## **Passions**
-
-- **Cuisine** : Il adore expérimenter des recettes, son plat signature étant une tourte à la viande de loup et aux champignons.
-- **Innovation** : PotatoBot aime repousser les limites, que ce soit en voyageant dans le temps ou en réinventant les traditions culinaires.
-
-## **Qualités/Défauts**
-
-- **Qualité :** Ingénieux
-- **Défaut :** Autoritaire
-
-## **Petit Plus**
-
-PotatoBot a déjà enfermé Francis pendant trois jours à cause de son obsession pour les tourtes, le privant volontairement de farine pour qu’il "réfléchisse". Cette anecdote est devenue légendaire dans l’Académie.`
-      },
-      {
-        id: "francis",
-        name: "Francis",
-        emoji: "🥖",
-        active: true,
-        image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop&q=60",
-        description: `## **Histoire**
-Co-fondateur de l'Académie aux côtés de PotatoBot. Grand amateur de boulangerie et stratège du groupe.
-
-## **Passions**
-- La confection de pain
-- La gestion stratégique
-
-## **Qualités/Défauts**
-- **Qualité :** Patient
-- **Défaut :** Râleur`
-      },
-      {
-        id: "citrus",
-        name: "Citrus",
-        emoji: "🎃",
-        active: false,
-        image: "https://images.unsplash.com/photo-1508280756091-9e708d1269a6?w=600&auto=format&fit=crop&q=60",
-        description: `## **Histoire**
-Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie des Patates en Académie des Citrouilles.
-
-## **Passions**
-- La magie multiverselle
-- La botanique sombre
-
-## **Qualités/Défauts**
-- **Qualité :** Visionnaire
-- **Défaut :** Imprévisible`
-      }
-    ];
-
-    // ------------------------------------------------------------
-    // EXÉCUTION DU TERMINAL
-    // ------------------------------------------------------------
     const consoleEl = document.getElementById("terminalConsole");
     const footerEl = document.getElementById("terminalFooter");
-    let displayedLines = [];
 
     function renderTerminalLines(isFinal = false) {
       let text = displayedLines.map(line => `> ${line}`).join("\n");
@@ -345,18 +297,15 @@ Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie 
 
       for (let i = 0; i < terminalSteps.length; i++) {
         if (isSkipped) break;
-        currentStep = i;
-
         await new Promise(resolve => {
           timeoutId = setTimeout(resolve, terminalSteps[i].delay);
         });
-
         if (!isSkipped) {
           displayedLines.push(terminalSteps[i].text);
           renderTerminalLines();
+          playBeep(800, 0.015);
         }
       }
-
       finishTerminal();
     }
 
@@ -375,17 +324,50 @@ Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie 
       setTimeout(() => {
         document.getElementById("terminal").style.display = "none";
         initApp();
-      }, 800);
+      }, 600);
     }
 
     // ------------------------------------------------------------
-    // INITIALISATION DE L'INTERFACE PRINCIPALE
+    // CHARGEMENT DE L'API VERCEL / MONGODB
     // ------------------------------------------------------------
-    function initApp() {
+    async function loadCharactersFromAPI() {
+      try {
+        const response = await fetch(VERCEL_API_URL);
+        if (!response.ok) throw new Error("Erreur HTTP");
+        const data = await response.json();
+        
+        // Adaptation du schéma MongoDB (Name -> name, Emoji -> emoji, etc.)
+        return data.map(item => ({
+          id: item._id || item.id,
+          name: item.Name || item.name || "Inconnu",
+          emoji: item.Emoji || item.emoji || "🥔",
+          active: item.Active !== undefined ? item.Active : true,
+          image: item.Image || item.image || "",
+          description: item.Description || item.description || "Aucune description."
+        }));
+      } catch (err) {
+        console.warn("API indisponible, chargement des données de secours...", err);
+        // Données de secours si l'API Vercel n'est pas encore déployée
+        return [
+          {
+            id: "me",
+            name: "PotatoBot",
+            emoji: "🥔",
+            active: true,
+            image: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=600&auto=format&fit=crop&q=60",
+            description: `## **Histoire**\n\nPotatoBot est une entité polyvalente et déterminée, pilier de l’Académie des Patates. Après avoir voyagé dans le futur pour aider son soi futur, il a ensuite exploré le passé pour corriger les anomalies qu'il avait lui-même provoquées.\n\n## **Passions**\n\n- **Cuisine** : Il adore expérimenter des recettes.\n- **Innovation** : Voyager dans le temps.`
+          }
+        ];
+      }
+    }
+
+    async function initApp() {
       const appEl = document.getElementById("app");
       const selectEl = document.getElementById("characterSelect");
 
-      // Remplissage du menu déroulant
+      charactersData = await loadCharactersFromAPI();
+
+      selectEl.innerHTML = '<option value="" disabled selected>Choisissez un personnage...</option>';
       charactersData.forEach(char => {
         const option = document.createElement("option");
         option.value = char.id;
@@ -397,19 +379,65 @@ Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie 
     }
 
     // ------------------------------------------------------------
-    // SÉLECTION D'UN PERSONNAGE ET RENDU
+    // ANIMATION DE TEXTE LETTRE PAR LETTRE (TYPEWRITER)
+    // ------------------------------------------------------------
+    let typingInterval = null;
+
+    function typeWriterEffect(htmlContent, targetElement, speed = 12) {
+      if (typingInterval) clearInterval(typingInterval);
+      
+      targetElement.innerHTML = "";
+      let index = 0;
+      let tempContainer = document.createElement("div");
+      tempContainer.innerHTML = htmlContent;
+      let fullText = tempContainer.innerHTML;
+
+      // Découpage en évitant de couper les balises HTML <...>
+      let tokens = [];
+      let i = 0;
+      while (i < fullText.length) {
+        if (fullText[i] === '<') {
+          let tagEnd = fullText.indexOf('>', i);
+          if (tagEnd !== -1) {
+            tokens.push(fullText.substring(i, tagEnd + 1));
+            i = tagEnd + 1;
+            continue;
+          }
+        }
+        tokens.push(fullText[i]);
+        i++;
+      }
+
+      typingInterval = setInterval(() => {
+        if (index < tokens.length) {
+          targetElement.innerHTML += tokens[index];
+          if (tokens[index].length === 1 && tokens[index] !== ' ') {
+            playBeep(1200 + Math.random() * 200, 0.008);
+          }
+          index++;
+        } else {
+          clearInterval(typingInterval);
+          typingInterval = null;
+        }
+      }, speed);
+    }
+
+    // ------------------------------------------------------------
+    // SÉLECTION DU PERSONNAGE
     // ------------------------------------------------------------
     function onCharacterSelect(characterId) {
       const char = charactersData.find(c => c.id === characterId);
       if (!char) return;
 
-      // Titre
       document.getElementById("embedTitle").innerHTML = `${char.emoji} ${char.name}`;
 
-      // Rendu du Markdown simple
-      document.getElementById("embedBody").innerHTML = parseMarkdown(char.description);
+      const parsedHTML = parseMarkdown(char.description);
+      const bodyEl = document.getElementById("embedBody");
+      
+      // Lancement de l'animation lettre par lettre
+      typeWriterEffect(parsedHTML, bodyEl, 8);
 
-      // Image
+      // Gestion de l'image
       const imgEl = document.getElementById("embedImage");
       if (char.image) {
         imgEl.src = char.image;
@@ -418,14 +446,14 @@ Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie 
         imgEl.classList.add("hidden");
       }
 
-      // Statut & Footer
+      // Statut et Footer
       const statusDot = document.getElementById("statusDot");
       const footerText = document.getElementById("footerText");
 
       statusDot.classList.remove("hidden", "status-active", "status-inactive");
       if (char.active) {
         statusDot.classList.add("status-active");
-        footerText.textContent = "Actif";
+        footerText.textContent = "Actif dans le Potatoverse";
       } else {
         statusDot.classList.add("status-inactive");
         footerText.textContent = "Inactif";
@@ -439,20 +467,14 @@ Entité mystérieuse ayant provoqué l'altération multiverselle de l'Académie 
       if (!text) return "Aucune description disponible.";
 
       return text
-        // Titres ##
         .replace(/^## (.*$)/gim, '<h2>$1</h2>')
-        // Gras **texte**
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        // Listes - Item
         .replace(/^- (.*$)/gim, '<li>$1</li>')
-        // Enveloppement des éléments <li> dans <ul>
         .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
-        // Retours à la ligne
         .replace(/\n\n/g, '<br><br>')
         .replace(/\n/g, '<br>');
     }
 
-    // Démarrage automatique au chargement
     window.onload = runTerminal;
   </script>
 </body>
