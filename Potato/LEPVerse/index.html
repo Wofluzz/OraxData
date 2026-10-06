@@ -122,6 +122,13 @@
                 </div>
 
                 <div>
+                    <label class="block text-amber-500 mb-1 font-bold">PARENT REALITY (OPTIONAL)</label>
+                    <select id="input-parent" class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400 font-mono text-xs">
+                        <option value="">-- Root (Connects to Core) --</option>
+                    </select>
+                </div>
+
+                <div>
                     <label class="block text-amber-500 mb-1 font-bold">MULTIVERSAL DESCRIPTION</label>
                     <textarea id="input-desc" rows="3" required placeholder="Describe this timeline anomaly..." 
                         class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400"></textarea>
@@ -156,8 +163,8 @@
                         <span id="stat-total" class="text-base font-bold text-amber-300">0</span>
                     </div>
                     <div class="bg-black/50 border border-amber-500/30 p-2 rounded text-center">
-                        <span class="block text-amber-600">NEXUS EVENTS</span>
-                        <span id="stat-nexus" class="text-base font-bold text-red-400">0</span>
+                        <span class="block text-amber-600">SUB-BRANCHES</span>
+                        <span id="stat-nexus" class="text-base font-bold text-amber-400">0</span>
                     </div>
                 </div>
             </div>
@@ -174,33 +181,22 @@
                         SACRED POTATO CORE & TIMELINE BRANCHES
                     </p>
                 </div>
-
-                <div class="absolute top-3 right-3 z-10 text-right bg-black/70 p-2 rounded border border-amber-500/40 text-[11px]">
-                    <span class="text-amber-500 block">CLICK BRANCH NODE:</span>
-                    <span class="text-amber-300">INSPECT / EDIT REALITY</span>
-                </div>
-
-                <!-- Canvas -->
-                <canvas id="multiverse-canvas" class="w-full h-full block cursor-crosshair"></canvas>
-
-                <div class="bg-black/80 border-t border-amber-500/40 p-2 text-xs flex justify-between items-center text-amber-500/80">
-                    <span>💡 Dynamic Radial Ether Flow matching Multiverse Reference</span>
-                    <button id="btn-reset-demo" class="px-2 py-1 bg-amber-950/80 border border-amber-500/50 hover:bg-amber-500 hover:text-black text-amber-300 text-[11px] rounded transition">
-                        🔄 RESET DEMO DATA
+                <div class="absolute top-3 right-3 z-10 flex gap-2">
+                    <button id="btn-reset-demo" class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 border border-amber-500/50 rounded text-amber-300 text-xs transition">
+                        🔄 RESET DATA
                     </button>
                 </div>
+                <canvas id="multiverse-canvas" class="w-full h-full cursor-crosshair"></canvas>
             </div>
 
-            <!-- GRID / CARD VIEW CONTAINER (Hidden by default) -->
-            <div id="grid-view-container" class="hidden w-full h-full tva-box rounded p-3 overflow-y-auto flex-col">
-                <div class="flex justify-between items-center border-b border-amber-500/40 pb-2 mb-3">
-                    <h2 class="text-sm font-bold text-amber-300">INDEXED REALITIES DATABASE</h2>
-                    <span class="text-xs text-amber-600">Select any reality card to edit or prune</span>
+            <!-- GRID / CARD VIEW CONTAINER -->
+            <div id="grid-view-container" class="w-full h-full tva-box rounded relative hidden flex-col overflow-y-auto p-4">
+                <div class="flex justify-between items-center mb-4 border-b border-amber-500/40 pb-2">
+                    <h2 class="text-sm font-bold text-amber-300 uppercase">🗂️ SACRED TIMELINE BRANCH DATABASE</h2>
+                    <span class="text-xs text-amber-600">Showing all registered realities</span>
                 </div>
-
-                <!-- Reality Cards Grid -->
-                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-                    <!-- Dynamic Cards Rendered Here -->
+                <div id="cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Dynamic Cards injected here -->
                 </div>
             </div>
 
@@ -208,84 +204,80 @@
 
     </main>
 
-    <!-- Branch Detail Modal -->
-    <div id="branch-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-        <div class="tva-box rounded-lg max-w-lg w-full p-5 relative border-2 border-amber-500/80 shadow-[0_0_30px_rgba(255,176,0,0.3)] text-xs">
-            <button id="modal-close-btn" class="absolute top-3 right-3 text-amber-500 hover:text-amber-300 text-lg font-bold">✕</button>
-
-            <div class="flex items-center space-x-2 border-b border-amber-500/40 pb-2 mb-3">
-                <span id="modal-reality-id" class="px-2 py-0.5 bg-amber-500 text-black font-bold font-mono text-sm rounded">POTATO-616</span>
-                <h3 id="modal-reality-name" class="text-lg font-bold text-amber-300 font-vt323 tracking-wide">Sacred Potato Prime</h3>
+    <!-- Reality Detail Modal -->
+    <div id="branch-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-3 backdrop-blur-sm">
+        <div class="tva-box rounded max-w-lg w-full p-5 relative border-2 border-amber-500 shadow-[0_0_30px_rgba(255,176,0,0.3)]">
+            <button id="modal-close-btn" class="absolute top-3 right-3 text-amber-500 hover:text-amber-300 font-bold text-lg">✕</button>
+            <div class="flex items-center gap-2 mb-3">
+                <span id="modal-reality-id" class="px-2 py-0.5 bg-black/80 border border-amber-500/50 rounded text-xs font-mono font-bold text-amber-300">REALITY-X</span>
+                <span class="text-[10px] text-amber-600">// MONITORED BRANCH</span>
             </div>
-
-            <div class="mb-3 rounded overflow-hidden border border-amber-500/40 bg-black flex justify-center items-center max-h-48">
-                <img id="modal-reality-img" src="" alt="Reality Image" class="w-full h-48 object-cover">
+            <h2 id="modal-reality-name" class="text-xl font-vt323 font-bold text-amber-300 mb-2">Reality Name</h2>
+            <div class="w-full h-44 rounded overflow-hidden bg-black border border-amber-500/30 mb-3 relative">
+                <img id="modal-reality-img" src="" class="w-full h-full object-cover" alt="Reality Visual">
             </div>
-
-            <p id="modal-reality-desc" class="text-amber-200 text-sm leading-relaxed mb-4 bg-black/50 p-2.5 rounded border border-amber-500/20">
-                Description goes here...
-            </p>
-
-            <div class="flex justify-between items-center pt-2 border-t border-amber-500/30">
-                <button id="modal-edit-btn" class="px-4 py-2 bg-amber-500 text-black font-bold rounded hover:bg-amber-400 transition">
+            <p id="modal-reality-desc" class="text-xs text-amber-500/90 leading-relaxed mb-5">Description goes here...</p>
+            <div class="flex justify-end gap-2 border-t border-amber-500/30 pt-3">
+                <button id="modal-edit-btn" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-amber-500/40 rounded text-xs font-bold text-amber-300 transition">
                     ✏️ EDIT REALITY
                 </button>
-                <button id="modal-prune-btn" class="px-4 py-2 bg-red-950 border border-red-500 text-red-400 font-bold rounded hover:bg-red-600 hover:text-white transition">
+                <button id="modal-prune-btn" class="px-3 py-1.5 bg-red-950/80 hover:bg-red-900 border border-red-500/40 rounded text-xs font-bold text-red-300 transition">
                     ✂️ PRUNE BRANCH
                 </button>
             </div>
         </div>
     </div>
 
+    <!-- Audio & Logic Script -->
     <script>
-        /* --- Web Audio API Sound Generator --- */
+        /* --- Audio Synthesizer (Web Audio API) --- */
         let audioEnabled = true;
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
         function playSound(type) {
             if (!audioEnabled) return;
-            if (audioCtx.state === 'suspended') audioCtx.resume();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
 
-            try {
-                const osc = audioCtx.createOscillator();
-                const gain = audioCtx.createGain();
-                osc.connect(gain);
-                gain.connect(audioCtx.destination);
-                const now = audioCtx.currentTime;
+            const now = audioCtx.currentTime;
 
-                if (type === 'select') {
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(600, now);
-                    osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
-                    gain.gain.setValueAtTime(0.05, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.08);
-                    osc.start(now);
-                    osc.stop(now + 0.08);
-                } else if (type === 'save') {
-                    osc.type = 'triangle';
-                    osc.frequency.setValueAtTime(400, now);
-                    osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
-                    gain.gain.setValueAtTime(0.08, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.15);
-                    osc.start(now);
-                    osc.stop(now + 0.15);
-                } else if (type === 'prune') {
-                    osc.type = 'sawtooth';
-                    osc.frequency.setValueAtTime(800, now);
-                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.25);
-                    gain.gain.setValueAtTime(0.12, now);
-                    gain.gain.linearRampToValueAtTime(0, now + 0.25);
-                    osc.start(now);
-                    osc.stop(now + 0.25);
-                }
-            } catch (e) {}
+            if (type === 'select') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(440, now);
+                osc.frequency.exponentialRampToValueAtTime(880, now + 0.08);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'prune') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.2);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+                osc.start(now);
+                osc.stop(now + 0.2);
+            } else if (type === 'save') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(587.33, now);
+                osc.frequency.setValueAtTime(880, now + 0.1);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
         }
 
         const audioToggleBtn = document.getElementById('audio-toggle-btn');
         if (audioToggleBtn) {
-            audioToggleBtn.addEventListener('click', (e) => {
+            audioToggleBtn.addEventListener('click', () => {
                 audioEnabled = !audioEnabled;
-                e.target.innerText = audioEnabled ? '🔊 AUDIO: ON' : '🔇 AUDIO: OFF';
+                audioToggleBtn.innerText = audioEnabled ? "🔊 AUDIO: ON" : "🔇 AUDIO: OFF";
             });
         }
 
@@ -294,77 +286,84 @@
             {
                 id: "REALITY-000",
                 name: "Réalité Originelle",
-                desc: "La Réalité 0, berceau du Verse avant la naissance du Potatoverse. C'est ici que vécurent Pytan, Citrus et \"LUI\".",
-                image: ""
+                desc: "La Réalité 0, berceau du Verse avant la naissance du Potatoverse. C'est ici que vécurent les premiers Pytan, Citrus et Grand Omega.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-616",
                 name: "Réalité 616",
-                desc: "Notre réalité. Une réalité ordinaire où l'Académie des patates prospère",
-                image: ""
+                desc: "Notre réalité, étrangère au Potatoverse. Une réalité ordinaire dont les habitants ignorent encore l'existence.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-616-C10",
                 name: "Réalité 616 - Nexus du Citrouilloverse",
                 desc: "Notre réalité sous l'emprise d'une citrouille. Une réalité ordinaire où l'Académie des citrouilles...prospère ?",
-                image: ""
+                image: "",
+                parentId: "REALITY-616"
             },
             {
                 id: "REALITY-427",
                 name: "Réalité Potatoverse Clash",
-                desc: "Une réalité où la Graine du Verse ne fut jamais volée, mais disséminée en plusieurs fragments à travers le monde.",
-                image: ""
+                desc: "Une réalité où la Graine du Verse ne fut jamais volée, mais disséminée en fragments.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-836",
                 name: "Académie des Patates Déchues",
-                desc: "Une réalité marquée par l'Académie des Patates Déchues, où Loup Alpha et les siens suivent une voie radicalement différente.",
-                image: ""
+                desc: "Une réalité marquée par l'Académie des Patates Déchues, où Loup Alpha et les siens suivent une voie différente.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-042",
                 name: "Le Royaume des Frites",
-                desc: "Une réalité dans laquelle l'évolution des tubercules a suivi une trajectoire inattendue. Les pommes de terre y sont conscientes.",
-                image: ""
+                desc: "Une réalité dans laquelle l'évolution des tubercules a suivi une trajectoire inattendue.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-213",
                 name: "L'Empire des Patates Douces",
-                desc: "Une réalité dominée par les patates douces. Leur civilisation a développé une technologie avancée fondée sur l'énergie du Verse.",
-                image: ""
+                desc: "Une réalité dominée par les patates douces et leur technologie avancée.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-404",
                 name: "L'Anomalie de la Purée",
-                desc: "Une réalité victime d'une catastrophe du Verse. L'espace, le temps et la matière y ont été profondément altérés.",
-                image: ""
+                desc: "Une réalité victime d'une catastrophe du Verse. Espace et temps profondément altérés.",
+                image: "",
+                parentId: null
             },
             {
                 id: "REALITY-777",
                 name: "Le Continuum Croustillant",
-                desc: "Une branche temporelle instable où les lois physiques dépendent du niveau de croustillant de la matière.",
-                image: ""
+                desc: "Une branche temporelle instable où les lois physiques dépendent du croustillant.",
+                image: "",
+                parentId: null
             }
         ];
 
-        // Load branches from localStorage or seed defaults
-        let branches = JSON.parse(localStorage.getItem('potatoverse_branches')) || [...DEFAULT_BRANCHES];
+        let branches = JSON.parse(localStorage.getItem('tva_potatoverse_branches')) || DEFAULT_BRANCHES;
 
         function saveState() {
-            localStorage.setItem('potatoverse_branches', JSON.stringify(branches));
+            localStorage.setItem('tva_potatoverse_branches', JSON.stringify(branches));
+            updateParentSelect();
             updateStats();
             renderCards();
         }
 
-        /* --- SVG Placeholder Image Generator --- */
+        /* --- SVG Placeholder Generator --- */
         function generateSVGPlaceholder(id, name) {
-            const svg = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
+            const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="240" viewBox="0 0 400 240">
                 <defs>
                     <radialGradient id="grad" cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stop-color="#ffcc00" stop-opacity="0.9"/>
-                        <stop offset="50%" stop-color="#ff8800" stop-opacity="0.6"/>
-                        <stop offset="100%" stop-color="#050510" stop-opacity="1"/>
+                        <stop offset="0%" stop-color="#3b2200"/>
+                        <stop offset="100%" stop-color="#0a0500"/>
                     </radialGradient>
                 </defs>
                 <rect width="100%" height="100%" fill="#05050a"/>
@@ -380,6 +379,7 @@
             </svg>`;
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
+
 
         /* --- Canvas Radial Multiverse Renderer --- */
         const canvas = document.getElementById('multiverse-canvas');
@@ -417,7 +417,7 @@
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             const cx = canvas.width / 2;
             const cy = canvas.height / 2;
-            const time = Date.now() * 0.002;
+            const time = Date.now() * 0.0025;
 
             const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(canvas.width, canvas.height) * 0.6);
             bgGrad.addColorStop(0, 'rgba(255, 180, 0, 0.25)');
@@ -493,32 +493,72 @@
             const count = branches.length;
             const radius = Math.min(canvas.width, canvas.height) * 0.35;
 
+            // First pass: compute primary node positions for all branches
             branches.forEach((b, i) => {
                 const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-                const targetX = cx + Math.cos(angle) * radius;
-                const targetY = cy + Math.sin(angle) * radius;
+                b._nodeX = cx + Math.cos(angle) * radius;
+                b._nodeY = cy + Math.sin(angle) * radius;
+            });
 
-                const waveOffset = Math.sin(time + i) * 20;
-                const cp1x = cx + Math.cos(angle + 0.3) * (radius * 0.4) + waveOffset;
-                const cp1y = cy + Math.sin(angle + 0.3) * (radius * 0.4);
-                const cp2x = cx + Math.cos(angle - 0.3) * (radius * 0.7) - waveOffset;
-                const cp2y = cy + Math.sin(angle - 0.3) * (radius * 0.7);
+            // Second pass: Draw branches and sub-branches with stronger orange wavy curves (Amplitude increased to 42)
+            branches.forEach((b, i) => {
+                const targetX = b._nodeX;
+                const targetY = b._nodeY;
+                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
+                
+                // Stronger wave offset for parent branches (amplitude = 42)
+                const waveOffset = Math.sin(time * 1.2 + i * 1.5) * 42;
+
+                let startX = cx;
+                let startY = cy;
+                let cp1x = cx + Math.cos(angle + 0.3) * (radius * 0.4) + waveOffset;
+                let cp1y = cy + Math.sin(angle + 0.3) * (radius * 0.4);
+                let cp2x = cx + Math.cos(angle - 0.3) * (radius * 0.7) - waveOffset;
+                let cp2y = cy + Math.sin(angle - 0.3) * (radius * 0.7);
+
+                if (b.parentId) {
+                    const parent = branches.find(p => p.id === b.parentId);
+                    if (parent && parent._nodeX && parent._nodeY) {
+                        const pIdx = branches.indexOf(parent);
+                        const pAngle = (pIdx / count) * Math.PI * 2 - Math.PI / 2;
+                        const pWave = Math.sin(time * 1.2 + pIdx * 1.5) * 42;
+                        const pStartX = cx;
+                        const pStartY = cy;
+                        const pCp1x = cx + Math.cos(pAngle + 0.3) * (radius * 0.4) + pWave;
+                        const pCp1y = cy + Math.sin(pAngle + 0.3) * (radius * 0.4);
+                        const pCp2x = cx + Math.cos(pAngle - 0.3) * (radius * 0.7) - pWave;
+                        const pCp2y = cy + Math.sin(pAngle - 0.3) * (radius * 0.7);
+                        const pTargetX = parent._nodeX;
+                        const pTargetY = parent._nodeY;
+
+                        // Cubic Bezier midpoint formula (t = 0.5) on parent's branch curve
+                        startX = Math.pow(0.5, 3)*pStartX + 3*Math.pow(0.5, 2)*0.5*pCp1x + 3*0.5*Math.pow(0.5, 2)*pCp2x + Math.pow(0.5, 3)*pTargetX;
+                        startY = Math.pow(0.5, 3)*pStartY + 3*Math.pow(0.5, 2)*0.5*pCp1y + 3*0.5*Math.pow(0.5, 2)*pCp2y + Math.pow(0.5, 3)*pTargetY;
+
+                        // Stronger independent child wave offset so children undulate vigorously in orange
+                        const childWave = Math.sin(time * 2.0 + i * 2.0) * 35;
+                        cp1x = startX + (targetX - startX) * 0.3 + childWave;
+                        cp1y = startY + (targetY - startY) * 0.3;
+                        cp2x = startX + (targetX - startX) * 0.7 - childWave;
+                        cp2y = startY + (targetY - startY) * 0.7;
+                    }
+                }
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(cx, cy);
+                ctx.moveTo(startX, startY);
                 ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, targetX, targetY);
 
                 const isHovered = (hoverIndex === i);
                 ctx.strokeStyle = isHovered ? '#00f0ff' : '#ffb000';
-                ctx.lineWidth = isHovered ? 4 : 2;
+                ctx.lineWidth = isHovered ? 4 : (b.parentId ? 2.5 : 3);
                 ctx.shadowColor = isHovered ? '#00f0ff' : '#ffb000';
                 ctx.shadowBlur = isHovered ? 15 : 8;
                 ctx.stroke();
 
                 const t = (time * 0.5 + i * 0.2) % 1;
-                const px = Math.pow(1-t, 3)*cx + 3*Math.pow(1-t, 2)*t*cp1x + 3*(1-t)*Math.pow(t, 2)*cp2x + Math.pow(t, 3)*targetX;
-                const py = Math.pow(1-t, 3)*cy + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*targetY;
+                const px = Math.pow(1-t, 3)*startX + 3*Math.pow(1-t, 2)*t*cp1x + 3*(1-t)*Math.pow(t, 2)*cp2x + Math.pow(t, 3)*targetX;
+                const py = Math.pow(1-t, 3)*startY + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*targetY;
 
                 ctx.beginPath();
                 ctx.arc(px, py, 3, 0, Math.PI * 2);
@@ -542,9 +582,6 @@
                 ctx.fillText(b.id, textX, targetY + 4);
 
                 ctx.restore();
-
-                b._nodeX = targetX;
-                b._nodeY = targetY;
             });
 
             requestAnimationFrame(drawCanvas);
@@ -574,8 +611,24 @@
         /* --- UI Card Grid Renderer --- */
         const cardsGrid = document.getElementById('cards-grid');
 
+        function updateParentSelect() {
+            const select = document.getElementById('input-parent');
+            if (!select) return;
+            const currentEditIdx = parseInt(document.getElementById('form-edit-index').value);
+            select.innerHTML = '<option value="">-- Root (Connects to Core) --</option>';
+            branches.forEach((b, idx) => {
+                if (idx !== currentEditIdx) {
+                    const opt = document.createElement('option');
+                    opt.value = b.id;
+                    opt.textContent = `${b.id} - ${b.name}`;
+                    select.appendChild(opt);
+                }
+            });
+        }
+
         function renderCards() {
             if (!cardsGrid) return;
+            updateParentSelect();
             const searchInput = document.getElementById('search-input');
             const filter = searchInput ? searchInput.value.toLowerCase() : '';
             cardsGrid.innerHTML = '';
@@ -586,15 +639,19 @@
                 }
 
                 const imgSrc = b.image || generateSVGPlaceholder(b.id, b.name);
+                const parentBadge = b.parentId ? `<span class="text-[10px] bg-amber-950 text-amber-300 px-1.5 py-0.5 border border-amber-500/40 rounded">Sub: ${b.parentId}</span>` : '';
 
                 const card = document.createElement('div');
                 card.className = "tva-box rounded p-3 flex flex-col space-y-2 hover:border-amber-400 transition cursor-pointer group";
                 card.innerHTML = `
                     <div class="flex justify-between items-center border-b border-amber-500/30 pb-1.5">
                         <span class="font-mono font-bold text-amber-300 text-xs px-2 py-0.5 bg-black/60 rounded border border-amber-500/40">${b.id}</span>
-                        <div class="flex gap-1">
-                            <button onclick="event.stopPropagation(); editBranch(${index})" class="text-amber-500 hover:text-amber-300 px-1 text-xs">✏️</button>
-                            <button onclick="event.stopPropagation(); pruneBranch(${index})" class="text-red-400 hover:text-red-300 px-1 text-xs">✂️</button>
+                        <div class="flex items-center gap-2">
+                            ${parentBadge}
+                            <div class="flex gap-1">
+                                <button onclick="event.stopPropagation(); editBranch(${index})" class="text-amber-500 hover:text-amber-300 px-1 text-xs">✏️</button>
+                                <button onclick="event.stopPropagation(); pruneBranch(${index})" class="text-red-400 hover:text-red-300 px-1 text-xs">✂️️</button>
+                            </div>
                         </div>
                     </div>
                     <div class="h-28 rounded overflow-hidden bg-black border border-amber-500/20 relative">
@@ -619,7 +676,7 @@
             const modDesc = document.getElementById('modal-reality-desc');
             const modImg = document.getElementById('modal-reality-img');
 
-            if (modId) modId.innerText = b.id;
+            if (modId) modId.innerText = b.id + (b.parentId ? ` (Child of ${b.parentId})` : '');
             if (modName) modName.innerText = b.name;
             if (modDesc) modDesc.innerText = b.desc;
             if (modImg) modImg.src = b.image || generateSVGPlaceholder(b.id, b.name);
@@ -664,19 +721,21 @@
                 const nameInput = document.getElementById('input-name');
                 const descInput = document.getElementById('input-desc');
                 const imageInput = document.getElementById('input-image');
+                const parentInput = document.getElementById('input-parent');
 
                 const id = idInput ? idInput.value.trim() : 'POTATO-NEW';
                 const name = nameInput ? nameInput.value.trim() : 'Unnamed Reality';
                 const desc = descInput ? descInput.value.trim() : '';
                 const image = imageInput ? imageInput.value.trim() : '';
+                const parentId = parentInput ? parentInput.value : '';
 
                 const idx = formEditIndex ? parseInt(formEditIndex.value) : -1;
 
                 if (idx >= 0) {
-                    branches[idx] = { id, name, desc, image };
+                    branches[idx] = { ...branches[idx], id, name, desc, image, parentId };
                     playSound('save');
                 } else {
-                    branches.push({ id, name, desc, image });
+                    branches.push({ id, name, desc, image, parentId });
                     playSound('save');
                 }
 
@@ -688,16 +747,19 @@
         window.editBranch = function(index) {
             const b = branches[index];
             if (formEditIndex) formEditIndex.value = index;
+            updateParentSelect();
             
             const idInput = document.getElementById('input-id');
             const nameInput = document.getElementById('input-name');
             const descInput = document.getElementById('input-desc');
             const imageInput = document.getElementById('input-image');
+            const parentInput = document.getElementById('input-parent');
 
             if (idInput) idInput.value = b.id;
             if (nameInput) nameInput.value = b.name;
             if (descInput) descInput.value = b.desc;
             if (imageInput) imageInput.value = b.image;
+            if (parentInput) parentInput.value = b.parentId || '';
 
             if (formTitle) formTitle.innerText = "✏️ EDIT REALITY";
             if (btnCancelEdit) btnCancelEdit.classList.remove('hidden');
@@ -717,6 +779,7 @@
         function resetForm() {
             if (formEditIndex) formEditIndex.value = "-1";
             if (branchForm) branchForm.reset();
+            updateParentSelect();
             if (formTitle) formTitle.innerText = "➕ ADD NEW REALITY";
             if (btnCancelEdit) btnCancelEdit.classList.add('hidden');
         }
@@ -745,7 +808,7 @@
             viewGridBtn.addEventListener('click', () => {
                 if (gridViewContainer) {
                     gridViewContainer.classList.remove('hidden');
-                    gridViewContainer.classList.add('flex');
+                    gridViewContainer.classList.flex;
                 }
                 if (mapViewContainer) {
                     mapViewContainer.classList.add('hidden');
@@ -776,11 +839,12 @@
             const statTotal = document.getElementById('stat-total');
             const statNexus = document.getElementById('stat-nexus');
             if (statTotal) statTotal.innerText = branches.length;
-            if (statNexus) statNexus.innerText = branches.filter(b => b.id.includes('ANOMALY') || b.id.includes('404') || b.id.includes('CLASH')).length;
+            if (statNexus) statNexus.innerText = branches.filter(b => b.parentId).length;
         }
 
         // Init
         window.onload = () => {
+            updateParentSelect();
             updateStats();
             renderCards();
             drawCanvas();
