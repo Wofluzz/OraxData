@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Potatoverse Hyper Terminal - Lore & LEP OS</title>
+  <title>LEP Terminal - LEP OS</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -145,14 +145,8 @@
       </div>
 
       <div class="flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded border border-lep-border">
-        <i class="fas fa-database text-lep-amber"></i>
-        <span id="dbStatusBadge" class="text-slate-300">Cluster: <strong class="text-lep-amber">OraxDB (Atlas)</strong></span>
-      </div>
-
-      <!-- Vercel Integration Badge -->
-      <div class="hidden xl:flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded border border-lep-border text-slate-400">
-        <span class="text-white font-bold text-xs">▲</span>
-        <span>Vercel: <strong id="vercelHeaderStatus" class="text-lep-cyan">Prêt (Serverless)</strong></span>
+        <i class="fas fa-shuttle-space text-lep-amber"></i>
+        <span id="dbStatusBadge" class="text-slate-300">Réalité: <strong class="text-lep-amber">616</strong></span>
       </div>
 
       <!-- Quick Toggles -->
@@ -164,11 +158,6 @@
       <button id="btnToggleCrt" onclick="toggleCrt()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded border border-lep-border transition flex items-center gap-1.5" title="Activer/Désactiver effet CRT">
         <i class="fas fa-tv text-lep-amber"></i>
         <span class="hidden md:inline">CRT</span>
-      </button>
-
-      <button onclick="openSecurityModal()" class="px-3 py-1 bg-lep-cyan/20 hover:bg-lep-cyan/30 text-lep-cyan border border-lep-cyan/50 rounded font-semibold transition flex items-center gap-1.5">
-        <i class="fas fa-shield-alt"></i>
-        <span>API / MongoDB</span>
       </button>
     </div>
   </header>
@@ -301,7 +290,7 @@
           <span class="text-slate-400">Raccourcis CLI:</span>
           <button onclick="executeCommand('list')" class="bg-slate-900 hover:bg-slate-800 text-lep-cyan border border-slate-700 px-2 py-0.5 rounded">list</button>
           <button onclick="executeCommand('cat PotatoBot')" class="bg-slate-900 hover:bg-slate-800 text-lep-amber border border-slate-700 px-2 py-0.5 rounded">cat PotatoBot</button>
-          <button onclick="executeCommand('vercel')" class="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span class="text-xs">▲</span> vercel</button>
+          <!-- <button onclick="executeCommand('vercel')" class="bg-slate-900 hover:bg-slate-800 text-white border border-slate-700 px-2 py-0.5 rounded flex items-center gap-1"><span class="text-xs">▲</span> vercel</button> -->
           <button onclick="executeCommand('status')" class="bg-slate-900 hover:bg-slate-800 text-lep-green border border-slate-700 px-2 py-0.5 rounded">status</button>
           <button onclick="executeCommand('matrix')" class="bg-slate-900 hover:bg-slate-800 text-lep-purple border border-slate-700 px-2 py-0.5 rounded">matrix</button>
         </div>
@@ -309,131 +298,8 @@
     </section>
   </main>
 
-  <!-- MODAL: SECURE MONGODB INTEGRATION FOR PUBLIC WEBSITES -->
-  <div id="securityModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-lep-card border border-lep-cyan/50 rounded-xl max-w-2xl w-full p-5 sm:p-6 shadow-[0_0_30px_rgba(0,240,255,0.2)] space-y-4 max-h-[90vh] overflow-y-auto">
-      
-      <div class="flex justify-between items-start border-b border-lep-border pb-3">
-        <div class="flex items-center gap-2">
-          <i class="fas fa-shield-halved text-lep-cyan text-xl"></i>
-          <div>
-            <h3 class="text-lg font-bold text-white">Sécuriser MongoDB & Vercel sur un Site Public</h3>
-            <p class="text-xs text-slate-400">Cluster Atlas: <span class="text-lep-amber font-mono">OraxDB (Wofluzz)</span></p>
-          </div>
-        </div>
-        <button onclick="closeSecurityModal()" class="text-slate-400 hover:text-white p-1">
-          <i class="fas fa-times text-lg"></i>
-        </button>
-      </div>
-
-      <!-- Security Guidance -->
-      <div class="bg-amber-950/40 border border-amber-500/30 rounded p-3 text-xs text-amber-200 leading-relaxed space-y-1">
-        <p class="font-bold flex items-center gap-1.5 text-amber-400">
-          <i class="fas fa-exclamation-triangle"></i>
-          <span>Règle d'or de sécurité web:</span>
-        </p>
-        <p>Ne mettez jamais votre chaîne <code class="bg-black/50 px-1 py-0.5 rounded text-lep-amber">mongodb+srv://Wofluzz:<pass>@oraxdb...</code> directement dans le code du site client. N'importe qui pourrait ouvrir la console du navigateur et voler l'accès complet à votre base.</p>
-      </div>
-
-      <!-- Architecture Option Tabs -->
-      <div class="space-y-3">
-        <h4 class="text-xs font-bold text-lep-cyan uppercase tracking-wider">Comment connecter votre site public via Vercel Serverless ?</h4>
-        
-        <!-- Option 1: Vercel Serverless Function & vercel.json -->
-        <div class="bg-slate-950 border border-lep-cyan/40 rounded p-3.5 space-y-3 text-xs shadow-inner">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-lep-cyan flex items-center gap-2">
-              <span class="text-white font-black text-sm">▲</span>
-              <span>Solution N°1: Déploiement Vercel Serverless & API Routes</span>
-            </span>
-            <span class="bg-lep-cyan/20 text-lep-cyan text-[10px] px-2.5 py-0.5 rounded border border-lep-cyan/40 font-bold">Vercel Ready</span>
-          </div>
-          <p class="text-slate-300">Déployez votre API sécurisée MongoDB sur <strong>Vercel</strong>. Les identifiants Atlas restent protégés dans les variables d'environnement Vercel (<code>MONGODB_URI</code>).</p>
-          
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-            <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">1. Fichier <code>api/characters.js</code> (Vercel Function)</span>
-              <pre class="bg-black/90 text-slate-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto border border-slate-800 h-32">
-import { MongoClient } from 'mongodb';
-
-const client = new MongoClient(process.env.MONGODB_URI);
-
-export default async function handler(req, res) {
-  try {
-    await client.connect();
-    const db = client.db('OraxDB');
-    const chars = await db.collection('characters').find({}).toArray();
-    res.status(200).json(chars);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-}</pre>
-            </div>
-            <div>
-              <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block mb-1">2. Fichier <code>vercel.json</code> (Configuration)</span>
-              <pre class="bg-black/90 text-slate-300 p-2.5 rounded font-mono text-[11px] overflow-x-auto border border-slate-800 h-32">
-{
-  "version": 2,
-  "builds": [
-    { "src": "api/*.js", "use": "@vercel/node" },
-    { "src": "index.html", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/$1" },
-    { "src": "/(.*)", "dest": "/index.html" }
-  ]
-}</pre>
-            </div>
-          </div>
-
-          <div class="bg-slate-900 p-2 rounded border border-slate-800 flex items-center justify-between gap-2 text-[11px]">
-            <span class="text-slate-400">Commande CLI Vercel rapide : <code class="text-lep-amber">npx vercel --prod</code></span>
-            <button onclick="executeCommand('vercel')" class="px-2.5 py-1 bg-lep-cyan/20 hover:bg-lep-cyan/30 text-lep-cyan border border-lep-cyan/40 rounded text-[10px] font-bold transition">
-              Inspecter dans la console
-            </button>
-          </div>
-        </div>
-
-        <!-- Custom Endpoint Tester -->
-        <div class="bg-slate-950 border border-lep-border rounded p-3 space-y-2 text-xs">
-          <label class="font-bold text-slate-200 block">Tester une URL API personnalisée :</label>
-          <div class="flex gap-2">
-            <input 
-              type="text" 
-              id="customApiUrl" 
-              placeholder="https://votre-app.vercel.app/api/characters" 
-              class="flex-grow bg-slate-900 border border-slate-700 rounded p-2 text-white font-mono focus:outline-none focus:border-lep-cyan"
-            />
-            <button onclick="connectCustomApi()" class="px-3 py-2 bg-lep-cyan text-black font-bold rounded hover:bg-cyan-400 transition">
-              Connecter
-            </button>
-          </div>
-        </div>
-
-        <!-- Manual Data Sync (Backup JSON) -->
-        <div class="bg-slate-950 border border-lep-border rounded p-3 space-y-2 text-xs">
-          <div class="flex justify-between items-center">
-            <span class="font-bold text-slate-300">Exporter / Importer le Lore JSON en direct</span>
-            <button onclick="exportCurrentJson()" class="text-lep-amber hover:underline text-[11px]">Copier JSON actuel</button>
-          </div>
-          <textarea id="jsonImportArea" rows="4" class="w-full bg-slate-900 border border-slate-700 rounded p-2 text-lep-green font-mono text-[11px]" placeholder="Collez ici un tableau JSON de personnages si vous souhaitez mettre à jour la base locale..."></textarea>
-          <button onclick="importJsonData()" class="px-3 py-1.5 bg-slate-800 text-slate-200 border border-slate-700 hover:border-lep-green rounded font-semibold transition">
-            Mettre à jour les personnages
-          </button>
-        </div>
-      </div>
-
-      <div class="pt-2 flex justify-between items-center border-t border-lep-border">
-        <span class="text-[11px] text-slate-400">Statut actuel: <strong id="currentApiStatusText" class="text-lep-green">Mode Demo / Données Locales Actives</strong></span>
-        <button onclick="closeSecurityModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white rounded font-semibold text-xs border border-slate-600">
-          Fermer
-        </button>
-      </div>
-    </div>
-  </div>
-
   <footer class="relative z-10 bg-lep-card/90 border-t border-lep-border px-4 py-2 text-center text-xs text-slate-500 font-mono flex flex-wrap justify-between items-center gap-2">
-    <span>&copy; Potatoverse Network &bull; Laboratoire d'Études Patatières (LEP)</span>
+    <span>&copy; Potatoverse Network &bull; Lore Etendu du Potatoverse (LEP)</span>
     <span class="text-slate-400">Déchiffrement Quantum Active &bull; <span class="text-lep-green">Statut: Sécurisé</span></span>
   </footer>
 
@@ -792,10 +658,6 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
     let isCurrentlyTyping = false;
     let typingCancelToken = 0;
 
-    connectCustomApi();
-    executeLoreSequence();
-
-
     /* ============================================================
        4. TYPEWRITER ANIMATION ENGINE (Letter by Letter)
        ============================================================ */
@@ -1056,17 +918,17 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
           await executeLoreSequence();
           break;
 
-        case "vercel":
-        case "deploy":
-          soundFX.playCommandBeep();
-          writeCliLog("=== DÉPLOIEMENT & CONFIGURATION VERCEL ===", "text-lep-cyan font-bold");
-          writeCliLog("  ▲ Plateforme: Vercel Edge / Serverless Network", "text-slate-200");
-          writeCliLog("  ▲ Endpoint API: /api/characters (MongoDB Atlas Proxy)", "text-slate-200");
-          writeCliLog("  ▲ Variable requise: MONGODB_URI (Configurée dans Vercel Dashboard)", "text-lep-amber");
-          writeCliLog("  ▲ Fichier de config: vercel.json (Routes & Builds statiques)", "text-slate-300");
-          writeCliLog("  ▲ Statut Déploiement: Prêt pour Vercel CLI (npx vercel --prod)", "text-lep-green");
-          writeCliLog("Tapez 'api' pour voir le code de la fonction Vercel et du vercel.json.", "text-slate-400");
-          break;
+        // case "vercel":
+        // case "deploy":
+        //   soundFX.playCommandBeep();
+        //   writeCliLog("=== DÉPLOIEMENT & CONFIGURATION VERCEL ===", "text-lep-cyan font-bold");
+        //   writeCliLog("  ▲ Plateforme: Vercel Edge / Serverless Network", "text-slate-200");
+        //   writeCliLog("  ▲ Endpoint API: /api/characters (MongoDB Atlas Proxy)", "text-slate-200");
+        //   writeCliLog("  ▲ Variable requise: MONGODB_URI (Configurée dans Vercel Dashboard)", "text-lep-amber");
+        //   writeCliLog("  ▲ Fichier de config: vercel.json (Routes & Builds statiques)", "text-slate-300");
+        //   writeCliLog("  ▲ Statut Déploiement: Prêt pour Vercel CLI (npx vercel --prod)", "text-lep-green");
+        //   // writeCliLog("Tapez 'api' pour voir le code de la fonction Vercel et du vercel.json.", "text-slate-400");
+        //   break;
 
         case "cat":
         case "show":
@@ -1140,14 +1002,13 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
           soundFX.playCommandBeep();
           writeCliLog("--- COMMANDES COMPATIBLES LEP TERMINAL ---", "text-lep-cyan font-bold");
           writeCliLog("  /lore               : Déclenche l'animation complète d'accès au lore", "text-slate-300");
-          writeCliLog("  vercel              : Inspecte la configuration et l'état de Vercel", "text-slate-300");
+          // writeCliLog("  vercel              : Inspecte la configuration et l'état de Vercel", "text-slate-300");
           writeCliLog("  cat <nom/id>        : Affiche la fiche détaillée d'un personnage", "text-slate-300");
           writeCliLog("  list                : Affiche toutes les entités répertoriées", "text-slate-300");
           writeCliLog("  search <mot_clef>   : Recherche dans le lore du Potatoverse", "text-slate-300");
           writeCliLog("  status              : Vérifie l'état de la connexion OraxDB", "text-slate-300");
           writeCliLog("  matrix              : Relance la pluie de code Matrix", "text-slate-300");
           writeCliLog("  sound               : Active/Désactive la synthèse sonore", "text-slate-300");
-          writeCliLog("  api                 : Ouvre le modal de configuration MongoDB/Vercel", "text-slate-300");
           writeCliLog("  clear               : Efface l'historique de la console", "text-slate-300");
           break;
 
@@ -1188,8 +1049,11 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
       document.getElementById("securityModal").classList.add("hidden");
     }
 
-    async function connectCustomApi() {
-      const urlInput = https://potatoverse-api.vercel.app/api/characters;
+    async function connectCustomApi(showErrorAlert = false) {
+      const inputEl = document.getElementById("customApiUrl");
+      const urlInput = (inputEl && inputEl.value.trim()) 
+        ? inputEl.value.trim() 
+        : "https://potatoverse-api.vercel.app/api/characters";
 
       writeCliLog(`Tentative de connexion à l'API: ${urlInput}...`, "text-lep-amber");
 
@@ -1199,9 +1063,11 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
         const data = await res.json();
 
         if (Array.isArray(data) && data.length > 0) {
-          characters = data;
+          const existingIds = new Set(characters.map(c => c._id));
+          const newChars = data.filter(c => !existingIds.has(c._id));
+          characters = [...characters, ...newChars];
           renderCharacterDropdownOptions();
-          document.getElementById("dbStatusBadge").innerHTML = 'Cluster: <strong class="text-lep-green">API Vercel En Ligne</strong>';
+          // document.getElementById("dbStatusBadge").innerHTML = 'Cluster: <strong class="text-lep-green">API Vercel En Ligne</strong>';
           document.getElementById("currentApiStatusText").textContent = `Connecté avec succès! (${characters.length} personnages reçus)`;
           document.getElementById("currentApiStatusText").className = "text-lep-green font-bold";
           
@@ -1212,17 +1078,22 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
         }
       } catch (err) {
         soundFX.playErrorBeep();
-        alert(`Échec de la connexion API: ${err.message}`);
-        writeCliLog(`Erreur de connexion API: ${err.message}`, "text-lep-red");
+        if (showErrorAlert) {
+          writeCliLog(`Échec de la connexion API: ${err.message}`, "text-lep-red font-bold");
+        } else {
+          writeCliLog(`Note: API distante non disponible (${err.message}). Utilisation des données locales.`, "text-slate-400");
+        }
       }
     }
 
     function exportCurrentJson() {
       const jsonStr = JSON.stringify(characters, null, 2);
       navigator.clipboard.writeText(jsonStr).then(() => {
-        alert("JSON actuel copié dans le presse-papier !");
+        writeCliLog("JSON actuel copié dans le presse-papier !", "text-lep-green");
       }).catch(() => {
-        document.getElementById("jsonImportArea").value = jsonStr;
+        const area = document.getElementById("jsonImportArea");
+        if (area) area.value = jsonStr;
+        writeCliLog("JSON affiché dans la zone de texte ci-dessous.", "text-lep-amber");
       });
     }
 
@@ -1233,13 +1104,13 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
         if (Array.isArray(parsed)) {
           characters = parsed;
           renderCharacterDropdownOptions();
-          alert(`${characters.length} personnages importés avec succès !`);
+          writeCliLog(`${characters.length} personnages importés avec succès !`, "text-lep-green font-bold");
           closeSecurityModal();
         } else {
-          alert("Le JSON doit être un tableau d'objets.");
+          writeCliLog("Erreur: Le JSON doit être un tableau d'objets.", "text-lep-red");
         }
       } catch (e) {
-        alert("JSON invalide : " + e.message);
+        writeCliLog("JSON invalide : " + e.message, "text-lep-red");
       }
     }
 
@@ -1249,6 +1120,8 @@ Entité consciente résidant dans la base de données Atlas (OraxDB). Orax gère
     window.addEventListener("load", () => {
       initMatrix();
       renderCharacterDropdownOptions();
+      connectCustomApi();
+      executeLoreSequence();
       
       // Focus CLI input automatically
       document.getElementById("cliInput").focus();
