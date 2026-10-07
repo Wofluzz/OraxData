@@ -57,11 +57,10 @@
 </head>
 <body class="h-full flex flex-col overflow-hidden crt-pulse p-2 md:p-3 relative">
 
-    <!-- Retro CRT Overlay -->
+    <!-- Scanline Overlay -->
     <div class="fixed inset-0 scanline-overlay z-50 pointer-events-none"></div>
 
-    <!-- Top TVA Bar -->
-    <header class="flex flex-wrap items-center justify-between border-b-2 border-amber-500/80 pb-2 mb-2 px-2 bg-black/60 rounded backdrop-blur">
+    <header class="flex flex-wrap items-center justify-between border-b-2 border-amber-500/80 pb-2 mb-2 px-2 bg-black/60 rounded backdrop-blur z-10">
         <div class="flex items-center space-x-3">
             <div class="w-9 h-9 rounded-full border-2 border-amber-400 flex items-center justify-center font-bold font-vt323 text-2xl bg-amber-950 text-amber-300 shadow-[0_0_10px_rgba(255,176,0,0.5)]">
                 LEP
@@ -93,7 +92,6 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-3 min-h-0 relative">
 
         <!-- Left Controls / Add Form Panel -->
@@ -138,7 +136,7 @@
                     <label class="block text-amber-500 mb-1 font-bold">IMAGE URL (OPTIONAL)</label>
                     <input type="url" id="input-image" placeholder="Leave blank for auto placeholder" 
                         class="w-full bg-black/80 border border-amber-500/50 rounded p-2 text-amber-300 focus:outline-none focus:border-amber-400 font-mono text-[11px]">
-                    <p class="text-[10px] text-amber-600 mt-1">If empty, a customized Reality-ID SVG placeholder is generated automatically.</p>
+                    <p class="text-[10px] text-amber-600 mt-1">If empty, a customized SVG placeholder is generated automatically.</p>
                 </div>
 
                 <div class="flex gap-2 pt-2">
@@ -170,7 +168,7 @@
             </div>
         </section>
 
-        <!-- Center View: Interactive Canvas Tree MAP OR Card List Grid -->
+        <!-- Center View: Interactive Canvas Map & Grid -->
         <section class="lg:col-span-9 flex flex-col min-h-0 relative">
             
             <!-- MAP VIEW CONTAINER -->
@@ -204,7 +202,6 @@
 
     </main>
 
-    <!-- Reality Detail Modal -->
     <div id="branch-modal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-3 backdrop-blur-sm">
         <div class="tva-box rounded max-w-lg w-full p-5 relative border-2 border-amber-500 shadow-[0_0_30px_rgba(255,176,0,0.3)]">
             <button id="modal-close-btn" class="absolute top-3 right-3 text-amber-500 hover:text-amber-300 font-bold text-lg">✕</button>
@@ -228,7 +225,6 @@
         </div>
     </div>
 
-    <!-- Audio & Logic Script -->
     <script>
         /* --- Audio Synthesizer (Web Audio API) --- */
         let audioEnabled = true;
@@ -299,22 +295,29 @@
             },
             {
                 id: "REALITY-616-C10",
-                name: "Réalité 616 - Nexus du Citrouilloverse",
-                desc: "Notre réalité sous l'emprise d'une citrouille. Une réalité ordinaire où l'Académie des citrouilles...prospère ?",
+                name: "Réalité 616 - Nexus Citrouille",
+                desc: "Sous-branche de la Réalité 616 sous l'emprise d'une citrouille mystique.",
                 image: "",
                 parentId: "REALITY-616"
+            },
+            {
+                id: "REALITY-616-SUB2",
+                name: "Réalité 616 - Académie des Citrouilles",
+                desc: "Sous-sous-branche dérivée du Nexus Citrouille, étendant l'apprentissage du Verse.",
+                image: "",
+                parentId: "REALITY-616-C10"
             },
             {
                 id: "REALITY-427",
                 name: "Réalité Potatoverse Clash",
                 desc: "Une réalité où la Graine du Verse ne fut jamais volée, mais disséminée en fragments.",
                 image: "",
-                parentId: null
+                parentId: "REALITY-000"
             },
             {
                 id: "REALITY-836",
                 name: "Académie des Patates Déchues",
-                desc: "Une réalité marquée par l'Académie des Patates Déchues, où Loup Alpha et les siens suivent une voie différente.",
+                desc: "Une réalité marquée par l'Académie des Patates Déchues, où Loup Alpha suit une voie différente.",
                 image: "",
                 parentId: null
             },
@@ -380,8 +383,6 @@
             return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
         }
 
-
-        /* --- Canvas Radial Multiverse Renderer --- */
         const canvas = document.getElementById('multiverse-canvas');
         const ctx = canvas ? canvas.getContext('2d') : null;
         let activeModalIndex = -1;
@@ -412,6 +413,117 @@
             speed: 0.003 + Math.random() * 0.002
         }));
 
+        /* --- Recursive Node Target Positioning on Same Circle --- */
+        function calculateNodePositions(cx, cy, radius) {
+            const allIds = new Set(branches.map(b => b.id));
+            const childrenMap = new Map();
+
+            // Group branches by effective parent
+            branches.forEach(b => {
+                const parentValid = b.parentId && allIds.has(b.parentId) && b.parentId !== b.id;
+                const effParent = parentValid ? b.parentId : null;
+                b._effParentId = effParent;
+                if (!childrenMap.has(effParent)) childrenMap.set(effParent, []);
+                childrenMap.get(effParent).push(b);
+            });
+
+            // Roots are branches with effParent === null
+            const roots = childrenMap.get(null) || [];
+            if (roots.length === 0) return;
+
+            // Traverse each family in pre-order so parents and their descendants stay grouped together
+            const visited = new Set();
+            function getFamilyNodes(node) {
+                if (visited.has(node.id)) return [];
+                visited.add(node.id);
+                const list = [node];
+                const children = childrenMap.get(node.id) || [];
+                children.forEach(child => {
+                    list.push(...getFamilyNodes(child));
+                });
+                return list;
+            }
+
+            const families = roots.map(root => getFamilyNodes(root)).filter(fam => fam.length > 0);
+            const numFamilies = families.length;
+            const totalNodes = branches.length;
+
+            if (totalNodes === 0) return;
+
+            // Calculate angular spacing:
+            // Standard slot gap between family members vs larger gap between different parent families
+            const gapFactor = numFamilies > 1 ? 2.5 : 0;
+            const effectiveSlots = totalNodes + (numFamilies * gapFactor);
+            const unitAngle = (Math.PI * 2) / Math.max(1, effectiveSlots);
+            const familyGap = unitAngle * gapFactor;
+
+            let currentAngle = -Math.PI / 2; // Start from top 12 o'clock
+
+            families.forEach((familyList) => {
+                familyList.forEach((node) => {
+                    node._angle = currentAngle;
+                    node._depth = node._effParentId ? 1 : 0;
+
+                    // ALL nodes (parents and children) are positioned on the EXACT SAME main circle radius!
+                    node._nodeX = cx + Math.cos(currentAngle) * radius;
+                    node._nodeY = cy + Math.sin(currentAngle) * radius;
+
+                    currentAngle += unitAngle;
+                });
+                // Extra angular distance separating this family from the next family
+                currentAngle += familyGap;
+            });
+        }
+
+        /* --- Recursive Multi-Level Bezier Curve Computation --- */
+        function computeCurves(cx, cy, time) {
+            branches.forEach(b => b._curve = null);
+
+            function getCurve(b, index) {
+                if (b._curve) return b._curve;
+
+                let startX = cx;
+                let startY = cy;
+
+                if (b._effParentId) {
+                    const parent = branches.find(p => p.id === b._effParentId);
+                    if (parent) {
+                        const parentIdx = branches.indexOf(parent);
+                        const parentCurve = getCurve(parent, parentIdx);
+                        // Child connects precisely to the midpoint (t=0.5) of parent's curve
+                        startX = parentCurve.midX;
+                        startY = parentCurve.midY;
+                    }
+                }
+
+                const targetX = b._nodeX;
+                const targetY = b._nodeY;
+
+                const dx = targetX - startX;
+                const dy = targetY - startY;
+                const branchAngle = Math.atan2(dy, dx);
+                const perpAngle = branchAngle + Math.PI / 2;
+
+                // Strong wave amplitude for all branches
+                const waveAmp = 38;
+                const wave = Math.sin(time * 1.5 + index * 1.3) * waveAmp;
+
+                const cp1x = startX + dx * 0.33 + Math.cos(perpAngle) * wave;
+                const cp1y = startY + dy * 0.33 + Math.sin(perpAngle) * wave;
+                const cp2x = startX + dx * 0.67 - Math.cos(perpAngle) * wave;
+                const cp2y = startY + dy * 0.67 - Math.sin(perpAngle) * wave;
+
+                // Compute exact midpoint at t = 0.5
+                const midX = 0.125 * startX + 0.375 * cp1x + 0.375 * cp2x + 0.125 * targetX;
+                const midY = 0.125 * startY + 0.375 * cp1y + 0.375 * cp2y + 0.125 * targetY;
+
+                b._curve = { startX, startY, cp1x, cp1y, cp2x, cp2y, targetX, targetY, midX, midY };
+                return b._curve;
+            }
+
+            branches.forEach((b, i) => getCurve(b, i));
+        }
+
         function drawCanvas() {
             if (!ctx || !canvas) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -419,6 +531,7 @@
             const cy = canvas.height / 2;
             const time = Date.now() * 0.0025;
 
+            // Background Ether Gradient
             const bgGrad = ctx.createRadialGradient(cx, cy, 10, cx, cy, Math.max(canvas.width, canvas.height) * 0.6);
             bgGrad.addColorStop(0, 'rgba(255, 180, 0, 0.25)');
             bgGrad.addColorStop(0.3, 'rgba(57, 255, 20, 0.08)');
@@ -427,6 +540,7 @@
             ctx.fillStyle = bgGrad;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+            // Ether Floating Particles
             etherParticles.forEach(p => {
                 p.x = (p.x + p.speedX + 1) % 1;
                 p.y = (p.y + p.speedY + 1) % 1;
@@ -436,6 +550,7 @@
                 ctx.fill();
             });
 
+            // Central Sacred Potato Core
             ctx.save();
             ctx.translate(cx, cy);
             const coreGlow = ctx.createRadialGradient(0, 0, 5, 0, 0, 65);
@@ -466,6 +581,7 @@
             ctx.fill();
             ctx.restore();
 
+            // Orbiting Obsidian Fragments
             obsidianRocks.forEach(rock => {
                 rock.angle += rock.speed;
                 const rx = cx + Math.cos(rock.angle) * rock.distance;
@@ -490,96 +606,60 @@
                 ctx.restore();
             });
 
-            const count = branches.length;
-            const radius = Math.min(canvas.width, canvas.height) * 0.35;
+            // 1. Calculate target node positions (all parents and children on single main circle ring)
+            const mainCircleRadius = Math.min(canvas.width, canvas.height) * 0.33;
+            calculateNodePositions(cx, cy, mainCircleRadius);
 
-            // First pass: compute primary node positions for all branches
+            // 2. Compute Bezier curves recursively
+            computeCurves(cx, cy, time);
+
+            // 3. Draw reality branches and nodes
             branches.forEach((b, i) => {
-                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-                b._nodeX = cx + Math.cos(angle) * radius;
-                b._nodeY = cy + Math.sin(angle) * radius;
-            });
+                const c = b._curve;
+                if (!c) return;
 
-            // Second pass: Draw branches and sub-branches with stronger orange wavy curves (Amplitude increased to 42)
-            branches.forEach((b, i) => {
-                const targetX = b._nodeX;
-                const targetY = b._nodeY;
-                const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
-                
-                // Stronger wave offset for parent branches (amplitude = 42)
-                const waveOffset = Math.sin(time * 1.2 + i * 1.5) * 42;
-
-                let startX = cx;
-                let startY = cy;
-                let cp1x = cx + Math.cos(angle + 0.3) * (radius * 0.4) + waveOffset;
-                let cp1y = cy + Math.sin(angle + 0.3) * (radius * 0.4);
-                let cp2x = cx + Math.cos(angle - 0.3) * (radius * 0.7) - waveOffset;
-                let cp2y = cy + Math.sin(angle - 0.3) * (radius * 0.7);
-
-                if (b.parentId) {
-                    const parent = branches.find(p => p.id === b.parentId);
-                    if (parent && parent._nodeX && parent._nodeY) {
-                        const pIdx = branches.indexOf(parent);
-                        const pAngle = (pIdx / count) * Math.PI * 2 - Math.PI / 2;
-                        const pWave = Math.sin(time * 1.2 + pIdx * 1.5) * 42;
-                        const pStartX = cx;
-                        const pStartY = cy;
-                        const pCp1x = cx + Math.cos(pAngle + 0.3) * (radius * 0.4) + pWave;
-                        const pCp1y = cy + Math.sin(pAngle + 0.3) * (radius * 0.4);
-                        const pCp2x = cx + Math.cos(pAngle - 0.3) * (radius * 0.7) - pWave;
-                        const pCp2y = cy + Math.sin(pAngle - 0.3) * (radius * 0.7);
-                        const pTargetX = parent._nodeX;
-                        const pTargetY = parent._nodeY;
-
-                        // Cubic Bezier midpoint formula (t = 0.5) on parent's branch curve
-                        startX = Math.pow(0.5, 3)*pStartX + 3*Math.pow(0.5, 2)*0.5*pCp1x + 3*0.5*Math.pow(0.5, 2)*pCp2x + Math.pow(0.5, 3)*pTargetX;
-                        startY = Math.pow(0.5, 3)*pStartY + 3*Math.pow(0.5, 2)*0.5*pCp1y + 3*0.5*Math.pow(0.5, 2)*pCp2y + Math.pow(0.5, 3)*pTargetY;
-
-                        // Stronger independent child wave offset so children undulate vigorously in orange
-                        const childWave = Math.sin(time * 2.0 + i * 2.0) * 35;
-                        cp1x = startX + (targetX - startX) * 0.3 + childWave;
-                        cp1y = startY + (targetY - startY) * 0.3;
-                        cp2x = startX + (targetX - startX) * 0.7 - childWave;
-                        cp2y = startY + (targetY - startY) * 0.7;
-                    }
-                }
+                const isHovered = (hoverIndex === i);
 
                 ctx.save();
                 ctx.beginPath();
-                ctx.moveTo(startX, startY);
-                ctx.bezierCurveTo(cp1x, cp1y, cp2x, cp2y, targetX, targetY);
+                ctx.moveTo(c.startX, c.startY);
+                ctx.bezierCurveTo(c.cp1x, c.cp1y, c.cp2x, c.cp2y, c.targetX, c.targetY);
 
-                const isHovered = (hoverIndex === i);
                 ctx.strokeStyle = isHovered ? '#00f0ff' : '#ffb000';
-                ctx.lineWidth = isHovered ? 4 : (b.parentId ? 2.5 : 3);
+                ctx.lineWidth = isHovered ? 4.5 : (b._effParentId ? 2.5 : 3.5);
                 ctx.shadowColor = isHovered ? '#00f0ff' : '#ffb000';
-                ctx.shadowBlur = isHovered ? 15 : 8;
+                ctx.shadowBlur = isHovered ? 18 : 10;
                 ctx.stroke();
 
+                // Energy particle pulse along the Bezier curve
                 const t = (time * 0.5 + i * 0.2) % 1;
-                const px = Math.pow(1-t, 3)*startX + 3*Math.pow(1-t, 2)*t*cp1x + 3*(1-t)*Math.pow(t, 2)*cp2x + Math.pow(t, 3)*targetX;
-                const py = Math.pow(1-t, 3)*startY + 3*Math.pow(1-t, 2)*t*cp1y + 3*(1-t)*Math.pow(t, 2)*cp2y + Math.pow(t, 3)*targetY;
+                const px = Math.pow(1-t, 3)*c.startX + 3*Math.pow(1-t, 2)*t*c.cp1x + 3*(1-t)*Math.pow(t, 2)*c.cp2x + Math.pow(t, 3)*c.targetX;
+                const py = Math.pow(1-t, 3)*c.startY + 3*Math.pow(1-t, 2)*t*c.cp1y + 3*(1-t)*Math.pow(t, 2)*c.cp2y + Math.pow(t, 3)*c.targetY;
 
                 ctx.beginPath();
-                ctx.arc(px, py, 3, 0, Math.PI * 2);
+                ctx.arc(px, py, 3.5, 0, Math.PI * 2);
                 ctx.fillStyle = '#ffffff';
-                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ffffff';
+                ctx.shadowBlur = 12;
                 ctx.fill();
 
+                // Branch end node
                 ctx.beginPath();
-                ctx.arc(targetX, targetY, isHovered ? 12 : 9, 0, Math.PI * 2);
+                ctx.arc(c.targetX, c.targetY, isHovered ? 12 : 8.5, 0, Math.PI * 2);
                 ctx.fillStyle = isHovered ? '#00f0ff' : '#100a00';
                 ctx.strokeStyle = isHovered ? '#ffffff' : '#ffb000';
                 ctx.lineWidth = 2.5;
                 ctx.fill();
                 ctx.stroke();
 
+                // Reality ID Label
                 ctx.font = '11px "Share Tech Mono"';
                 ctx.fillStyle = isHovered ? '#00f0ff' : '#ffb000';
-                ctx.shadowBlur = isHovered ? 8 : 0;
-                ctx.textAlign = targetX > cx ? 'left' : 'right';
-                const textX = targetX > cx ? targetX + 16 : targetX - 16;
-                ctx.fillText(b.id, textX, targetY + 4);
+                ctx.shadowColor = isHovered ? '#00f0ff' : '#000000';
+                ctx.shadowBlur = isHovered ? 10 : 4;
+                ctx.textAlign = c.targetX > cx ? 'left' : 'right';
+                const textX = c.targetX > cx ? c.targetX + 14 : c.targetX - 14;
+                ctx.fillText(b.id, textX, c.targetY + 4);
 
                 ctx.restore();
             });
@@ -608,7 +688,6 @@
             });
         }
 
-        /* --- UI Card Grid Renderer --- */
         const cardsGrid = document.getElementById('cards-grid');
 
         function updateParentSelect() {
@@ -650,7 +729,7 @@
                             ${parentBadge}
                             <div class="flex gap-1">
                                 <button onclick="event.stopPropagation(); editBranch(${index})" class="text-amber-500 hover:text-amber-300 px-1 text-xs">✏️</button>
-                                <button onclick="event.stopPropagation(); pruneBranch(${index})" class="text-red-400 hover:text-red-300 px-1 text-xs">✂️️</button>
+                                <button onclick="event.stopPropagation(); pruneBranch(${index})" class="text-red-400 hover:text-red-300 px-1 text-xs">✂</button>
                             </div>
                         </div>
                     </div>
@@ -808,7 +887,7 @@
             viewGridBtn.addEventListener('click', () => {
                 if (gridViewContainer) {
                     gridViewContainer.classList.remove('hidden');
-                    gridViewContainer.classList.flex;
+                    gridViewContainer.classList.add('flex');
                 }
                 if (mapViewContainer) {
                     mapViewContainer.classList.add('hidden');
